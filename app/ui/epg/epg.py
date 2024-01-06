@@ -403,18 +403,19 @@ class EpgTool(Gtk.Box):
 
         self._app = app
         self._app.connect("data-open", self.on_data_open)
+        self._app.connect("data-send", self.on_data_send)
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
         self._app.connect("filter-toggled", self.on_filter_toggled)
 
-        handlers = {"on_epg_press": self.on_epg_press,
-                    "on_timer_add": self.on_timer_add,
-                    "on_epg_filter_changed": self.on_epg_filter_changed,
+        handlers = {"on_epg_filter_changed": self.on_epg_filter_changed,
                     "on_epg_filter_toggled": self.on_epg_filter_toggled,
                     "on_view_query_tooltip": self.on_view_query_tooltip,
                     "on_multi_epg_toggled": self.on_multi_epg_toggled,
-                    "on_xmltv_toggled": self.on_xmltv_toggled}
+                    "on_xmltv_toggled": self.on_xmltv_toggled,
+                    "on_epg_press": self.on_epg_press,
+                    "on_timer_add": self.on_timer_add}
 
         builder = get_builder(f"{UI_RESOURCES_PATH}epg{SEP}tab.glade", handlers)
 
@@ -446,49 +447,6 @@ class EpgTool(Gtk.Box):
 
         self.show()
 
-    def on_timer_add(self, action=None, value=None):
-        model, paths = self._view.get_selection().get_selected_rows()
-        p_count = len(paths)
-
-        if p_count == 1:
-            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1] or {})
-            response = dialog.run()
-            if response == Gtk.ResponseType.OK:
-                gen = self.write_timers_list([dialog.get_request()])
-                GLib.idle_add(lambda: next(gen, False))
-            dialog.destroy()
-        elif p_count > 1:
-            if show_dialog(DialogType.QUESTION, self._app.app_window,
-                           "Add timers for selected events?") != Gtk.ResponseType.OK:
-                return True
-
-            self.add_timers_list((model[p][-1] for p in paths))
-        else:
-            self._app.show_error_message("No selected item!")
-
-    def add_timers_list(self, paths):
-        ref_str = "timeraddbyeventid?sRef={}&eventid={}&justplay=0"
-        refs = [ref_str.format(quote(ev.get("e2eventservicereference", "")), ev.get("e2eventid", "")) for ev in paths]
-
-        gen = self.write_timers_list(refs)
-        GLib.idle_add(lambda: next(gen, False))
-
-    def write_timers_list(self, refs):
-        self._app.wait_dialog.show()
-        tasks = list(refs)
-        for ref in refs:
-            self._app.send_http_request(HttpAPI.Request.TIMER, ref, lambda x: tasks.pop())
-            yield True
-
-        while tasks:
-            yield True
-
-        self._app.emit("change-page", Page.TIMERS.value)
-
-    def on_epg_press(self, view, event):
-        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
-            self.on_timer_add()
-
     def on_data_open(self, app, page):
         if page is not Page.EPG:
             return
@@ -501,6 +459,15 @@ class EpgTool(Gtk.Box):
         self._epg_cache = TabEpgCache(self._app, response)
         if not self._src_xmltv_button.get_active():
             self._src_xmltv_button.set_active(True)
+
+    def on_data_send(self, app, page):
+        if page is not Page.EPG:
+            return
+
+        if self._src_xmltv_button.get_active():
+            self._app.show_error_message("Not implemented yet!")
+        else:
+            self._app.show_error_message("Not allowed in this context!")
 
     def on_service_changed(self, app, srv):
         if app.page is not Page.EPG:
@@ -649,6 +616,51 @@ class EpgTool(Gtk.Box):
         else:
             srvs = self._app.current_services
             self.update_xmltv_epg_data(srvs[s].service for s in self._app.current_bouquets.get(self._current_bq, []))
+
+    # ****************** Timers ***************** #
+
+    def on_epg_press(self, view, event):
+        if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
+            self.on_timer_add()
+
+    def on_timer_add(self, action=None, value=None):
+        model, paths = self._view.get_selection().get_selected_rows()
+        p_count = len(paths)
+
+        if p_count == 1:
+            dialog = TimerTool.TimerDialog(self._app.app_window, TimerTool.TimerAction.EVENT, model[paths][-1] or {})
+            response = dialog.run()
+            if response == Gtk.ResponseType.OK:
+                gen = self.write_timers_list([dialog.get_request()])
+                GLib.idle_add(lambda: next(gen, False))
+            dialog.destroy()
+        elif p_count > 1:
+            if show_dialog(DialogType.QUESTION, self._app.app_window,
+                           "Add timers for selected events?") != Gtk.ResponseType.OK:
+                return True
+
+            self.add_timers_list((model[p][-1] for p in paths))
+        else:
+            self._app.show_error_message("No selected item!")
+
+    def add_timers_list(self, paths):
+        ref_str = "timeraddbyeventid?sRef={}&eventid={}&justplay=0"
+        refs = [ref_str.format(quote(ev.get("e2eventservicereference", "")), ev.get("e2eventid", "")) for ev in paths]
+
+        gen = self.write_timers_list(refs)
+        GLib.idle_add(lambda: next(gen, False))
+
+    def write_timers_list(self, refs):
+        self._app.wait_dialog.show()
+        tasks = list(refs)
+        for ref in refs:
+            self._app.send_http_request(HttpAPI.Request.TIMER, ref, lambda x: tasks.pop())
+            yield True
+
+        while tasks:
+            yield True
+
+        self._app.emit("change-page", Page.TIMERS.value)
 
 
 class EpgDialog:
