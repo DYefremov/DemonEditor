@@ -1104,7 +1104,7 @@ class Application(Gtk.Application):
 
     def on_recordings_realize(self, box):
         if not self._recordings_tool:
-            self._recordings_tool = RecordingsTool(self, self._settings)
+            self._recordings_tool = RecordingsTool(self)
             box.pack_start(self._recordings_tool, True, True, 0)
             self._player_box.connect("play", self._recordings_tool.on_playback)
             self._player_box.connect("playback-close", self._recordings_tool.on_playback_close)

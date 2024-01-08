@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -46,15 +46,16 @@ class RecordingsTool(Gtk.Box):
     ROOT = ".."
     DEFAULT_PATH = "/hdd"
 
-    def __init__(self, app, settings, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app, **kwargs):
+        super().__init__(**kwargs)
 
         self._app = app
         self._app.connect("layout-changed", self.on_layout_changed)
         self._app.connect("data-receive", self.on_data_receive)
         self._app.connect("profile-changed", self.init)
+        self._app.connect("filter-toggled", self.on_filter_toggled)
 
-        self._settings = settings
+        self._settings = app.app_settings
         self._ftp = None
         self._logos = {}
         # Icon.
@@ -82,6 +83,7 @@ class RecordingsTool(Gtk.Box):
         self._filter_model = builder.get_object("recordings_filter_model")
         self._filter_model.set_visible_func(self.recordings_filter_function)
         self._filter_entry = builder.get_object("recordings_filter_entry")
+        self._recordings_filter_button = builder.get_object("recordings_filter_button")
         self._recordings_count_label = builder.get_object("recordings_count_label")
         self.pack_start(builder.get_object("recordings_box"), True, True, 0)
         self._rec_view.get_model().set_sort_func(3, self.time_sort_func, 3)
@@ -92,7 +94,7 @@ class RecordingsTool(Gtk.Box):
         renderer.set_fixed_size(size, size * 0.65)
         srv_column.set_cell_data_func(renderer, self.logo_data_func)
 
-        if settings.alternate_layout:
+        if self._settings.alternate_layout:
             self.on_layout_changed(app, True)
 
         self.init()
@@ -293,9 +295,12 @@ class RecordingsTool(Gtk.Box):
         txt = self._filter_entry.get_text().upper()
         return next((s for s in model.get(itr, 1, 2, 3, 5, 6) if s and txt in s.upper()), False)
 
+    def on_filter_toggled(self, app, value):
+        if self._app.page is Page.RECORDINGS:
+            self._recordings_filter_button.set_active(not self._recordings_filter_button.get_active())
+
     def on_recordings_filter_toggled(self, button):
-        if not button.get_active():
-            self._filter_entry.set_text("")
+        self._filter_entry.grab_focus() if button.get_active() else self._filter_entry.set_text("")
 
     def on_recordings_key_press(self, view, event):
         key_code = event.hardware_keycode
