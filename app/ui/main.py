@@ -2324,8 +2324,6 @@ class Application(Gtk.Application):
             if callback:
                 callback()
             yield True
-            self.on_view_focus(self._services_view)
-            yield True
             self._data_hash = self.get_data_hash()
             yield True
             if self._filter_box.get_visible():
@@ -2346,7 +2344,11 @@ class Application(Gtk.Application):
 
     def show_app_info(self, visible):
         self._app_info_box.set_visible(visible)
-        self._app_info_box.grab_focus() if visible else self._services_view.grab_focus()
+        if visible:
+            self._app_info_box.grab_focus()
+        else:
+            if self._services_view.get_realized():
+                self._services_view.grab_focus()
         yield True
 
     def append_blacklist(self, black_list):
