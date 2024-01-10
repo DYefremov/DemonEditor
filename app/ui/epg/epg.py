@@ -394,6 +394,9 @@ class TabEpgSettingsPopover(EpgSettingsPopover):
 
 
 class EpgTool(Gtk.Box):
+    # Batch size to data load in one pass.
+    LOAD_FACTOR = 100
+
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
 
@@ -490,29 +493,48 @@ class EpgTool(Gtk.Box):
                 path = next((r.path for r in self._model if r[-1].get("e2eventservicename", None) == srv.service), None)
                 scroll_to(path, self._view) if path else None
             else:
+                self._app.wait_dialog.show()
                 self.update_xmltv_epg_data([srv.service])
 
     def on_profile_changed(self, app, prf):
-        self.update_http_epg_data()
+        gen = self.update_epg_data()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
-    @run_idle
     def update_http_epg_data(self, epg=None):
-        self.clear()
+        events = None
         if epg:
-            list(map(self._model.append, (self.get_event(e) for e in epg.get("event_list", [])
-                                          if e.get("e2eventid", "").isdigit())))
-        self._event_count_label.set_text(str(len(self._model)))
-        self._app.wait_dialog.hide()
+            events = (self.get_event(e) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit())
+        gen = self.update_epg_data(events)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_xmltv_epg_data(self, names):
-        self.clear()
-        events = chain.from_iterable(self._epg_cache.get_current_events(n) for n in names)
-        [self._model.append(e) for e in events]
+        gen = self.update_epg_data(chain.from_iterable(self._epg_cache.get_current_events(n) for n in names))
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_epg_data(self, events=()):
+        c_gen = self.clear()
+        yield from c_gen
+        for index, e in enumerate(events):
+            if index % self.LOAD_FACTOR == 0:
+                self._event_count_label.set_text(str(len(self._model)))
+                yield True
+            self._model.append(e)
         self._event_count_label.set_text(str(len(self._model)))
+        self._app.wait_dialog.hide()
+        yield True
 
     def clear(self):
-        self._model.clear()
+        if len(self._model) < self.LOAD_FACTOR * 20:
+            self._model.clear()
+        else:
+            # Init new models.
+            column_types = (self._model.get_column_type(i) for i in range(self._model.get_n_columns()))
+            self._model = Gtk.ListStore(*column_types)
+            self._filter_model = self._model.filter_new()
+            self._filter_model.set_visible_func(self.epg_filter_function)
+            self._view.set_model(Gtk.TreeModelSort(model=self._filter_model))
         self._event_count_label.set_text("0")
+        yield True
 
     @staticmethod
     def get_event(event, show_day=True):
@@ -536,6 +558,7 @@ class EpgTool(Gtk.Box):
         value = datetime.utcfromtimestamp(model.get_value(itr, Column.EPG_LENGTH))
         renderer.set_property("text", value.strftime(self._duration_fmt))
 
+    @run_with_delay(2)
     def on_epg_filter_changed(self, entry):
         self._filter_model.refilter()
 
@@ -604,11 +627,10 @@ class EpgTool(Gtk.Box):
         if not self._current_bq:
             return
 
-        if self._src is EpgSource.HTTP:
-            self._app.wait_dialog.show()
-            bq = self._app.current_bouquet_files.get(self._current_bq, None)
-            api = self._app.http_api
+        self._app.wait_dialog.show()
 
+        if self._src is EpgSource.HTTP:
+            bq, api = self._app.current_bouquet_files.get(self._current_bq, None), self._app.http_api
             if bq and api:
                 tm = datetime.now().timestamp()
                 req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"&time={tm}')
