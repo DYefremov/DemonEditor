@@ -156,6 +156,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="epg_add_timer_button">
                     <property name="visible">True</property>
+                    <property name="sensitive" bind-source="src_xmltv_button" bind-property="active" bind-flags="invert-boolean">True</property>
                     <property name="can-focus">True</property>
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>

@@ -207,20 +207,25 @@ class TabEpgCache(EpgCache):
     def init(self):
         self._is_run = True
         self._reader = XmlTvReader(self._path, url=self._xml_src)
+        if self._canceled:
+            return
 
         if os.path.isfile(self._path):
-            # Difference calculation between the current time and file modification.
-            dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(self._path))
-            # We will update daily. -> Temporarily!!!
-            if dif.days > 0 and not self._canceled:
-                self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
-                self._app.emit("add-background-task", self._task)
+            if self._xml_src:
+                # Difference calculation between the current time and file modification.
+                dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(self._path))
+                # We will update daily. -> Temporarily!!!
+                if dif.days > 0:
+                    self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download,
+                                              self.process_data, )
+                    self._app.emit("add-background-task", self._task)
+                else:
+                    self.process_data()
             else:
-                self.process_data()
+                self._task = BGTaskWidget(self._app, "", self.process_data, )
         else:
-            if not self._canceled:
-                self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
-                self._app.emit("add-background-task", self._task)
+            self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+            self._app.emit("add-background-task", self._task)
 
     def process_data(self):
         GLib.idle_add(self._app.wait_dialog.show)
@@ -458,10 +463,10 @@ class EpgTool(Gtk.Box):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        self.clear()
-        self._epg_cache = TabEpgCache(self._app, response)
-        if not self._src_xmltv_button.get_active():
-            self._src_xmltv_button.set_active(True)
+        if next(self.clear(), False):
+            self._epg_cache = TabEpgCache(self._app, response)
+            if not self._src_xmltv_button.get_active():
+                self._src_xmltv_button.set_active(True)
 
     def on_data_send(self, app, page):
         if page is not Page.EPG:
@@ -501,9 +506,10 @@ class EpgTool(Gtk.Box):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def update_http_epg_data(self, epg=None):
-        events = None
         if epg:
             events = (self.get_event(e) for e in epg.get("event_list", []) if e.get("e2eventid", "").isdigit())
+        else:
+            events = ()
         gen = self.update_epg_data(events)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
@@ -602,10 +608,10 @@ class EpgTool(Gtk.Box):
         return True
 
     def on_multi_epg_toggled(self, button):
-        self.clear()
-
         if button.get_active():
             self.get_multi_epg()
+        else:
+            next(self.clear(), False)
 
     def on_xmltv_toggled(self, button):
         if button.get_active():
@@ -642,6 +648,9 @@ class EpgTool(Gtk.Box):
     # ****************** Timers ***************** #
 
     def on_epg_press(self, view, event):
+        if self._src_xmltv_button.get_active():
+            return True
+
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and len(view.get_model()) > 0:
             self.on_timer_add()
 
