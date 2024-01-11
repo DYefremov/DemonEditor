@@ -159,11 +159,9 @@ class FavEpgCache(EpgCache):
 
     def update_epg_data(self):
         if self._src is EpgSource.HTTP:
-            api = self._app.http_api
-            bq = self._app.current_bouquet_files.get(self._current_bq, None)
-
+            api, bq = self._app.http_api, self._app.current_bouquet_files.get(self._current_bq, None)
             if bq and api:
-                req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"')
+                req = quote(f'FROM BOUQUET "{bq}"')
                 api.send(HttpAPI.Request.EPG_NOW, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_http_data)
         elif self._src is EpgSource.XML:
             self.update_xml_data()
