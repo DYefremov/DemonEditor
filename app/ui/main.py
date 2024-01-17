@@ -474,7 +474,6 @@ class Application(Gtk.Application):
         # Sub-bouquets menu item.
         self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
         # Export bouquet to m3u menu items.
-        self.bind_property("is-enigma", self._iptv_menu_button, "visible")
         export_to_m3u_item = builder.get_object("bouquet_export_to_m3u_item")
         self.bind_property("is-enigma", export_to_m3u_item, "visible")
         export_to_m3u_model_button = builder.get_object("export_all_to_m3u_model_button")
