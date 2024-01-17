@@ -105,14 +105,13 @@ class Application(Gtk.Application):
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
-                         "bouquet_import_popup_item")
+                         "bouquet_import_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button")
 
     _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item", "import_bq_menu_button")
 
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item")
 
-    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button",
-                          "iptv_menu_button")
+    _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "iptv_menu_button")
 
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
@@ -475,12 +474,11 @@ class Application(Gtk.Application):
         # Sub-bouquets menu item.
         self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
         # Export bouquet to m3u menu items.
+        self.bind_property("is-enigma", self._iptv_menu_button, "visible")
         export_to_m3u_item = builder.get_object("bouquet_export_to_m3u_item")
         self.bind_property("is-enigma", export_to_m3u_item, "visible")
-        self._signal_box.bind_property("visible", export_to_m3u_item, "sensitive")
         export_to_m3u_model_button = builder.get_object("export_all_to_m3u_model_button")
         self.bind_property("is-enigma", export_to_m3u_model_button, "visible")
-        self._signal_box.bind_property("visible", export_to_m3u_model_button, "sensitive")
         # Stack page widgets.
         self._stack_services_frame = builder.get_object("services_frame")
         self._stack_satellite_box = builder.get_object("satellite_box")
@@ -682,8 +680,8 @@ class Application(Gtk.Application):
         # IPTV menu.
         self._iptv_menu_button.set_menu_model(builder.get_object("iptv_menu"))
         iptv_elem = self._tool_elements.get("fav_iptv_popup_item")
-        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_export_iptv_to_m3u,
-                  self.on_epg_list_configuration, self.on_iptv_list_configuration, self.on_remove_all_unavailable):
+        for h in (self.on_iptv, self.on_import_yt_list, self.on_import_m3u, self.on_epg_list_configuration,
+                  self.on_iptv_list_configuration, self.on_remove_all_unavailable):
             iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
         if self._settings.extensions_support:

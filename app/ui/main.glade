@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2023 Dmitriy Yefremov
+Copyright (c) 2018-2024 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellite list editor. -->
-  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkListStore" id="alt_list_store">
     <columns>
@@ -59,9 +59,9 @@ Author: Dmitriy Yefremov
     <property name="can-focus">False</property>
     <child>
       <object class="GtkMenuItem" id="alt_remove_popup_item">
-        <property name="label" translatable="yes">Remove</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
         <signal name="activate" handler="on_delete" object="alt_tree_view" swapped="no"/>
       </object>
     </child>
@@ -71,10 +71,10 @@ Author: Dmitriy Yefremov
     <property name="can-focus">False</property>
     <child>
       <object class="GtkMenuItem" id="bouquets_new_popup_item">
-        <property name="label" translatable="yes">New</property>
         <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">New</property>
         <signal name="activate" handler="on_new_bouquet" object="bouquets_tree_view" swapped="no"/>
         <accelerator key="Insert" signal="activate" modifiers="Primary"/>
       </object>
@@ -105,8 +105,15 @@ Author: Dmitriy Yefremov
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="bouquet_import_m3u_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Import m3u file</property>
+        <signal name="activate" handler="on_import_m3u" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="bouquet_export_to_m3u_item">
-        <property name="sensitive">False</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">Export to m3u</property>
         <signal name="activate" handler="on_bouquet_export_to_m3u" swapped="no"/>
@@ -208,7 +215,6 @@ Author: Dmitriy Yefremov
         <property name="spacing">2</property>
         <child>
           <object class="GtkModelButton" id="export_all_to_m3u_model_button">
-            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
             <property name="text" translatable="yes">All</property>
@@ -225,8 +231,8 @@ Author: Dmitriy Yefremov
             <property name="visible">True</property>
             <property name="can-focus">True</property>
             <property name="receives-default">True</property>
-            <property name="action-name">app.on_export_iptv_to_m3u</property>
             <property name="text" translatable="yes">IPTV services only</property>
+            <signal name="clicked" handler="on_export_iptv_to_m3u" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -526,18 +532,18 @@ Author: Dmitriy Yefremov
     <property name="can-focus">False</property>
     <child>
       <object class="GtkMenuItem" id="iptv_to_fav_end_move_popup_item">
-        <property name="label" translatable="yes">To the end</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">To the end</property>
         <signal name="activate" handler="on_to_fav_end_copy" object="iptv_services_view" swapped="no"/>
         <accelerator key="BackSpace" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="iptv_to_fav_move_popup_item">
-        <property name="label" translatable="yes">To the top</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">To the top</property>
         <signal name="activate" handler="on_to_fav_copy" object="iptv_services_view" swapped="no"/>
         <accelerator key="Insert" signal="activate" modifiers="Primary"/>
       </object>
@@ -550,18 +556,18 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="iptv_copy_popup_item">
-        <property name="label" translatable="yes">Copy</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Copy</property>
         <signal name="activate" handler="on_iptv_services_copy" object="iptv_services_view" swapped="no"/>
         <accelerator key="c" signal="activate" modifiers="Primary"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem" id="iptv_edit_popup_item">
-        <property name="label" translatable="yes">Edit</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Edit</property>
         <signal name="activate" handler="on_edit" swapped="no"/>
         <accelerator key="e" signal="activate" modifiers="Primary"/>
       </object>
@@ -574,9 +580,9 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="iptv_remove_popup_item">
-        <property name="label" translatable="yes">Remove</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
         <signal name="activate" handler="on_delete" object="iptv_services_view" swapped="no"/>
         <accelerator key="Delete" signal="activate"/>
       </object>
@@ -1229,22 +1235,6 @@ Author: Dmitriy Yefremov
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Import YouTube playlist</property>
                 <signal name="activate" handler="on_import_yt_list" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="fav_import_m3u_popup_item">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Import m3u</property>
-                <signal name="activate" handler="on_import_m3u" swapped="no"/>
-              </object>
-            </child>
-            <child>
-              <object class="GtkMenuItem" id="fav_export_m3u_popup_item">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Export to m3u</property>
-                <signal name="activate" handler="on_export_iptv_to_m3u" swapped="no"/>
               </object>
             </child>
             <child>
@@ -3370,7 +3360,6 @@ Author: Dmitriy Yefremov
                                         </child>
                                         <child>
                                           <object class="GtkMenuButton" id="iptv_menu_button">
-                                            <property name="visible">True</property>
                                             <property name="sensitive">False</property>
                                             <property name="can-focus">False</property>
                                             <property name="focus-on-click">False</property>
@@ -3390,54 +3379,6 @@ Author: Dmitriy Yefremov
                                             <property name="fill">True</property>
                                             <property name="pack-type">end</property>
                                             <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkMenuButton" id="export_to_m3u_menu_button">
-                                            <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="focus-on-click">False</property>
-                                            <property name="receives-default">True</property>
-                                            <property name="tooltip-text" translatable="yes">Export to m3u</property>
-                                            <property name="popover">export_to_m3u_menu</property>
-                                            <child>
-                                              <object class="GtkImage" id="export_to_m3u_menu_button_image">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="icon-name">document-save-as-symbolic</property>
-                                              </object>
-                                            </child>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="pack-type">end</property>
-                                            <property name="position">2</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkButton" id="import_m3u_header_button">
-                                            <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="focus-on-click">False</property>
-                                            <property name="receives-default">True</property>
-                                            <property name="tooltip-text" translatable="yes">Import m3u file</property>
-                                            <signal name="clicked" handler="on_import_m3u" swapped="no"/>
-                                            <child>
-                                              <object class="GtkImage" id="import_m3u_header_button_image">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <property name="icon-name">insert-link-symbolic</property>
-                                              </object>
-                                            </child>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="pack-type">end</property>
-                                            <property name="position">3</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -3939,8 +3880,8 @@ Author: Dmitriy Yefremov
                                         <property name="height-request">26</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="margin-left">5</property>
-                                        <property name="margin-right">5</property>
+                                        <property name="margin-start">5</property>
+                                        <property name="margin-end">5</property>
                                         <property name="spacing">5</property>
                                         <child>
                                           <object class="GtkImage" id="image2">
@@ -4085,6 +4026,62 @@ Author: Dmitriy Yefremov
                                           </packing>
                                         </child>
                                         <child>
+                                          <object class="GtkButtonBox" id="bouquet_m3u_box">
+                                            <property name="visible">True</property>
+                                            <property name="can-focus">False</property>
+                                            <property name="layout-style">expand</property>
+                                            <child>
+                                              <object class="GtkButton" id="import_m3u_header_button">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="focus-on-click">False</property>
+                                                <property name="receives-default">True</property>
+                                                <property name="tooltip-text" translatable="yes">Import m3u file</property>
+                                                <signal name="clicked" handler="on_import_m3u" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkImage" id="import_m3u_header_button_image">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="icon-name">insert-link-symbolic</property>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkMenuButton" id="export_to_m3u_menu_button">
+                                                <property name="visible">True</property>
+                                                <property name="can-focus">False</property>
+                                                <property name="focus-on-click">False</property>
+                                                <property name="receives-default">True</property>
+                                                <property name="tooltip-text" translatable="yes">Export to m3u</property>
+                                                <property name="popover">export_to_m3u_menu</property>
+                                                <child>
+                                                  <object class="GtkImage" id="export_to_m3u_menu_button_image">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="icon-name">document-save-as-symbolic</property>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">False</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                        <child>
                                           <object class="GtkBox" id="bouquet_lock_hide_box">
                                             <property name="visible">True</property>
                                             <property name="sensitive">False</property>
@@ -4140,7 +4137,7 @@ Author: Dmitriy Yefremov
                                             <property name="expand">False</property>
                                             <property name="fill">True</property>
                                             <property name="pack-type">end</property>
-                                            <property name="position">1</property>
+                                            <property name="position">4</property>
                                           </packing>
                                         </child>
                                       </object>
@@ -4260,8 +4257,8 @@ Author: Dmitriy Yefremov
                                         <property name="height-request">26</property>
                                         <property name="visible">True</property>
                                         <property name="can-focus">False</property>
-                                        <property name="margin-left">5</property>
-                                        <property name="margin-right">5</property>
+                                        <property name="margin-start">5</property>
+                                        <property name="margin-end">5</property>
                                         <property name="spacing">5</property>
                                         <child>
                                           <object class="GtkImage" id="bq_count_image">
