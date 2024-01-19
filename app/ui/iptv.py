@@ -699,33 +699,15 @@ class M3uImportDialog(IptvListDialog):
         self._dialog.set_title(translate("Playlist import"))
         self._dialog.connect("delete-event", self.on_close)
         self._apply_button.set_label(translate("Import"))
-        # Progress
-        self._progress_bar = Gtk.ProgressBar(visible=False, valign="center")
-        self._spinner = Gtk.Spinner(active=False)
-        self._info_label = Gtk.Label(visible=True, ellipsize="end", max_width_chars=30)
-        load_label = Gtk.Label(label=translate("Loading data..."))
-        self._spinner.bind_property("active", self._spinner, "visible")
-        self._spinner.bind_property("visible", load_label, "visible")
+        # Extra box.
+        builder = get_builder(f"{UI_RESOURCES_PATH}m3u.glade", use_str=True, objects=("import_m3u_box",))
+        self._data_box.add(builder.get_object("import_m3u_box"))
+        self._info_label = builder.get_object("info_label")
+        self._progress_bar = builder.get_object("progress_bar")
+        self._spinner = builder.get_object("spinner")
         self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
-
-        progress_box = Gtk.HBox(visible=True, spacing=2)
-        progress_box.add(self._progress_bar)
-        progress_box.pack_end(self._spinner, False, False, 0)
-        progress_box.pack_start(load_label, False, False, 0)
-        # Picons
-        self._picons_switch = Gtk.Switch(visible=True)
-        self._picon_box = Gtk.HBox(visible=True, sensitive=False, spacing=5)
-        self._picon_box.pack_end(self._picons_switch, False, False, 0)
-        self._picon_box.pack_end(Gtk.Label(visible=True, label=translate("Download picons")), False, False, 0)
-        # Extra box
-        extra_box = Gtk.HBox(visible=True, spacing=2, margin_bottom=5, margin_top=5)
-        extra_box.set_center_widget(progress_box)
-        extra_box.pack_start(self._info_label, False, False, 5)
-        extra_box.pack_end(self._picon_box, True, True, 5)
-
-        frame = Gtk.Frame(visible=True, margin_bottom=5)
-        frame.add(extra_box)
-        self._data_box.add(frame)
+        self._picon_switch = builder.get_object("picon_switch")
+        self._picon_box = builder.get_object("picon_box")
 
         self.get_m3u(m3_path, s_type)
 
@@ -775,7 +757,7 @@ class M3uImportDialog(IptvListDialog):
 
                 services.append(s._replace(picon=None, picon_id=picon_id, data_id=None, fav_id=fav_id))
 
-        if self._picons_switch.get_active():
+        if self._picon_switch.get_active():
             if self.is_default_values():
                 show_dialog(DialogType.ERROR, self._dialog,
                             "Set values for TID, NID and Namespace for correct naming of the picons!")
