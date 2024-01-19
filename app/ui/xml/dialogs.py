@@ -43,9 +43,9 @@ from app.eparser.ecommons import (PLS_MODE, get_key_by_value, POLARIZATION, FEC,
                                   HIERARCHY, Inversion, C_MODULATION, FEC_DEFAULT, TerTransponder, CableTransponder,
                                   Bouquet, BouquetService, BqServiceType, Bouquets, BqType)
 from app.eparser.satxml import get_pos_str
-from app.settings import USE_HEADER_BAR, Settings, CONFIG_PATH
+from app.settings import Settings, CONFIG_PATH
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
-from ..dialogs import show_dialog, DialogType, translate, get_builder
+from ..dialogs import show_dialog, BaseDialog, DialogType, translate, get_builder
 from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu, get_services_type_groups
 from ..search import SearchProvider
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
@@ -53,22 +53,11 @@ from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
 _DIALOGS_UI_PATH = f"{UI_RESOURCES_PATH}xml{os.sep}dialogs.glade"
 
 
-class DVBDialog(Gtk.Dialog):
+class DVBDialog(BaseDialog):
     """ Base dialog class for editing DVB (-> *.xml) data. """
 
     def __init__(self, parent, title, data=None, *args, **kwargs):
-        super().__init__(transient_for=parent,
-                         title=translate(title),
-                         modal=True,
-                         resizable=False,
-                         default_width=240,
-                         skip_taskbar_hint=True,
-                         skip_pager_hint=True,
-                         destroy_with_parent=True,
-                         use_header_bar=USE_HEADER_BAR,
-                         window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
-                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK),
-                         *args, **kwargs)
+        super().__init__(parent=parent, title=title, *args, **kwargs)
 
         self._viewport = Gtk.Viewport(margin_top=2)
         self._viewport.get_style_context().add_class("view")

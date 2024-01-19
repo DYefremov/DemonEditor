@@ -38,6 +38,25 @@ from app.settings import SEP, IS_WIN, USE_HEADER_BAR
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
+class BaseDialog(Gtk.Dialog):
+    """ Base dialog class for editing DVB (-> *.xml) data. """
+    DEFAULT_BUTTONS = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_OK, Gtk.ResponseType.OK)
+
+    def __init__(self, parent, title, buttons=None, *args, **kwargs):
+        super().__init__(transient_for=parent,
+                         title=translate(title),
+                         modal=True,
+                         resizable=False,
+                         default_width=240,
+                         skip_taskbar_hint=True,
+                         skip_pager_hint=True,
+                         destroy_with_parent=True,
+                         use_header_bar=USE_HEADER_BAR,
+                         window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
+                         buttons=buttons or self.DEFAULT_BUTTONS,
+                         *args, **kwargs)
+
+
 class Dialog(Enum):
     MESSAGE = """
     <?xml version="1.0" encoding="UTF-8"?>
