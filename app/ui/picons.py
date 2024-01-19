@@ -30,6 +30,7 @@ import os
 import re
 import shutil
 from enum import Enum
+from html import escape
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 
@@ -193,6 +194,8 @@ class PiconManager(Gtk.Box):
         column.set_cell_data_func(builder.get_object("picons_dest_renderer"), self.picon_data_func)
         column = builder.get_object("src_picon_column")
         column.set_cell_data_func(builder.get_object("picons_src_renderer"), self.picon_data_func)
+        column = builder.get_object("dest_title_column")
+        column.set_cell_data_func(builder.get_object("title_dest_renderer"), self.title_data_func)
         # Settings
         self._settings = settings
         self._s_type = settings.setting_type
@@ -296,6 +299,17 @@ class PiconManager(Gtk.Box):
 
     def picon_data_func(self, column, renderer, model, itr, data):
         renderer.set_property("pixbuf", get_pixbuf_at_scale(model.get_value(itr, 2), 72, 48, True))
+
+    def title_data_func(self, column, renderer, model, itr, data):
+        srv = self._services.get(model[itr][1], None)
+        if srv:
+            renderer.set_property("markup", self.get_picon_info_markup(srv))
+
+    def get_picon_info_markup(self, srv):
+        ext_info = "" if srv.service_type == "IPTV" else f" {srv.pos} {srv.freq}"
+        return (f'{escape(srv.picon_id)}\n\n'
+                f'<span size="small" weight="bold">{translate("Service")}: {escape(srv.service)}</span>\n'
+                f'<span size="small" style="italic">{srv.service_type}{ext_info}</span>')
 
     def update_picons_from_file(self, view, uri):
         """ Adds picons in the view on dragging from file system. """
@@ -1025,12 +1039,7 @@ class PiconManager(Gtk.Box):
         show_dialog(dialog_type, self._app_window, message)
 
     def get_picons_format(self):
-        picon_format = SettingsType.ENIGMA_2
-
-        if self._neutrino_mp_radio_button.get_active():
-            picon_format = SettingsType.NEUTRINO_MP
-
-        return picon_format
+        return SettingsType.NEUTRINO_MP if self._neutrino_mp_radio_button.get_active() else SettingsType.ENIGMA_2
 
 
 if __name__ == "__main__":
