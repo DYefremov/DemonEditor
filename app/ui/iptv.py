@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -691,6 +691,7 @@ class M3uImportDialog(IptvListDialog):
         self._picons = app.picons
         self._pic_path = app._settings.profile_picons_path
         self._services = None
+        self._epg_src = None
         self._url_count = 0
         self._errors_count = 0
         self._max_count = 0
@@ -708,6 +709,7 @@ class M3uImportDialog(IptvListDialog):
         self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
         self._picon_switch = builder.get_object("picon_switch")
         self._picon_box = builder.get_object("picon_box")
+        builder.get_object("import_type_box").set_visible(False)
 
         self.get_m3u(m3_path, s_type)
 
@@ -715,7 +717,7 @@ class M3uImportDialog(IptvListDialog):
     def get_m3u(self, path, s_type):
         try:
             GLib.idle_add(self._spinner.set_property, "active", True)
-            self._services = parse_m3u(path, s_type)
+            self._epg_src, self._services = parse_m3u(path, s_type)
             for s in self._services:
                 if s.picon:
                     GLib.idle_add(self._picon_box.set_sensitive, True)
@@ -765,8 +767,7 @@ class M3uImportDialog(IptvListDialog):
 
             self.download_picons(picons)
         else:
-            GLib.idle_add(self._ok_button.set_visible, True)
-            GLib.idle_add(self._info_bar.set_visible, True, priority=GLib.PRIORITY_LOW)
+            self.on_apply_done()
 
         self._app.append_imported_services(services)
 
@@ -850,9 +851,14 @@ class M3uImportDialog(IptvListDialog):
                 model.set_value(r.iter, Column.FAV_PICON, picons.get(s.picon_id, None))
                 yield True
 
+        self.on_apply_done()
+        yield True
+
+    @run_idle
+    def on_apply_done(self):
         self._info_bar.set_visible(True)
         self._ok_button.set_visible(True)
-        yield True
+        self._picon_box.set_sensitive(False)
 
     def on_response(self, dialog, response):
         if response == Gtk.ResponseType.APPLY:
