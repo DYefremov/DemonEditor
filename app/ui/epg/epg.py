@@ -50,7 +50,8 @@ from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
 from app.ui.dialogs import translate, show_dialog, DialogType, get_builder, get_chooser_dialog
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
-from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions
+from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions, \
+    show_info_bar_message
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, Column, EPG_ICON, KeyboardKey, Page, HeaderBar
 
 
@@ -1175,9 +1176,7 @@ class EpgDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
-        self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+        show_info_bar_message(self._info_bar, self._message_label, text, message_type)
 
     @run_idle
     def update_source_info(self, info):

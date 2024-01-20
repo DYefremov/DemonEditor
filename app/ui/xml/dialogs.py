@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -592,12 +592,6 @@ class UpdateDialog:
     @run_idle
     def update_receive_button_state(self, model):
         self._receive_button.set_sensitive((any(r[4] for r in model)))
-
-    @run_idle
-    def show_info_message(self, text, message_type):
-        self._sat_update_info_bar.set_visible(True)
-        self._sat_update_info_bar.set_message_type(message_type)
-        self._info_bar_message_label.set_text(text)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._sat_update_info_bar.set_visible(False)

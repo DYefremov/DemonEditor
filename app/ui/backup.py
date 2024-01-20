@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ from pathlib import Path
 from app.commons import run_idle, get_size_from_bytes
 from app.settings import SettingsType, SEP
 from app.ui.dialogs import show_dialog, DialogType, get_builder
-from app.ui.main_helper import append_text_to_tview
+from app.ui.main_helper import append_text_to_tview, show_info_bar_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, HeaderBar
 
 
@@ -153,9 +153,7 @@ class BackupDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(True)
-        self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(text)
+        show_info_bar_message(self._info_bar, self._message_label, text, message_type)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

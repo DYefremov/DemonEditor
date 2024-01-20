@@ -3215,8 +3215,7 @@ class Application(Gtk.Application):
             self.show_error_message("No m3u file is selected!")
             return
 
-        if self._bq_selected:
-            M3uImportDialog(self._main_window, self._s_type, response, self).show()
+        M3uImportDialog(self._main_window, self._s_type, response, self).show()
 
     def append_imported_services(self, services):
         bq_services = self._bouquets.get(self._bq_selected)
@@ -4438,10 +4437,7 @@ class Application(Gtk.Application):
 
     @run_idle
     def show_info_message(self, text, message_type=Gtk.MessageType.INFO):
-        self._info_bar.set_visible(False)
-        self._info_label.set_text(translate(text))
-        self._info_bar.set_message_type(message_type)
-        self._info_bar.set_visible(True)
+        show_info_bar_message(self._info_bar, self._info_label, text, message_type)
 
     def on_info_bar_close(self, bar=None, resp=None):
         self._info_bar.set_visible(False)

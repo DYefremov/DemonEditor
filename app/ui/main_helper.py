@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,8 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "is_only_one_item_selected", "gen_bouquets", "BqGenType", "get_selection", "get_service_reference",
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name",
-           "update_toggle_model", "update_popup_filter_model", "update_filter_sat_positions", "get_pos_num")
+           "update_toggle_model", "update_popup_filter_model", "update_filter_sat_positions", "get_pos_num",
+           "show_info_bar_message")
 
 import os
 import re
@@ -844,6 +845,14 @@ def on_popup_menu(menu, event):
     """ Shows popup menu for the view """
     if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
         menu.popup(None, None, None, None, event.button, event.time)
+
+
+def show_info_bar_message(bar, label, text, message_type=Gtk.MessageType.INFO):
+    """ Shows a message for info bars. """
+    bar.set_visible(False)
+    label.set_text(translate(text))
+    bar.set_message_type(message_type)
+    bar.set_visible(True)
 
 
 if __name__ == "__main__":

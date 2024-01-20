@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode, PlaybackMode, IS_LINUX, SEP, IS_WIN
 from app.ui.dialogs import show_dialog, DialogType, translate, get_chooser_dialog, get_builder
-from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf
+from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf, show_info_bar_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, DEFAULT_ICON, APP_FONT, HeaderBar
 
 
@@ -476,10 +476,7 @@ class SettingsDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        self._info_bar.set_visible(False)
-        self._info_bar.set_message_type(message_type)
-        self._message_label.set_text(translate(text))
-        self._info_bar.set_visible(True)
+        show_info_bar_message(self._info_bar, self._message_label, text, message_type)
 
     @run_idle
     def show_spinner(self, show):
