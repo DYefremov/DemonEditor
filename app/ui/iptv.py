@@ -43,7 +43,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
                               parse_m3u, PICON_FORMAT)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
-from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder
+from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder, BaseDialog
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf, show_info_bar_message
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
@@ -712,7 +712,7 @@ class M3uImportDialog(IptvListDialog):
         self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
         self._picon_switch = builder.get_object("picon_switch")
         self._picon_box = builder.get_object("picon_box")
-        builder.get_object("import_type_box").set_visible(False)
+        # builder.get_object("import_type_box").set_visible(False)
 
         self.get_m3u(m3_path, s_type)
 
@@ -883,6 +883,33 @@ class M3uImportDialog(IptvListDialog):
             return True
 
         return False
+
+
+class ExportM3uDialog(BaseDialog):
+    def __init__(self, app):
+        super().__init__(app.app_window, "Export to m3u")
+        self._app = app
+
+        builder = get_builder(f"{UI_RESOURCES_PATH}m3u.glade", use_str=True, objects=("export_m3u_box",))
+        self._port_entry = builder.get_object("export_port_entry")
+        self._all_type_button = builder.get_object("export_all_button")
+        self._grp_bq_button = builder.get_object("export_grp_bq_button")
+        self._grp_marker_button = builder.get_object("export_grp_markers_button")
+        self._bq_count_label = builder.get_object("export_bq_count_label")
+        self._services_count_label = builder.get_object("export_services_count_label")
+        self.get_content_area().pack_start(builder.get_object("export_m3u_box"), False, False, 0)
+
+        self.connect("response", self.on_response)
+        builder.get_object("export_auto_button").connect("clicked", self.on_get_port_auto)
+
+    def on_response(self, dialog: Gtk.Dialog, response):
+        if response == Gtk.ResponseType.OK:
+            return True
+
+        dialog.destroy()
+
+    def on_get_port_auto(self, button):
+        self._app.show_error_message("Not implemented yet!")
 
 
 class YtListImportDialog:
@@ -1098,7 +1125,7 @@ class YtListImportDialog:
 
     @run_idle
     def show_info_message(self, text, message_type):
-        show_info_bar_message(self._info_bar,  self._message_label, text, message_type)
+        show_info_bar_message(self._info_bar, self._message_label, text, message_type)
 
     def on_selected_toggled(self, toggle, path):
         self._model.set_value(self._model.get_iter(path), 2, not toggle.get_active())

@@ -58,7 +58,7 @@ Author: Dmitriy Yefremov
             <property name="row-spacing">5</property>
             <property name="column-spacing">5</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_port_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
@@ -70,11 +70,11 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
-                <property name="label" translatable="yes">Export</property>
+                <property name="label" translatable="yes">Export:</property>
               </object>
               <packing>
                 <property name="left-attach">0</property>
@@ -82,12 +82,12 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButtonBox">
+              <object class="GtkButtonBox" id="export_types_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="layout-style">expand</property>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton2">
+                  <object class="GtkRadioButton" id="export_all_button">
                     <property name="label" translatable="yes">All types</property>
                     <property name="name">header-button</property>
                     <property name="visible">True</property>
@@ -103,7 +103,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton1">
+                  <object class="GtkRadioButton" id="export_iptv_button">
                     <property name="label" translatable="yes">IPTV only</property>
                     <property name="name">header-button</property>
                     <property name="visible">True</property>
@@ -111,7 +111,7 @@ Author: Dmitriy Yefremov
                     <property name="receives-default">False</property>
                     <property name="active">True</property>
                     <property name="draw-indicator">False</property>
-                    <property name="group">radiobutton2</property>
+                    <property name="group">export_all_button</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -126,12 +126,12 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkButtonBox">
+              <object class="GtkButtonBox" id="export_grp_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="layout-style">expand</property>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton3">
+                  <object class="GtkRadioButton" id="export_grp_bq_button">
                     <property name="label" translatable="yes">Bouquets</property>
                     <property name="name">header-button</property>
                     <property name="visible">True</property>
@@ -147,7 +147,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton4">
+                  <object class="GtkRadioButton" id="export_grp_markers_button">
                     <property name="label" translatable="yes">Markers</property>
                     <property name="name">header-button</property>
                     <property name="visible">True</property>
@@ -155,7 +155,7 @@ Author: Dmitriy Yefremov
                     <property name="receives-default">False</property>
                     <property name="active">True</property>
                     <property name="draw-indicator">False</property>
-                    <property name="group">radiobutton3</property>
+                    <property name="group">export_grp_bq_button</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -164,7 +164,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton">
+                  <object class="GtkRadioButton" id="export_grp_no_button">
                     <property name="label" translatable="yes">No</property>
                     <property name="name">header-button</property>
                     <property name="visible">True</property>
@@ -172,7 +172,7 @@ Author: Dmitriy Yefremov
                     <property name="receives-default">False</property>
                     <property name="active">True</property>
                     <property name="draw-indicator">False</property>
-                    <property name="group">radiobutton4</property>
+                    <property name="group">export_grp_markers_button</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
@@ -187,12 +187,12 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="export_port_box">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="spacing">5</property>
                 <child>
-                  <object class="GtkEntry">
+                  <object class="GtkEntry" id="export_port_entry">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="width-chars">10</property>
@@ -207,7 +207,7 @@ Author: Dmitriy Yefremov
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton">
+                  <object class="GtkButton" id="export_auto_button">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
@@ -261,7 +261,7 @@ Author: Dmitriy Yefremov
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkLabel" id="export_group_label">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Group by</property>
@@ -308,7 +308,7 @@ Author: Dmitriy Yefremov
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <object class="GtkImage">
+          <object class="GtkImage" id="export_info_image">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
             <property name="margin-start">10</property>
@@ -325,14 +325,12 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="export_bq_info_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="margin-start">5</property>
-            <property name="margin-end">10</property>
-            <property name="spacing">2</property>
+            <property name="margin-start">2</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_bq_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Bouquets</property>
@@ -356,9 +354,10 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_bq_count_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
                 <property name="label">0</property>
               </object>
               <packing>
@@ -375,11 +374,13 @@ Author: Dmitriy Yefremov
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="export_service_info_box">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-start">5</property>
+            <property name="spacing">1</property>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_services_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Services</property>
@@ -403,9 +404,10 @@ Author: Dmitriy Yefremov
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkLabel" id="export_services_count_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
+                <property name="margin-start">5</property>
                 <property name="label">0</property>
               </object>
               <packing>
@@ -464,6 +466,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkRadioButton" id="cuurent_bq_button">
                         <property name="label" translatable="yes">Current bouquet</property>
+                        <property name="name">header-button</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
@@ -480,6 +483,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkRadioButton" id="single_bq_button">
                         <property name="label" translatable="yes">Single bouquet</property>
+                        <property name="name">header-button</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
@@ -497,6 +501,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkRadioButton" id="broup_bq_button">
                         <property name="label" translatable="yes">Split by groups</property>
+                        <property name="name">header-button</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
@@ -514,6 +519,7 @@ Author: Dmitriy Yefremov
                     <child>
                       <object class="GtkRadioButton" id="sub_bq_button">
                         <property name="label" translatable="yes">Create sub-bouquets</property>
+                        <property name="name">header-button</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
