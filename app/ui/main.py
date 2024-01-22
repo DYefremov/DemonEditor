@@ -113,6 +113,12 @@ class Application(Gtk.Application):
 
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "iptv_menu_button")
 
+    DATA_SAVE_PAGES = {Page.SERVICES, Page.SATELLITE}
+    DATA_OPEN_PAGES = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.EPG}
+    DATA_EXTRACT_PAGES = {Page.SERVICES}
+    DATA_SEND_PAGES = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.FTP}
+    DATA_RECEIVE_PAGES_enabled = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.RECORDINGS, Page.FTP}
+
     def __init__(self, **kwargs):
         super().__init__(flags=Gio.ApplicationFlags.HANDLES_COMMAND_LINE, **kwargs)
         # Adding command line options
@@ -226,6 +232,8 @@ class Application(Gtk.Application):
         self._is_enigma = self._s_type is SettingsType.ENIGMA_2
         self._is_send_data_enabled = True
         self._is_receive_data_enabled = True
+        self._is_data_open_enabled = True
+        self._is_data_extract_enabled = False
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -315,6 +323,8 @@ class Application(Gtk.Application):
         GObject.signal_new("iptv-service-added", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-open", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("data-extract", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("data-receive", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -495,8 +505,9 @@ class Application(Gtk.Application):
         self._logs_box.pack_start(LogsClient(self), True, True, 0)
         self._bottom_paned = builder.get_object("bottom_paned")
         self.connect("services-update", self.on_services_update)
-        # Send/Receive.
+        # Open-Send-Receive.
         self.connect("data-open", self.on_data_open)
+        self.connect("data-extract", self.on_data_extract)
         self.connect("data-receive", self.on_download)
         self.connect("data-send", self.on_upload)
         # Data save.
@@ -771,8 +782,9 @@ class Application(Gtk.Application):
         sa = self.set_action("on_send", self.on_send)
         self.bind_property("is-send-data-enabled", sa, "enabled")
         sa = self.set_action("on_data_open", lambda a, v: self.emit("data-open", self._page))
-        self.bind_property("is-send-data-enabled", sa, "enabled")
-        self.set_action("on_archive_open", self.on_archive_open)
+        self.bind_property("is-data-open-enabled", sa, "enabled")
+        sa = self.set_action("on_archive_open", lambda a, v: self.emit("data-extract", self._page))
+        self.bind_property("is-data-extract-enabled", sa, "enabled")
         # Edit.
         self.set_action("on_edit", self.on_edit)
         # View actions.
@@ -1122,9 +1134,11 @@ class Application(Gtk.Application):
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(self._page in self._fav_pages)
-        self._save_tool_button.set_visible(self._page in (Page.SERVICES, Page.SATELLITE))
-        self.is_send_data_enabled = self._page not in (Page.TIMERS, Page.RECORDINGS, Page.CONTROL)
-        self.is_receive_data_enabled = self._page not in (Page.EPG, Page.TIMERS, Page.CONTROL)
+        self._save_tool_button.set_visible(self._page in self.DATA_SAVE_PAGES)
+        self.is_data_open_enabled = self._page in self.DATA_OPEN_PAGES
+        self.is_data_extract_enabled = self._page in self.DATA_EXTRACT_PAGES
+        self.is_send_data_enabled = self._page in self.DATA_SEND_PAGES
+        self.is_receive_data_enabled = self._page in self.DATA_RECEIVE_PAGES_enabled
         self.emit("page-changed", self._page)
 
     def on_iptv_toggled(self, button):
@@ -2199,20 +2213,21 @@ class Application(Gtk.Application):
                 return
             self.open_data(response)
 
-    def on_archive_open(self, action=None, value=None):
-        """ Opening the data archive via "File/Open archive". """
-        file_filter = None
-        if IS_DARWIN:
-            file_filter = Gtk.FileFilter()
-            file_filter.set_name("*.zip, *.gz")
-            file_filter.add_mime_type("application/zip")
-            file_filter.add_mime_type("application/gzip")
+    def on_data_extract(self, app, page):
+        """ Opening the data archive via "File/Extract...". """
+        if page is Page.SERVICES:
+            file_filter = None
+            if IS_DARWIN:
+                file_filter = Gtk.FileFilter()
+                file_filter.set_name("*.zip, *.gz")
+                file_filter.add_mime_type("application/zip")
+                file_filter.add_mime_type("application/gzip")
 
-        response = get_chooser_dialog(self._main_window, self._settings,
-                                      "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
-        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
-            return
-        self.open_data(response)
+            response = get_chooser_dialog(self._main_window, self._settings,
+                                          "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
+            if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+                return
+            self.open_data(response)
 
     def open_data(self, data_path=None, callback=None):
         """ Opening data and fill views. """
@@ -4551,6 +4566,22 @@ class Application(Gtk.Application):
     @is_receive_data_enabled.setter
     def is_receive_data_enabled(self, value):
         self._is_receive_data_enabled = value
+
+    @GObject.Property(type=bool, default=True)
+    def is_data_open_enabled(self):
+        return self._is_data_open_enabled
+
+    @is_data_open_enabled.setter
+    def is_data_open_enabled(self, value):
+        self._is_data_open_enabled = value
+
+    @GObject.Property(type=bool, default=True)
+    def is_data_extract_enabled(self):
+        return self._is_data_extract_enabled
+
+    @is_data_extract_enabled.setter
+    def is_data_extract_enabled(self, value):
+        self._is_data_extract_enabled = value
 
     @property
     def page(self):
