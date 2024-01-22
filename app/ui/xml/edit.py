@@ -557,18 +557,26 @@ class SatellitesTool(Gtk.Box):
     @run_idle
     def on_save(self, app, page):
         if page is Page.SATELLITE and show_dialog(DialogType.QUESTION, self._app.app_window) == Gtk.ResponseType.OK:
-            if self._dvb_type is self.DVB.SAT:
-                write_satellites((Satellite(*r) for r in self._satellite_view.get_model()),
-                                 f"{self._settings.profile_data_path}satellites.xml")
-            elif self._dvb_type is self.DVB.TERRESTRIAL:
-                write_terrestrial((Terrestrial(*r) for r in self._terrestrial_view.get_model()),
-                                  f"{self._settings.profile_data_path}terrestrial.xml")
-            else:
-                write_cable((Cable(*r) for r in self._cable_view.get_model()),
-                            f"{self._settings.profile_data_path}cables.xml")
+            self.save_data(self._settings.profile_data_path)
+
+    def save_data(self, path):
+        if self._dvb_type is self.DVB.SAT:
+            write_satellites((Satellite(*r) for r in self._satellite_view.get_model()), f"{path}satellites.xml")
+        elif self._dvb_type is self.DVB.TERRESTRIAL:
+            write_terrestrial((Terrestrial(*r) for r in self._terrestrial_view.get_model()), f"{path}terrestrial.xml")
+        else:
+            write_cable((Cable(*r) for r in self._cable_view.get_model()), f"{path}cables.xml")
 
     def on_save_as(self, app, page):
-        self._app.show_error_message("Not implemented yet!")
+        if page is not Page.SATELLITE:
+            return
+
+        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
+        response = show_dialog(DialogType.CHOOSER, self._app.app_window, settings=self._settings, buttons=buttons)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        self.save_data(response)
 
     def on_download(self, app, page):
         if page is Page.SATELLITE:
