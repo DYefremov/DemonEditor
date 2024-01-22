@@ -230,10 +230,11 @@ class Application(Gtk.Application):
         self._settings = Settings.get_instance()
         self._s_type = self._settings.setting_type
         self._is_enigma = self._s_type is SettingsType.ENIGMA_2
-        self._is_send_data_enabled = True
+        self._is_send_data_enabled = False
         self._is_receive_data_enabled = True
         self._is_data_open_enabled = True
         self._is_data_extract_enabled = False
+        self._is_data_save_enabled = False
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -395,6 +396,7 @@ class Application(Gtk.Application):
         self._services_load_spinner = builder.get_object("services_load_spinner")
         self._iptv_services_load_spinner = builder.get_object("iptv_services_load_spinner")
         self._save_tool_button = builder.get_object("save_tool_button")
+        self.bind_property("is-data-save-enabled", self._save_tool_button, "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
         self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
@@ -775,11 +777,13 @@ class Application(Gtk.Application):
         self.set_action("open_data", lambda a, v: self.open_data())
         self.set_action("upload_all", lambda a, v: self.on_upload_data(DownloadType.ALL))
         self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
-        self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page))
-        self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page))
+        sa = self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page), False)
+        self.bind_property("is-data-save-enabled", sa, "enabled")
+        sa = self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page), False)
+        self.bind_property("is-data-save-enabled", sa, "enabled")
         sa = self.set_action("on_receive", self.on_receive)
         self.bind_property("is-receive-data-enabled", sa, "enabled")
-        sa = self.set_action("on_send", self.on_send)
+        sa = self.set_action("on_send", self.on_send, False)
         self.bind_property("is-send-data-enabled", sa, "enabled")
         sa = self.set_action("on_data_open", lambda a, v: self.emit("data-open", self._page))
         self.bind_property("is-data-open-enabled", sa, "enabled")
@@ -1134,7 +1138,7 @@ class Application(Gtk.Application):
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
         self._fav_paned.set_visible(self._page in self._fav_pages)
-        self._save_tool_button.set_visible(self._page in self.DATA_SAVE_PAGES)
+        self.is_data_save_enabled = self._page in self.DATA_SAVE_PAGES
         self.is_data_open_enabled = self._page in self.DATA_OPEN_PAGES
         self.is_data_extract_enabled = self._page in self.DATA_EXTRACT_PAGES
         self.is_send_data_enabled = self._page in self.DATA_SEND_PAGES
@@ -4550,7 +4554,7 @@ class Application(Gtk.Application):
     def is_enigma(self, value):
         self._is_enigma = value
 
-    @GObject.Property(type=bool, default=True)
+    @GObject.Property(type=bool, default=False)
     def is_send_data_enabled(self):
         return self._is_send_data_enabled
 
@@ -4565,6 +4569,14 @@ class Application(Gtk.Application):
     @is_receive_data_enabled.setter
     def is_receive_data_enabled(self, value):
         self._is_receive_data_enabled = value
+
+    @GObject.Property(type=bool, default=False)
+    def is_data_save_enabled(self):
+        return self._is_data_save_enabled
+
+    @is_data_save_enabled.setter
+    def is_data_save_enabled(self, value):
+        self._is_data_save_enabled = value
 
     @GObject.Property(type=bool, default=True)
     def is_data_open_enabled(self):
