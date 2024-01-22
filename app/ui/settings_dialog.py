@@ -53,7 +53,6 @@ class SettingsDialog:
                     "on_force_bq_name": self.on_force_bq_name,
                     "on_http_mode_switch": self.on_http_mode_switch,
                     "on_experimental_switch": self.on_experimental_switch,
-                    "on_yt_dl_switch": self.on_yt_dl_switch,
                     "on_default_path_mode_switch": self.on_default_path_mode_switch,
                     "on_profile_add": self.on_profile_add,
                     "on_profile_edit": self.on_profile_edit,
@@ -509,9 +508,6 @@ class SettingsDialog:
             self.show_info_message(msg, Gtk.MessageType.WARNING)
         else:
             self.on_info_bar_close()
-
-    def on_yt_dl_switch(self, switch, state):
-        self.show_info_message("Not implemented yet!", Gtk.MessageType.WARNING)
 
     def on_default_path_mode_switch(self, switch, state):
         self._use_common_picon_path_switch.set_active(False) if state else None
