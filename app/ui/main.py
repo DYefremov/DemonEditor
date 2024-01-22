@@ -115,7 +115,7 @@ class Application(Gtk.Application):
 
     DATA_SAVE_PAGES = {Page.SERVICES, Page.SATELLITE}
     DATA_OPEN_PAGES = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.EPG}
-    DATA_EXTRACT_PAGES = {Page.SERVICES}
+    DATA_EXTRACT_PAGES = {Page.SERVICES, Page.EPG}
     DATA_SEND_PAGES = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.FTP}
     DATA_RECEIVE_PAGES_enabled = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.RECORDINGS, Page.FTP}
 
@@ -2191,7 +2191,6 @@ class Application(Gtk.Application):
     @run_task
     def upload_data(self, download_type):
         opts = self._settings
-        use_http = self._s_type is SettingsType.ENIGMA_2 and opts.use_http
         multiple = len(self._settings.hosts) > 1
         for host in self._settings.hosts:
             if multiple:

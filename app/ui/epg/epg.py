@@ -410,7 +410,7 @@ class EpgTool(Gtk.Box):
 
         self._app = app
         self._app.connect("data-open", self.on_data_open)
-        self._app.connect("data-send", self.on_data_send)
+        self._app.connect("data-extract", self.on_data_extract)
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
@@ -462,19 +462,29 @@ class EpgTool(Gtk.Box):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
-        if next(self.clear(), False):
-            self._epg_cache = TabEpgCache(self._app, response)
-            if not self._src_xmltv_button.get_active():
-                self._src_xmltv_button.set_active(True)
+        self.open_data(response)
 
-    def on_data_send(self, app, page):
+    def on_data_extract(self, app, page):
         if page is not Page.EPG:
             return
 
-        if self._src_xmltv_button.get_active():
-            self._app.show_error_message("Not implemented yet!")
-        else:
-            self._app.show_error_message("Not allowed in this context!")
+        f_filter = Gtk.FileFilter()
+        f_filter.set_name("*.zip, *.gz, *.xz")
+        f_filter.add_mime_type("application/zip")
+        f_filter.add_mime_type("application/gzip")
+        f_filter.add_mime_type("application/x-xz")
+
+        response = get_chooser_dialog(self._app.app_window, self._app.app_settings,
+                                      "*.zip, *.gz, *.xz files", ("*.zip", "*.gz", "*.xz"), "Open archive", f_filter)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+        self.open_data(response)
+
+    def open_data(self, path):
+        if next(self.clear(), False):
+            self._epg_cache = TabEpgCache(self._app, path)
+            if not self._src_xmltv_button.get_active():
+                self._src_xmltv_button.set_active(True)
 
     def on_service_changed(self, app, srv):
         if app.page is not Page.EPG:
