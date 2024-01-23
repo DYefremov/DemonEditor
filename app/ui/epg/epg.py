@@ -40,7 +40,7 @@ from itertools import chain
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
@@ -404,6 +404,9 @@ class EpgTool(Gtk.Box):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
 
+        GObject.signal_new("epg-cache-initialized", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+
         self._epg_cache = None
         self._src = EpgSource.HTTP
         self._current_bq = app.current_bouquet
@@ -483,6 +486,7 @@ class EpgTool(Gtk.Box):
     def open_data(self, path):
         if next(self.clear(), False):
             self._epg_cache = TabEpgCache(self._app, path)
+            self.emit("epg-cache-initialized", self._epg_cache)
             if not self._src_xmltv_button.get_active():
                 self._src_xmltv_button.set_active(True)
 
@@ -629,6 +633,7 @@ class EpgTool(Gtk.Box):
                 settings = self._app.app_settings
                 gz_file = f"{settings.profile_data_path}epg{os.sep}epg.gz"
                 self._epg_cache = TabEpgCache(self._app, gz_file, url=settings.epg_xml_source)
+                self.emit("epg-cache-initialized", self._epg_cache)
         else:
             self._src = EpgSource.HTTP
             self.update_http_epg_data()
