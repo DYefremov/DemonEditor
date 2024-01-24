@@ -2672,9 +2672,11 @@ class Application(Gtk.Application):
 
         if profile is SettingsType.ENIGMA_2:
             parent = self._bouquets_model.append(None, ["Bouquets (TV)", None, None, BqType.TV.value])
-            self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None, "favourites"), parent)
+            f_name = f"userbouquet.favourites.{BqType.TV.value}"
+            self.append_bouquet(Bouquet("Favourites (TV)", BqType.TV.value, [], None, None, f_name), parent)
             parent = self._bouquets_model.append(None, ["Bouquets (Radio)", None, None, BqType.RADIO.value])
-            self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None, "favourites"), parent)
+            f_name = f"userbouquet.favourites.{BqType.RADIO.value}"
+            self.append_bouquet(Bouquet("Favourites (Radio)", BqType.RADIO.value, [], None, None, f_name), parent)
         elif profile is SettingsType.NEUTRINO_MP:
             self._bouquets_model.append(None, ["Providers", None, None, BqType.BOUQUET.value])
             self._bouquets_model.append(None, ["FAV", None, None, BqType.TV.value])
