@@ -705,30 +705,55 @@ class M3uImportDialog(IptvListDialog):
         self._apply_button.set_label(translate("Import"))
         # Extra box.
         builder = get_builder(f"{UI_RESOURCES_PATH}m3u.glade", use_str=True, objects=("import_m3u_box",))
-        self._data_box.add(builder.get_object("import_m3u_box"))
         self._info_label = builder.get_object("info_label")
         self._progress_bar = builder.get_object("progress_bar")
         self._spinner = builder.get_object("spinner")
         self._spinner.bind_property("active", self._start_values_grid, "sensitive", 4)
         self._picon_switch = builder.get_object("picon_switch")
         self._picon_box = builder.get_object("picon_box")
-        # builder.get_object("import_type_box").set_visible(False)
+        # Type import buttons.
+        self._current_bq_button = builder.get_object("current_bq_button")
+        self._single_bq_button = builder.get_object("single_bq_button")
+        self._group_bq_button = builder.get_object("group_bq_button")
+        self._sub_bq_button = builder.get_object("sub_bq_button")
+        # EPG src.
+        self._epg_links_button = builder.get_object("epg_links_box")
+        self._add_epg_src_switch = builder.get_object("add_epg_src_switch")
+
+        m3u_box = builder.get_object("import_m3u_box")
+        if s_type is SettingsType.ENIGMA_2:
+            self._data_box.add(m3u_box)
+        else:
+            self._data_box.set_visible(False)
+            self._sub_bq_button.set_sensitive(False)
+            m3u_box.set_margin_start(5)
+            m3u_box.set_margin_end(5)
+            self._dialog.get_content_area().pack_start(m3u_box, True, True, 0)
 
         self.get_m3u(m3_path, s_type)
 
     @run_task
     def get_m3u(self, path, s_type):
         try:
-            GLib.idle_add(self._spinner.set_property, "active", True)
+            GLib.idle_add(self._spinner.start)
             self._epg_src, self._services = parse_m3u(path, s_type)
             for s in self._services:
                 if s.picon:
                     GLib.idle_add(self._picon_box.set_sensitive, True)
                     break
         finally:
-            msg = f"{translate('Streams detected:')} {len(self._services) if self._services else 0}."
-            GLib.idle_add(self._info_label.set_text, msg)
-            GLib.idle_add(self._spinner.set_property, "active", False)
+            self.update_info()
+
+    @run_idle
+    def update_info(self):
+        msg = f"{translate('Streams detected:')} {len(self._services) if self._services else 0}."
+        self._info_label.set_text(msg)
+        self._spinner.stop()
+
+        if self._epg_src:
+            self._epg_links_button.set_visible(True)
+            [self._epg_links_button.append(u, u) for u in self._epg_src]
+            self._epg_links_button.set_active(0)
 
     def on_apply(self, item):
         if not self._app.current_bouquet:
@@ -766,6 +791,9 @@ class M3uImportDialog(IptvListDialog):
 
                 services.append(s._replace(picon=None, picon_id=picon_id, data_id=None, fav_id=fav_id))
 
+        if self._add_epg_src_switch.get_active():
+            self.on_add_epg_source()
+
         if self._picon_switch.get_active():
             if self.is_default_values():
                 msg = "Set values for TID, NID and Namespace for correct naming of the picons!"
@@ -777,6 +805,18 @@ class M3uImportDialog(IptvListDialog):
             self.on_apply_done()
 
         self._app.append_imported_services(services)
+
+    def on_add_epg_source(self):
+        active_src = self._epg_links_button.get_active_id()
+        settings = self._app.app_settings
+        sources = settings.epg_xml_sources
+        log(f"Adding an EPG source -> {active_src}")
+        if active_src not in set(sources):
+            sources.append(active_src)
+            settings.epg_xml_sources = sources
+            self._app.emit("epg-settings-changed", None)
+        else:
+            log(f"{translate('This URL already exists!')}")
 
     @run_task
     def download_picons(self, picons):

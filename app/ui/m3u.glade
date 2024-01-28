@@ -464,7 +464,7 @@ Author: Dmitriy Yefremov
                     <property name="can-focus">False</property>
                     <property name="layout-style">expand</property>
                     <child>
-                      <object class="GtkRadioButton" id="cuurent_bq_button">
+                      <object class="GtkRadioButton" id="current_bq_button">
                         <property name="label" translatable="yes">Current bouquet</property>
                         <property name="name">header-button</property>
                         <property name="visible">True</property>
@@ -490,7 +490,7 @@ Author: Dmitriy Yefremov
                         <property name="receives-default">False</property>
                         <property name="active">True</property>
                         <property name="draw-indicator">False</property>
-                        <property name="group">cuurent_bq_button</property>
+                        <property name="group">current_bq_button</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -499,7 +499,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkRadioButton" id="broup_bq_button">
+                      <object class="GtkRadioButton" id="group_bq_button">
                         <property name="label" translatable="yes">Split by groups</property>
                         <property name="name">header-button</property>
                         <property name="visible">True</property>
@@ -526,7 +526,7 @@ Author: Dmitriy Yefremov
                         <property name="receives-default">False</property>
                         <property name="active">True</property>
                         <property name="draw-indicator">False</property>
-                        <property name="group">cuurent_bq_button</property>
+                        <property name="group">current_bq_button</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -646,6 +646,113 @@ Author: Dmitriy Yefremov
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="epg_src_box">
+                    <property name="height-request">30</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkLabel" id="epg_source_label">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label" translatable="yes">EPG source</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="label">:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="epg_links_box">
+                        <property name="can-focus">True</property>
+                        <property name="halign">start</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="active">0</property>
+                        <property name="has-entry">True</property>
+                        <child internal-child="entry">
+                          <object class="GtkEntry">
+                            <property name="can-focus">False</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="epg_info_label">
+                        <property name="visible" bind-source="epg_links_box" bind-property="visible" bind-flags="invert-boolean">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="margin-end">5</property>
+                        <property name="label" translatable="yes">Not found.</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="add_epg_src_box">
+                        <property name="visible" bind-source="epg_links_box" bind-property="visible">False</property>
+                        <property name="can-focus">False</property>
+                        <property name="margin-start">5</property>
+                        <property name="spacing">5</property>
+                        <child>
+                          <object class="GtkLabel" id="add_epg_src_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Add to EPG sources list</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSwitch" id="add_epg_src_switch">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack-type">end</property>
+                        <property name="position">4</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>
