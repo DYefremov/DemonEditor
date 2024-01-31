@@ -36,11 +36,12 @@ import shutil
 import urllib.request
 from datetime import datetime
 from enum import Enum
+from hashlib import sha1
 from itertools import chain
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 
-from gi.repository import GLib, GObject
+from gi.repository import GLib
 
 from app.commons import run_idle, run_task, run_with_delay
 from app.connections import download_data, DownloadType, HttpAPI
@@ -81,6 +82,18 @@ class EpgCache(abc.ABC):
         self._app.connect("epg-settings-changed", self.on_settings_changed)
         self._app.connect("task-canceled", self.on_xml_load_cancel)
 
+    @property
+    def current_reader(self):
+        return self._reader
+
+    @property
+    def is_run(self):
+        return self._is_run
+
+    @property
+    def current_gz_file_name(self):
+        return self.get_gz_file_name(self._settings.epg_xml_source, self._settings.profile_data_path)
+
     def on_bouquet_changed(self, app, bq):
         self._current_bq = bq
 
@@ -107,6 +120,11 @@ class EpgCache(abc.ABC):
     @abc.abstractmethod
     def get_current_events(self, service_name) -> list[EpgEvent]: pass
 
+    @staticmethod
+    def get_gz_file_name(url, path):
+        f_sha1 = sha1(url.encode("utf-8", errors="ignore")).hexdigest()
+        return f"{path}epg{os.sep}{f_sha1}_epg.gz"
+
 
 class FavEpgCache(EpgCache):
 
@@ -120,17 +138,16 @@ class FavEpgCache(EpgCache):
         self._is_run = True
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
-            gz_file = f"{self._settings.profile_data_path}epg{os.sep}epg.gz"
+            gz_file = self.current_gz_file_name
             self._reader = XmlTvReader(gz_file, url)
-
-            if url != self._xml_src:
-                self._xml_src = url
-                if os.path.isfile(gz_file):
-                    os.remove(gz_file)
 
             @run_with_delay(2)
             def process_data():
-                t = BGTaskWidget(self._app, "Processing XMLTV data...", self._reader.parse, )
+                def process():
+                    self._reader.parse()
+                    GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
+
+                t = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
                 self._app.emit("add-background-task", t)
 
             if os.path.isfile(gz_file):
@@ -191,10 +208,10 @@ class FavEpgCache(EpgCache):
 
 class TabEpgCache(EpgCache):
 
-    def __init__(self, app, path, url=None):
+    def __init__(self, app, path=None, url=None):
         super().__init__(app)
         self._page = Page.EPG
-        self._path = path
+        self._path = path or self.current_gz_file_name
         self._xml_src = url
         self._task = None
         self.init()
@@ -213,8 +230,8 @@ class TabEpgCache(EpgCache):
             if self._xml_src:
                 # Difference calculation between the current time and file modification.
                 dif = datetime.now() - datetime.fromtimestamp(os.path.getmtime(self._path))
-                # We will update daily. -> Temporarily!!!
-                if dif.days > 0:
+                # We will update daily. -> Temporarily!!! Skip download if FAV cache is enabled.
+                if dif.days > 0 and not self._app.display_epg:
                     self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download,
                                               self.process_data, )
                     self._app.emit("add-background-task", self._task)
@@ -230,10 +247,19 @@ class TabEpgCache(EpgCache):
         GLib.idle_add(self._app.wait_dialog.show)
 
         def process():
-            self._reader.parse()
+            # Loading data from FAV cache if epg display is enabled and EPG src is XMLTV.
+            if all((self._xml_src, self._app.display_epg, self._settings.epg_source is EpgSource.XML)):
+                fav_cache = self._app.current_epg_cache
+                reader = fav_cache.current_reader if fav_cache else None
+                if reader:
+                    self._reader.cache.update(reader.cache)
+            else:
+                self._reader.parse()
+
             self.update_epg_data()
             self._app.wait_dialog.hide()
             self._task = None
+            GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
 
         self._task = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
         self._app.emit("add-background-task", self._task)
@@ -279,6 +305,7 @@ class EpgSettingsPopover(Gtk.Popover):
 
         self._src_selection_box = builder.get_object("source_selection_box")
         self._xml_source_box = builder.get_object("xml_source_box")
+        self._download_interval_box = builder.get_object("download_interval_box")
         self._interval_box = builder.get_object("interval_box")
         self._http_src_button = builder.get_object("http_src_button")
         self._xml_src_button = builder.get_object("xml_src_button")
@@ -307,6 +334,7 @@ class EpgSettingsPopover(Gtk.Popover):
         self._url_combo_box.get_model().clear()
         [self._url_combo_box.append(i, i) for i in settings.epg_xml_sources if i]
         self._url_combo_box.set_active_id(settings.epg_xml_source)
+        self._remove_url_button.set_sensitive(len(self._url_combo_box.get_model()) > 1)
 
     def on_ad_url(self, button):
         self._url_entry.set_can_focus(True)
@@ -404,9 +432,6 @@ class EpgTool(Gtk.Box):
     def __init__(self, app, **kwargs):
         super().__init__(**kwargs)
 
-        GObject.signal_new("epg-cache-initialized", self, GObject.SIGNAL_RUN_LAST,
-                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
-
         self._epg_cache = None
         self._src = EpgSource.HTTP
         self._current_bq = app.current_bouquet
@@ -486,7 +511,6 @@ class EpgTool(Gtk.Box):
     def open_data(self, path):
         if next(self.clear(), False):
             self._epg_cache = TabEpgCache(self._app, path)
-            self.emit("epg-cache-initialized", self._epg_cache)
             if not self._src_xmltv_button.get_active():
                 self._src_xmltv_button.set_active(True)
 
@@ -630,10 +654,7 @@ class EpgTool(Gtk.Box):
         if button.get_active():
             self._src = EpgSource.XML
             if self._epg_cache is None:
-                settings = self._app.app_settings
-                gz_file = f"{settings.profile_data_path}epg{os.sep}epg.gz"
-                self._epg_cache = TabEpgCache(self._app, gz_file, url=settings.epg_xml_source)
-                self.emit("epg-cache-initialized", self._epg_cache)
+                self._epg_cache = TabEpgCache(self._app, url=self._app.app_settings.epg_xml_source)
         else:
             self._src = EpgSource.HTTP
             self.update_http_epg_data()

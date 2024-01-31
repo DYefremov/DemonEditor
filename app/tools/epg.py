@@ -61,6 +61,10 @@ EpgEvent.__new__.__defaults__ = ("N/A", "N/A", 0, 0, 0, "N/A", None)  # For Pyth
 
 class Reader(metaclass=abc.ABCMeta):
 
+    @property
+    @abc.abstractmethod
+    def cache(self) -> dict: pass
+
     @abc.abstractmethod
     def download(self, clb=None): pass
 
@@ -120,6 +124,10 @@ class EPG:
             self._path = path
             self._refs = {}
             self._desc = {}
+
+        @property
+        def cache(self) -> dict:
+            return self._refs
 
         def download(self, clb=None):
             pass
@@ -237,7 +245,11 @@ class XmlTvReader(Reader):
     def __init__(self, path, url=None):
         self._path = path
         self._url = url
-        self._ids = {}
+        self._cache = {}
+
+    @property
+    def cache(self) -> dict:
+        return self._cache
 
     def download(self, clb=None):
         """ Downloads an XMLTV file. """
@@ -307,7 +319,7 @@ class XmlTvReader(Reader):
         utc = dt.timestamp()
         offset = datetime.now() - dt
 
-        for srv in filter(lambda s: any(name in names for name in s.names), self._ids.values()):
+        for srv in filter(lambda s: any(name in names for name in s.names), self._cache.values()):
             [self.process_event(ev, events, offset, srv) for ev in filter(lambda s: s.duration > utc, srv.events)]
 
         return events
@@ -354,9 +366,9 @@ class XmlTvReader(Reader):
             ch_id = element.get("id", None)
             logo = None  # Currently not in use.
             # Since a service can have several names, we will store a set of names in the "names" field!
-            self._ids[ch_id] = self.Service(ch_id, {c.text for c in element if c.tag == self.DSP_NAME_TAG}, logo, [])
+            self._cache[ch_id] = self.Service(ch_id, {c.text for c in element if c.tag == self.DSP_NAME_TAG}, logo, [])
         elif element.tag == self.PR_TAG:
-            channel = self._ids.get(element.get(self.CH_TAG, None), None)
+            channel = self._cache.get(element.get(self.CH_TAG, None), None)
             if channel:
                 events = channel[-1]
                 start = element.get("start", None)
