@@ -4578,6 +4578,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="record_button">
                     <property name="name">status-bar-button</property>
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
                     <property name="tooltip-text" translatable="yes">Record</property>
@@ -4588,7 +4589,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkImage" id="record_button_image">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="stock">gtk-media-record</property>
+                        <property name="icon-name">media-record</property>
                       </object>
                     </child>
                   </object>
@@ -4601,6 +4602,7 @@ Author: Dmitriy Yefremov
                 <child>
                   <object class="GtkButton" id="play_current_service_button">
                     <property name="name">status-bar-button</property>
+                    <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
@@ -4614,7 +4616,7 @@ Author: Dmitriy Yefremov
                         <property name="can-focus">False</property>
                         <property name="halign">center</property>
                         <property name="valign">center</property>
-                        <property name="stock">gtk-media-play</property>
+                        <property name="icon-name">media-playback-start</property>
                       </object>
                     </child>
                   </object>

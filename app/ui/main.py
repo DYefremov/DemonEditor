@@ -92,6 +92,8 @@ class Application(Gtk.Application):
 
     BG_TASK_LIMIT = 5
 
+    _URL_PATTERN = re.compile(r"((https?)+.*?(?=https?|$))")
+
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
@@ -399,8 +401,6 @@ class Application(Gtk.Application):
         self._iptv_services_load_spinner = builder.get_object("iptv_services_load_spinner")
         self._save_tool_button = builder.get_object("save_tool_button")
         self.bind_property("is-data-save-enabled", self._save_tool_button, "visible")
-        self._signal_level_bar.bind_property("visible", builder.get_object("play_current_service_button"), "visible")
-        self._signal_level_bar.bind_property("visible", builder.get_object("record_button"), "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
         self._receiver_info_box.bind_property("visible", self._signal_box, "visible")
         self._task_box = builder.get_object("task_box")
@@ -3564,7 +3564,14 @@ class Application(Gtk.Application):
 
         m3u = data.get("m3u", None)
         if m3u:
-            return [s for s in m3u.split("\n") if not s.startswith("#")][0]
+            urls = re.findall(self._URL_PATTERN, m3u)
+            if urls:
+                if len(urls) > 1:
+                    # Retrieving direct link for IPTV service.
+                    url, sep, name = urls[1][0].partition(":")
+                    return unquote(url)
+                else:
+                    return urls[0][0]
 
     def save_stream_to_m3u(self, url):
         if self._page not in self._fav_pages:
