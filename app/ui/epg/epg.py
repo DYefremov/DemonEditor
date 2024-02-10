@@ -230,6 +230,12 @@ class TabEpgCache(EpgCache):
         if self._canceled:
             return
 
+        if self._app.display_epg and self._xml_src == self._settings.epg_xml_source:
+            return
+
+        self.load_data()
+
+    def load_data(self):
         if os.path.isfile(self._path):
             if self._xml_src:
                 # Difference calculation between the current time and file modification.
