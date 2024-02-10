@@ -231,6 +231,9 @@ class TabEpgCache(EpgCache):
             return
 
         if self._app.display_epg and self._xml_src == self._settings.epg_xml_source:
+            ext_cache = self._app.current_epg_cache
+            if ext_cache:
+                GLib.idle_add(self._app.emit, "epg-cache-initialized", ext_cache)
             return
 
         self.load_data()
@@ -255,15 +258,19 @@ class TabEpgCache(EpgCache):
 
     def on_cache_initialized(self, app, cache):
         if isinstance(cache, FavEpgCache):
-            reader = cache.current_reader
-            if reader:
-                self._reader.cache.update(reader.cache)
-            self._is_run = False
+            self.import_cache(cache)
         else:
             if not self._app.display_epg or self._settings.epg_source is not EpgSource.XML:
                 self._is_run = False
 
         self.update_epg_data()
+
+    def import_cache(self, cache):
+        """ Imports external reader cache data into the current one. """
+        reader = cache.current_reader
+        if reader:
+            self._reader.cache.update(reader.cache)
+        self._is_run = False
 
     @run_task
     def process_data(self):
