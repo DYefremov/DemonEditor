@@ -131,12 +131,20 @@ class FavEpgCache(EpgCache):
 
     def __init__(self, app):
         super().__init__(app)
+        self._app.connect("epg-cache-initialized", self.on_cache_initialized)
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
+
+    def on_cache_initialized(self, app, cache):
+        if cache is not self:
+            return
+
+        self._is_run = True
+        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
     def init(self):
         self._src = self._settings.epg_source
         self._xml_src = self._settings.epg_xml_source
-        self._is_run = True
+        self._is_run = False
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
             gz_file = self.current_gz_file_name
@@ -167,8 +175,6 @@ class FavEpgCache(EpgCache):
         elif self._src is EpgSource.DAT:
             self._reader = EPG.DatReader(f"{self._settings.profile_data_path}epg{os.sep}epg.dat")
             self._reader.download()
-
-        GLib.timeout_add_seconds(self._settings.epg_update_interval, self.update_epg_data, priority=GLib.PRIORITY_LOW)
 
     def reset(self) -> None:
         self.events.clear()
@@ -232,8 +238,8 @@ class TabEpgCache(EpgCache):
 
         if self._app.display_epg and self._xml_src == self._settings.epg_xml_source:
             ext_cache = self._app.current_epg_cache
-            if ext_cache:
-                GLib.idle_add(self._app.emit, "epg-cache-initialized", ext_cache)
+            if ext_cache and ext_cache.is_run:
+                self._app.emit("epg-cache-initialized", ext_cache)
             return
 
         self.load_data()
@@ -258,19 +264,15 @@ class TabEpgCache(EpgCache):
 
     def on_cache_initialized(self, app, cache):
         if isinstance(cache, FavEpgCache):
-            self.import_cache(cache)
+            reader = cache.current_reader
+            if reader:
+                self._reader.cache.update(reader.cache)
+            self._is_run = False
         else:
-            if not self._app.display_epg or self._settings.epg_source is not EpgSource.XML:
+            if not self._app.display_epg or self._settings.epg_source is not EpgSource.XML or self._xml_src is None:
                 self._is_run = False
 
         self.update_epg_data()
-
-    def import_cache(self, cache):
-        """ Imports external reader cache data into the current one. """
-        reader = cache.current_reader
-        if reader:
-            self._reader.cache.update(reader.cache)
-        self._is_run = False
 
     @run_task
     def process_data(self):

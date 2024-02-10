@@ -3212,8 +3212,8 @@ class Application(Gtk.Application):
         if display:
             if self._epg_cache is None:
                 self._epg_cache = FavEpgCache(self)
-        else:
-            self._epg_cache.reset()
+            else:
+                self._epg_cache.reset()
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
