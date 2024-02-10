@@ -258,23 +258,28 @@ class XmlTvReader(Reader):
             log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
             return
 
-        with requests.get(url=self._url, stream=True) as request:
-            if request.reason == "OK":
+        with requests.get(url=self._url, stream=True) as resp:
+            if resp.reason == "OK":
                 suf = self._url[self._url.rfind("."):]
                 if suf not in self.SUFFIXES:
                     log(f"{self.__class__.__name__} [download] error: Unsupported file extension.")
                     return
 
-                data_len = request.headers.get("content-length")
+                data_size = resp.headers.get("content-length")
+                if not data_size:
+                    log(f"{self.__class__.__name__} [download *.{suf}] error: Error getting data size.")
+                    if clb:
+                        clb()
+                    return
 
                 with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
                     downloaded = 0
-                    data_len = int(data_len)
+                    data_size = int(data_size)
                     log("Downloading XMLTV file...")
-                    for data in request.iter_content(chunk_size=1024):
+                    for data in resp.iter_content(chunk_size=1024):
                         downloaded += len(data)
                         tf.write(data)
-                        done = int(50 * downloaded / data_len)
+                        done = int(50 * downloaded / data_size)
                         sys.stdout.write(f"\rDownloading XMLTV file [{'=' * done}{' ' * (50 - done)}]")
                         sys.stdout.flush()
                     tf.seek(0)
@@ -307,7 +312,7 @@ class XmlTvReader(Reader):
                         tf.close()
                         os.remove(tf.name)
             else:
-                log(f"{self.__class__.__name__} [download] error: {request.reason}")
+                log(f"{self.__class__.__name__} [download] error: {resp.reason}")
 
         if clb:
             clb()
