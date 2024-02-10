@@ -75,6 +75,7 @@ class EpgCache(abc.ABC):
         self._settings = app.app_settings
         self._src = EpgSource.XML
         self._xml_src = None
+        self._path = None
 
         self._app = app
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
@@ -103,7 +104,7 @@ class EpgCache(abc.ABC):
 
     def on_settings_changed(self, app, page):
         if page is self._page:
-            self.reset()
+            self.on_profile_changed(app, page)
 
     def on_xml_load_cancel(self, app, widget):
         self._canceled = True
@@ -130,11 +131,11 @@ class FavEpgCache(EpgCache):
 
     def __init__(self, app):
         super().__init__(app)
-        self._src = self._settings.epg_source
-        self._xml_src = self._settings.epg_xml_source
         GLib.timeout_add_seconds(self._settings.epg_update_interval, self.init)
 
     def init(self):
+        self._src = self._settings.epg_source
+        self._xml_src = self._settings.epg_xml_source
         self._is_run = True
         if self._src is EpgSource.XML:
             url = self._settings.epg_xml_source
@@ -214,6 +215,9 @@ class TabEpgCache(EpgCache):
         self._path = path or self.current_gz_file_name
         self._xml_src = url
         self._task = None
+
+        self._app.connect("epg-cache-initialized", self.on_cache_initialized)
+
         self.init()
 
     def on_bouquet_changed(self, app, bq):
@@ -243,26 +247,33 @@ class TabEpgCache(EpgCache):
             self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
             self._app.emit("add-background-task", self._task)
 
+    def on_cache_initialized(self, app, cache):
+        if isinstance(cache, FavEpgCache):
+            reader = cache.current_reader
+            if reader:
+                self._reader.cache.update(reader.cache)
+            self._is_run = False
+        else:
+            if not self._app.display_epg or self._settings.epg_source is not EpgSource.XML:
+                self._is_run = False
+
+        self.update_epg_data()
+
+    @run_task
     def process_data(self):
         GLib.idle_add(self._app.wait_dialog.show)
 
         def process():
-            # Loading data from FAV cache if epg display is enabled and EPG src is XMLTV.
-            if all((self._xml_src, self._app.display_epg, self._settings.epg_source is EpgSource.XML)):
-                fav_cache = self._app.current_epg_cache
-                reader = fav_cache.current_reader if fav_cache else None
-                if reader:
-                    self._reader.cache.update(reader.cache)
-            else:
+            # Skip data parsing data if epg display is enabled and EPG src is XMLTV.
+            if not all((self._xml_src, self._app.display_epg, self._settings.epg_source is EpgSource.XML)):
                 self._reader.parse()
 
-            self.update_epg_data()
             self._app.wait_dialog.hide()
             self._task = None
             GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
 
         self._task = BGTaskWidget(self._app, "Processing XMLTV data...", process, )
-        self._app.emit("add-background-task", self._task)
+        GLib.idle_add(self._app.emit, "add-background-task", self._task)
 
     def reset(self) -> None:
         self._is_run = False
@@ -276,6 +287,8 @@ class TabEpgCache(EpgCache):
         names = {services[s].service for s in chain.from_iterable(self._app.current_bouquets.values())}
         for name, events in self._reader.get_current_events(names).items():
             self.events[name] = events
+
+        self._app.emit("epg-cache-updated", self)
 
         return self._is_run
 
@@ -418,9 +431,9 @@ class TabEpgSettingsPopover(EpgSettingsPopover):
         xml_src = self._url_combo_box.get_active_id()
 
         if xml_src != settings.epg_xml_source:
+            settings.epg_xml_source = xml_src
             self._app.emit("epg-settings-changed", Page.EPG)
 
-        settings.epg_xml_source = xml_src
         settings.epg_xml_sources = [r[0] for r in self._url_combo_box.get_model()]
         self.popdown()
 
@@ -442,6 +455,8 @@ class EpgTool(Gtk.Box):
         self._app.connect("fav-changed", self.on_service_changed)
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("bouquet-changed", self.on_bouquet_changed)
+        self._app.connect("epg-cache-updated", self.on_epg_cache_updated)
+        self._app.connect("epg-display-changed", self.on_epg_display_changed)
         self._app.connect("filter-toggled", self.on_filter_toggled)
 
         handlers = {"on_epg_filter_changed": self.on_epg_filter_changed,
@@ -465,6 +480,7 @@ class EpgTool(Gtk.Box):
         self._epg_options_button = builder.get_object("epg_options_button")
         self._epg_options_button.connect("realize", lambda b: b.set_popover(TabEpgSettingsPopover(self._app)))
         self._event_count_label = builder.get_object("event_count_label")
+        self._cache_count_label = builder.get_object("cache_count_label")
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom data functions.
         renderer = builder.get_object("epg_start_renderer")
@@ -510,9 +526,17 @@ class EpgTool(Gtk.Box):
 
     def open_data(self, path):
         if next(self.clear(), False):
-            self._epg_cache = TabEpgCache(self._app, path)
-            if not self._src_xmltv_button.get_active():
-                self._src_xmltv_button.set_active(True)
+            if not self._epg_cache:
+                self._epg_cache = TabEpgCache(self._app, path)
+            else:
+                if self._epg_cache.is_run:
+                    self._app.show_error_message("Data loading in progress!")
+                    return
+
+                self._epg_cache._path = path
+                self._epg_cache._xml_src = None
+                self._epg_cache.reset()
+            GLib.idle_add(self._src_xmltv_button.set_active, True)
 
     def on_service_changed(self, app, srv):
         if app.page is not Page.EPG:
@@ -531,6 +555,10 @@ class EpgTool(Gtk.Box):
                 self._app.wait_dialog.show()
                 self._app.send_http_request(HttpAPI.Request.EPG, quote(ref), self.update_http_epg_data)
         else:
+            if self._epg_cache.is_run:
+                self._app.show_error_message("Data loading in progress!")
+                return
+
             if self._multi_epg_button.get_active():
                 path = next((r.path for r in self._model if r[-1].get("e2eventservicename", None) == srv.service), None)
                 scroll_to(path, self._view) if path else None
@@ -541,6 +569,18 @@ class EpgTool(Gtk.Box):
     def on_profile_changed(self, app, prf):
         gen = self.update_epg_data()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def on_bouquet_changed(self, app, bq):
+        self._current_bq = bq
+        if app.page is Page.EPG and self._multi_epg_button.get_active():
+            self.get_multi_epg()
+
+    def on_epg_cache_updated(self, app, cache):
+        evc = len(list(chain.from_iterable(cache.events.values())))
+        self._cache_count_label.set_text(f"{translate('Services')}: {len(cache.events)}  {translate('Events')}: {evc}")
+
+    def on_epg_display_changed(self, app, display):
+        self._epg_options_button.set_visible(not display and self._src is EpgSource.XML)
 
     def update_http_epg_data(self, epg=None):
         if epg:
@@ -659,10 +699,7 @@ class EpgTool(Gtk.Box):
             self._src = EpgSource.HTTP
             self.update_http_epg_data()
 
-    def on_bouquet_changed(self, app, bq):
-        self._current_bq = bq
-        if app.page is Page.EPG and self._multi_epg_button.get_active():
-            self.get_multi_epg()
+        self._epg_options_button.set_visible(not self._app.display_epg and self._src is EpgSource.XML)
 
     def get_multi_epg(self):
         if not self._current_bq:

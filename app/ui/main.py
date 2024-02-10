@@ -353,6 +353,10 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("epg-cache-initialized", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("epg-cache-updated", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("epg-display-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
 
         builder = get_builder(UI_RESOURCES_PATH + "main.glade", handlers)
         self._main_window = builder.get_object("main_window")
@@ -594,6 +598,7 @@ class Application(Gtk.Application):
         self.bind_property("is_enigma", self._epg_menu_button, "sensitive")
         self._epg_start_time_fmt = "%a, %H:%M"
         self._epg_end_time_fmt = "%H:%M"
+        self.connect("epg-display-changed", self.on_epg_display_changed)
         # Hiding for Neutrino.
         self.bind_property("is_enigma", builder.get_object("services_button_box"), "visible")
         # Setting the last size of the window if it was saved.
@@ -3201,11 +3206,14 @@ class Application(Gtk.Application):
         self._settings.display_epg = set_display
         self._epg_menu_button.set_visible(set_display)
         self._display_epg = set_display
-        if set_display:
+        self.emit("epg-display-changed", set_display)
+
+    def on_epg_display_changed(self, app, display):
+        if display:
             if self._epg_cache is None:
                 self._epg_cache = FavEpgCache(self)
         else:
-            self._epg_cache = None
+            self._epg_cache.reset()
 
     def on_epg_list_configuration(self, action, value=None):
         if self._s_type is not SettingsType.ENIGMA_2:
