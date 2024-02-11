@@ -2441,8 +2441,6 @@ class Application(Gtk.Application):
                 self._services[fav_id] = srv
             elif s_type is BqServiceType.BOUQUET:
                 # Sub bouquets!
-                msg = "Detected sub-bouquets. This feature is still experimental!"
-                self.show_info_message(msg, Gtk.MessageType.WARNING)
                 self.append_bouquet(srv.data, bouquet)
             elif srv.name:
                 extra_services[fav_id] = srv.name
