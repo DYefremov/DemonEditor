@@ -34,7 +34,7 @@ __all__ = ("insert_marker", "move_items", "rename", "ViewTarget", "set_flags", "
            "get_model_data", "remove_all_unused_picons", "get_picon_pixbuf", "get_base_itrs", "get_iptv_url",
            "get_iptv_data", "update_entry_data", "append_text_to_tview", "on_popup_menu", "get_picon_file_name",
            "update_toggle_model", "update_popup_filter_model", "update_filter_sat_positions", "get_pos_num",
-           "show_info_bar_message")
+           "show_info_bar_message", "gen_bouquet_name")
 
 import os
 import re
@@ -684,6 +684,19 @@ def get_bouquets_names(model):
                 child_itr = model.iter_nth_child(itr, num)
                 bouquets_names.add(model[child_itr][0])
     return bouquets_names
+
+
+def gen_bouquet_name(bouquets, base_name, bq_type):
+    """ Generates a name for new bouquets. """
+    count = 0
+    key = f"{base_name}:{bq_type}"
+    bq_name = base_name
+    while key in bouquets:
+        count += 1
+        bq_name = f"{base_name}{count}"
+        key = f"{bq_name}:{bq_type}"
+
+    return bq_name
 
 
 def get_services_type_groups(services):

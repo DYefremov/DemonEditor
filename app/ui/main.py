@@ -1543,14 +1543,7 @@ class Application(Gtk.Application):
                 return
 
             bq_type = model.get_value(itr, Column.BQ_TYPE)
-            bq_name = "bouquet"
-            count = 0
-            key = f"{bq_name}:{bq_type}"
-            #  Generating name of new bouquet.
-            while key in self._bouquets:
-                count += 1
-                bq_name = f"bouquet{count}"
-                key = f"{bq_name}:{bq_type}"
+            bq_name = gen_bouquet_name(self._bouquets, "bouquet", bq_type)
 
             response = show_dialog(DialogType.INPUT, self._main_window, bq_name)
             if response == Gtk.ResponseType.CANCEL:
