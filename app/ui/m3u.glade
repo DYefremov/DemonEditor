@@ -485,7 +485,6 @@ Author: Dmitriy Yefremov
                         <property name="label" translatable="yes">Single bouquet</property>
                         <property name="name">header-button</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="active">True</property>
@@ -503,7 +502,6 @@ Author: Dmitriy Yefremov
                         <property name="label" translatable="yes">Split by groups</property>
                         <property name="name">header-button</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="active">True</property>
@@ -521,7 +519,6 @@ Author: Dmitriy Yefremov
                         <property name="label" translatable="yes">Create sub-bouquets</property>
                         <property name="name">header-button</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">False</property>
                         <property name="active">True</property>

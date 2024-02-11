@@ -30,6 +30,8 @@ import concurrent.futures
 import os
 import re
 import urllib
+from datetime import date
+from itertools import groupby
 from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
@@ -44,7 +46,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder, BaseDialog
-from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf, show_info_bar_message
+from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf, show_info_bar_message, gen_bouquet_name
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
 _DIGIT_ENTRY_NAME = "digit-entry"
@@ -725,10 +727,13 @@ class M3uImportDialog(IptvListDialog):
             self._data_box.add(m3u_box)
         else:
             self._data_box.set_visible(False)
+            self._group_bq_button.set_sensitive(False)
             self._sub_bq_button.set_sensitive(False)
             m3u_box.set_margin_start(5)
             m3u_box.set_margin_end(5)
-            self._dialog.get_content_area().pack_start(m3u_box, True, True, 0)
+            area = self._dialog.get_content_area()
+            area.pack_start(m3u_box, True, True, 0)
+            area.reorder_child(m3u_box, 0)
 
         self.get_m3u(m3_path, s_type)
 
@@ -756,7 +761,7 @@ class M3uImportDialog(IptvListDialog):
             self._epg_links_button.set_active(0)
 
     def on_apply(self, item):
-        if not self._app.current_bouquet:
+        if self._current_bq_button.get_active() and not self._app.current_bouquet:
             self.show_info_message("Error. No bouquet is selected!", Gtk.MessageType.ERROR)
             return
 
@@ -804,7 +809,51 @@ class M3uImportDialog(IptvListDialog):
         else:
             self.on_apply_done()
 
-        self._app.append_imported_services(services)
+        self.import_services(services)
+
+    def import_services(self, services):
+        if self._current_bq_button.get_active():
+            self._app.append_imported_services(services)
+            return
+
+        s_type = self._app.app_settings.setting_type
+        model = self._app.bouquets_view.get_model()
+
+        if s_type is SettingsType.ENIGMA_2:
+            itr = model.get_iter_first()
+        else:
+            # We will use the 'FAV' section for Neutrino!
+            itr = model.get_iter(Gtk.TreePath.new_from_indices([1]))
+
+        bqs = self._app.current_bouquets
+        bq_type = model.get_value(itr, Column.BQ_TYPE)
+        def_bq_name = gen_bouquet_name(bqs, f"IPTV {date.today()} ", bq_type)
+
+        if self._single_bq_button.get_active():
+            self.append_bouquet(def_bq_name,  bq_type, bqs, model, itr, services)
+        else:
+            # Sub-bouquets.
+            if self._sub_bq_button.get_active():
+                itr = self.append_bouquet(gen_bouquet_name(bqs, def_bq_name, bq_type), bq_type, bqs, model, itr, ())
+            # Generating groups with skipping markers.
+            m_name = BqServiceType.MARKER.value
+            def_bq_name = f"{def_bq_name} [No group]"
+            gr = self.get_services_groups(filter(lambda s: s.service_type != m_name, services), def_bq_name)
+            [self.append_bouquet(gen_bouquet_name(bqs, g, bq_type), bq_type, bqs, model, itr, s) for g, s in gr.items()]
+
+    def append_bouquet(self, bq_name,  bq_type, bqs, model, itr, services):
+        """ Adds new bouquet and returns iter of appended row. """
+        cur_services = self._app.current_services
+        bqs[f"{bq_name}:{bq_type}"] = [s.fav_id for s in services]
+        cur_services.update({s.fav_id: s for s in services})
+        bq = (bq_name, None, None, bq_type)
+        return model.append(itr, bq)
+
+    def get_services_groups(self, services, def_gr_name="No group"):
+        def grouper(s):
+            return s.package or def_gr_name
+
+        return {k: list(v) for k, v in groupby(sorted(services, key=grouper), key=grouper)}
 
     def on_add_epg_source(self):
         active_src = self._epg_links_button.get_active_id()
