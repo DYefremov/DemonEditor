@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
+<!-- Generated with glade 3.40.0
 
 The MIT License (MIT)
 
@@ -114,9 +114,10 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="bouquet_export_to_m3u_item">
+        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">Export to m3u</property>
-        <signal name="activate" handler="on_bouquet_export_to_m3u" swapped="no"/>
+        <signal name="activate" handler="on_export_to_m3u" swapped="no"/>
       </object>
     </child>
     <child>
@@ -200,52 +201,6 @@ Author: Dmitriy Yefremov
       <column type="gchararray"/>
     </columns>
     <signal name="row-inserted" handler="on_model_changed" swapped="no"/>
-  </object>
-  <object class="GtkPopoverMenu" id="export_to_m3u_menu">
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkBox" id="export_to_m3u_menu_box">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="margin-left">10</property>
-        <property name="margin-right">10</property>
-        <property name="margin-top">5</property>
-        <property name="margin-bottom">5</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkModelButton" id="export_all_to_m3u_model_button">
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="text" translatable="yes">All</property>
-            <signal name="clicked" handler="on_bouquet_export_to_m3u" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="export_to_m3u_model_button">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="text" translatable="yes">IPTV services only</property>
-            <signal name="clicked" handler="on_export_iptv_to_m3u" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">main</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
   </object>
   <object class="GtkImage" id="extra_edit_image">
     <property name="visible">True</property>
@@ -4054,15 +4009,15 @@ Author: Dmitriy Yefremov
                                               </packing>
                                             </child>
                                             <child>
-                                              <object class="GtkMenuButton" id="export_to_m3u_menu_button">
+                                              <object class="GtkButton" id="export_to_m3u_header_button">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="focus-on-click">False</property>
                                                 <property name="receives-default">True</property>
                                                 <property name="tooltip-text" translatable="yes">Export to m3u</property>
-                                                <property name="popover">export_to_m3u_menu</property>
+                                                <signal name="clicked" handler="on_export_to_m3u" swapped="no"/>
                                                 <child>
-                                                  <object class="GtkImage" id="export_to_m3u_menu_button_image">
+                                                  <object class="GtkImage" id="export_to_m3u_header_button_image">
                                                     <property name="visible">True</property>
                                                     <property name="can-focus">False</property>
                                                     <property name="icon-name">document-save-as-symbolic</property>
@@ -4083,11 +4038,11 @@ Author: Dmitriy Yefremov
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkBox" id="bouquet_lock_hide_box">
+                                          <object class="GtkButtonBox" id="bouquet_lock_hide_box">
                                             <property name="visible">True</property>
                                             <property name="sensitive">False</property>
                                             <property name="can-focus">False</property>
-                                            <property name="spacing">5</property>
+                                            <property name="layout-style">expand</property>
                                             <child>
                                               <object class="GtkButton" id="bouquet_locked_button">
                                                 <property name="visible">True</property>
@@ -4138,7 +4093,7 @@ Author: Dmitriy Yefremov
                                             <property name="expand">False</property>
                                             <property name="fill">True</property>
                                             <property name="pack-type">end</property>
-                                            <property name="position">4</property>
+                                            <property name="position">2</property>
                                           </packing>
                                         </child>
                                       </object>

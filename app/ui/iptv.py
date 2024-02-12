@@ -31,7 +31,7 @@ import os
 import re
 import urllib
 from datetime import date
-from itertools import groupby
+from itertools import groupby, chain
 from urllib.error import HTTPError
 from urllib.parse import urlparse, unquote, quote
 from urllib.request import Request, urlopen
@@ -40,9 +40,9 @@ import requests
 from gi.repository import GLib, Gio, GdkPixbuf
 
 from app.commons import run_idle, run_task, log
-from app.eparser.ecommons import BqServiceType, Service
+from app.eparser.ecommons import BqServiceType, BouquetService, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
-                              parse_m3u, PICON_FORMAT)
+                              parse_m3u, PICON_FORMAT, export_to_m3u)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder, BaseDialog
@@ -975,30 +975,106 @@ class M3uImportDialog(IptvListDialog):
 
 
 class ExportM3uDialog(BaseDialog):
-    def __init__(self, app):
-        super().__init__(app.app_window, "Export to m3u")
+    def __init__(self, app, bouquets):
+        super().__init__(app.app_window, "Export to m3u",
+                         buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, translate("Save"), Gtk.ResponseType.OK))
         self._app = app
+        self._bouquets = bouquets
+        self._url = None
 
         builder = get_builder(f"{UI_RESOURCES_PATH}m3u.glade", use_str=True, objects=("export_m3u_box",))
+        self._main_grid = builder.get_object("export_m3u_grid")
         self._port_entry = builder.get_object("export_port_entry")
+        self._port_auto_button = builder.get_object("export_auto_button")
         self._all_type_button = builder.get_object("export_all_button")
+        self._iptv_type_button = builder.get_object("export_iptv_button")
         self._grp_bq_button = builder.get_object("export_grp_bq_button")
         self._grp_marker_button = builder.get_object("export_grp_markers_button")
         self._bq_count_label = builder.get_object("export_bq_count_label")
         self._services_count_label = builder.get_object("export_services_count_label")
         self.get_content_area().pack_start(builder.get_object("export_m3u_box"), False, False, 0)
 
+        is_enigma = self._app.is_enigma
+        self._port_auto_button.set_active(True) if is_enigma else self._main_grid.remove_row(0)
+        self._grp_marker_button.set_visible(is_enigma)
+        self._all_type_button.set_active(True) if is_enigma else self._iptv_type_button.set_active(True)
+        self._all_type_button.set_sensitive(is_enigma)
+
         self.connect("response", self.on_response)
-        builder.get_object("export_auto_button").connect("clicked", self.on_get_port_auto)
+        self.connect("realize", self.init)
 
-    def on_response(self, dialog: Gtk.Dialog, response):
-        if response == Gtk.ResponseType.OK:
-            return True
+    def init(self, widget=None):
+        self._bq_count_label.set_text(str(len(self._bouquets)))
+        self._services_count_label.set_text(str(len(list(chain.from_iterable(self._bouquets.values())))))
 
-        dialog.destroy()
+    def on_response(self, dialog, response):
+        if response != Gtk.ResponseType.OK:
+            self.destroy()
+        else:
+            if self._app.is_enigma and self._port_auto_button.get_active():
+                self.do_export_auto()
+            else:
+                self.do_export()
+        return True
 
-    def on_get_port_auto(self, button):
-        self._app.show_error_message("Not implemented yet!")
+    def do_export_auto(self, button=None):
+        """  Retrieves streaming port from Receiver via HTTP API and starts export.
+
+            Since the streaming port can be changed by the user,
+            we're getting base link to the stream -> http(s)://IP:PORT/
+        """
+        from app.connections import HttpAPI
+
+        sent = self._app.send_http_request(HttpAPI.Request.STREAM, "", self.start_export)
+        self._port_auto_button.set_active(sent)
+        self._port_auto_button.set_sensitive(sent)
+
+    def start_export(self, data):
+        self._port_auto_button.set_active("error_code" not in data)
+
+        url = self._app.get_url_from_m3u(data)
+        url = urlparse(url)
+        if all((url.scheme, url.port)):
+            self._url = url.geturl()
+            self._port_entry.set_text(str(url.port))
+            self.do_export()
+
+    @run_idle
+    def do_export(self):
+        self.destroy()
+
+        services = self._app.current_services
+
+        def get_service(fav_id, num=0):
+            srv = services.get(fav_id, None)
+            if srv:
+                s_type = BqServiceType(srv.service_type)
+                if s_type is BqServiceType.DEFAULT:
+                    srv = services.get(fav_id, None)
+                    s_data = srv.picon_id.rstrip(".png").replace("_", ":") if srv.picon_id else None
+                    return BouquetService(srv.service, s_type, s_data, num)
+                return BouquetService(srv.service, s_type, fav_id, num)
+            return BouquetService("N/A", BqServiceType.MARKER, fav_id, num)
+
+        # Preparing bouquets data.
+        bouquets = {b[:b.rindex(":")]: [get_service(i) for i in s] for b, s in self._bouquets.items()}
+
+        bq_services = []
+        s_types = {BqServiceType.IPTV}
+        if self._all_type_button.get_active():
+            s_types.add(BqServiceType.DEFAULT)
+
+        if self._grp_bq_button.get_active():
+            for b, bs in bouquets.items():
+                bq_services.append(BouquetService(b, BqServiceType.MARKER, None, 0))
+                bq_services.extend(filter(lambda s: s.type in s_types, bs))
+        elif self._grp_marker_button.get_active():
+            bq_services = chain.from_iterable(bouquets.values())
+        else:
+            bq_services = filter(lambda s: s.type in s_types, chain.from_iterable(bouquets.values()))
+
+        file_name = f"{'_'.join(list(bouquets)[:10])}__{date.today().strftime('%Y_%m_%d')}"
+        self._app.save_bouquet_to_m3u(bq_services, self._url, file_name)
 
 
 class YtListImportDialog:

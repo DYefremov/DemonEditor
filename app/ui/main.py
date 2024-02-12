@@ -62,7 +62,8 @@ from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path, restore_data
 from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, translate, get_builder
 from .imports import ImportDialog, import_bouquet
-from .iptv import IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog, M3uImportDialog
+from .iptv import (IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog,
+                   M3uImportDialog, ExportM3uDialog)
 from .main_helper import *
 from .picons import PiconManager
 from .search import SearchProvider
@@ -107,7 +108,7 @@ class Application(Gtk.Application):
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
-                         "bouquet_import_popup_item", "import_m3u_header_button", "export_to_m3u_menu_button")
+                         "bouquet_import_popup_item", "import_m3u_header_button", "export_to_m3u_header_button")
 
     _COMMONS_ELEMENTS = ("bouquets_remove_popup_item", "fav_remove_popup_item", "import_bq_menu_button")
 
@@ -175,8 +176,7 @@ class Application(Gtk.Application):
                     "on_import_yt_list": self.on_import_yt_list,
                     "on_import_m3u": self.on_import_m3u,
                     "on_bouquet_export": self.on_bouquet_export,
-                    "on_bouquet_export_to_m3u": self.on_bouquet_export_to_m3u,
-                    "on_export_iptv_to_m3u": self.on_export_iptv_to_m3u,
+                    "on_export_to_m3u": self.on_export_to_m3u,
                     "on_export_all_iptv_to_m3u": self.on_export_all_iptv_to_m3u,
                     "on_import_bouquet": self.on_import_bouquet,
                     "on_insert_marker": self.on_insert_marker,
@@ -491,11 +491,6 @@ class Application(Gtk.Application):
         self.bind_property("is-enigma", builder.get_object("services_clear_new_flag_item"), "visible")
         # Sub-bouquets menu item.
         self.bind_property("is-enigma", builder.get_object("bouquets_new_sub_popup_item"), "visible")
-        # Export bouquet to m3u menu items.
-        export_to_m3u_item = builder.get_object("bouquet_export_to_m3u_item")
-        self.bind_property("is-enigma", export_to_m3u_item, "visible")
-        export_to_m3u_model_button = builder.get_object("export_all_to_m3u_model_button")
-        self.bind_property("is-enigma", export_to_m3u_model_button, "visible")
         # Stack page widgets.
         self._stack_services_frame = builder.get_object("services_frame")
         self._stack_satellite_box = builder.get_object("satellite_box")
@@ -3363,42 +3358,21 @@ class Application(Gtk.Application):
         else:
             show_dialog(DialogType.INFO, self._main_window, "Done!")
 
-    def on_bouquet_export_to_m3u(self, item):
-        """ Exports bouquet services to * .m3u file.
-
-            Since the streaming port can be changed by the user,
-            we're getting base link to the stream -> http(s)://IP:PORT/
-        """
-        self._http_api.send(HttpAPI.Request.STREAM, "", lambda d: self.export_bouquet_to_m3u(self.get_url_from_m3u(d)))
-
     @run_idle
-    def export_bouquet_to_m3u(self, url):
-        if not url:
+    def on_export_to_m3u(self, item=None):
+        """ Exports bouquets to a *.m3u file. """
+        if self.is_data_loading():
+            return self.show_error_message("Data loading in progress!")
+
+        model, paths = self._bouquets_view.get_selection().get_selected_rows()
+        sb = (f"{i[0]}:{i[1]}" for i in (model.get(model.get_iter(p), Column.BQ_NAME, Column.BQ_TYPE) for p in paths))
+        bouquets = {b: self._bouquets[b] for b in sb if b in self._bouquets}
+        if not bouquets:
+            self.show_error_message("Error. No bouquets selected!")
             return
 
-        def get_service(name, s_type, fav_id, num):
-            if s_type is BqServiceType.DEFAULT:
-                srv = self._services.get(fav_id, None)
-                s_data = srv.picon_id.rstrip(".png").replace("_", ":") if srv.picon_id else None
-                return BouquetService(name, s_type, s_data, num)
-            return BouquetService(name, s_type, fav_id, num)
+        ExportM3uDialog(self, bouquets).run()
 
-        self.save_bouquet_to_m3u((get_service(r[Column.FAV_SERVICE], BqServiceType(r[Column.FAV_TYPE]),
-                                              r[Column.FAV_ID], r[Column.FAV_NUM]) for r in self._fav_model), url)
-
-    @run_idle
-    def on_export_iptv_to_m3u(self, action, value=None):
-        i_types = (BqServiceType.IPTV.value, BqServiceType.MARKER.value)
-        bq_services = [BouquetService(r[Column.FAV_SERVICE], BqServiceType(r[Column.FAV_TYPE]), r[Column.FAV_ID],
-                                      r[Column.FAV_NUM]) for r in self._fav_model if r[Column.FAV_TYPE] in i_types]
-
-        if not any(s.type is BqServiceType.IPTV for s in bq_services):
-            self.show_error_message("This list does not contains IPTV streams!")
-            return
-
-        self.save_bouquet_to_m3u(bq_services)
-
-    @run_idle
     def on_export_all_iptv_to_m3u(self, action, value=None):
         if self.is_data_loading():
             return self.show_error_message("Data loading in progress!")
@@ -3634,7 +3608,10 @@ class Application(Gtk.Application):
         return True
 
     def send_http_request(self, req_type, ref, callback=log, ref_prefix=""):
-        """ Sends requests via HTTP API. """
+        """ Sends requests via HTTP API.
+
+            Returns request status (sent or no).
+        """
         if not self._http_api:
             self.show_error_message("HTTP API is not activated. Check your settings!")
             self._wait_dialog.hide()
@@ -3643,6 +3620,8 @@ class Application(Gtk.Application):
             self._wait_dialog.hide()
         else:
             self._http_api.send(req_type, ref, callback)
+            return True
+        return False
 
     # ************** Enigma2 HTTP API section ********************** #
 
