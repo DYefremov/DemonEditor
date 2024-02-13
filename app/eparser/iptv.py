@@ -129,7 +129,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
 
 
 def export_to_m3u(path, bouquet, s_type, url=None):
-    pattern = re.compile(".*:(http.*):.*") if s_type is SettingsType.ENIGMA_2 else re.compile("(http.*?)::::.*")
+    pattern = re.compile(".*:(http.*).*") if s_type is SettingsType.ENIGMA_2 else re.compile("(http.*?)::::.*")
     lines = ["#EXTM3U\n"]
     current_grp = None
 
@@ -141,7 +141,8 @@ def export_to_m3u(path, bouquet, s_type, url=None):
                 continue
             lines.append(f"#EXTINF:-1,{s.name}\n")
             lines.append(current_grp) if current_grp else None
-            lines.append(f"{unquote(res.group(1).strip())}\n")
+            u = res.group(1)
+            lines.append(f"{unquote(u[:u.rfind(':')])}\n")
         elif s_type is BqServiceType.MARKER:
             current_grp = f"#EXTGRP:{s.name}\n"
         elif s_type is BqServiceType.DEFAULT and url:
