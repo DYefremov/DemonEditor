@@ -526,7 +526,7 @@ Author: Dmitriy Yefremov
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="cache_count_label">
+                      <object class="GtkLabel" id="cache_info_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label">0</property>

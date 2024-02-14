@@ -276,14 +276,10 @@ class TabEpgCache(EpgCache):
 
     @run_task
     def process_data(self):
-        GLib.idle_add(self._app.wait_dialog.show)
-
         def process():
             # Skip data parsing data if epg display is enabled and EPG src is XMLTV.
             if not all((self._xml_src, self._app.display_epg, self._settings.epg_source is EpgSource.XML)):
                 self._reader.parse()
-
-            self._app.wait_dialog.hide()
             self._task = None
             GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
 
@@ -495,7 +491,8 @@ class EpgTool(Gtk.Box):
         self._epg_options_button = builder.get_object("epg_options_button")
         self._epg_options_button.connect("realize", lambda b: b.set_popover(TabEpgSettingsPopover(self._app)))
         self._event_count_label = builder.get_object("event_count_label")
-        self._cache_count_label = builder.get_object("cache_count_label")
+        self._cache_info_label = builder.get_object("cache_info_label")
+        self.set_cache_info(0, 0)
         self.pack_start(builder.get_object("epg_frame"), True, True, 0)
         # Custom data functions.
         renderer = builder.get_object("epg_start_renderer")
@@ -591,8 +588,10 @@ class EpgTool(Gtk.Box):
             self.get_multi_epg()
 
     def on_epg_cache_updated(self, app, cache):
-        evc = len(list(chain.from_iterable(cache.events.values())))
-        self._cache_count_label.set_text(f"{translate('Services')}: {len(cache.events)}  {translate('Events')}: {evc}")
+        self.set_cache_info(len(cache.events), len(list(chain.from_iterable(cache.events.values()))))
+
+    def set_cache_info(self, s_count, ev_count):
+        self._cache_info_label.set_text(f"{translate('Services')}: {s_count}  {translate('Events')}: {ev_count}")
 
     def on_epg_display_changed(self, app, display):
         self._epg_options_button.set_visible(not display and self._src is EpgSource.XML)
@@ -709,7 +708,9 @@ class EpgTool(Gtk.Box):
         if button.get_active():
             self._src = EpgSource.XML
             if self._epg_cache is None:
-                self._epg_cache = TabEpgCache(self._app, url=self._app.app_settings.epg_xml_source)
+                settings = self._app.app_settings
+                xml_src = self._app.app_settings.epg_xml_source if settings.epg_source is EpgSource.XML else None
+                self._epg_cache = TabEpgCache(self._app, url=xml_src)
         else:
             self._src = EpgSource.HTTP
             self.update_http_epg_data()
