@@ -703,6 +703,7 @@ class Application(Gtk.Application):
 
     def init_extensions(self, builder):
         import pkgutil
+        from importlib.util import module_from_spec
         from app.ui.extensions.management import ExtensionManager
         # Extensions (Plugins) section.
         ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
@@ -728,7 +729,13 @@ class Application(Gtk.Application):
 
         for importer, name, is_package in pkgutil.iter_modules(ext_paths):
             if is_package:
-                m = importer.find_module(name).load_module()
+                spec = importer.find_spec(name)
+                if spec is None:
+                    log(f"Extension init error: Module {name} not found.")
+                    continue
+
+                m = module_from_spec(spec)
+                spec.loader.exec_module(m)
                 cls_name = name.capitalize()
                 if hasattr(m, cls_name):
                     cls = getattr(m, cls_name)

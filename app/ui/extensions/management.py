@@ -27,7 +27,6 @@
 
 import json
 import os
-import pkgutil
 import shutil
 from enum import IntEnum
 from pathlib import Path
@@ -201,16 +200,25 @@ class ExtensionManager(Gtk.Window):
         self.update()
 
     def get_installed(self):
+        import pkgutil
+        from importlib.util import module_from_spec
+
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}", self._ext_path, "extensions"]
         installed = {}
 
         for importer, name, is_package in pkgutil.iter_modules(ext_paths):
             if is_package:
-                m = importer.find_module(name).load_module()
+                spec = importer.find_spec(name)
+                if spec is None:
+                    log(f"{self.__class__.__name__} [get installed]: Module {name} not found.")
+                    continue
+
+                m = module_from_spec(spec)
+                spec.loader.exec_module(m)
                 cls_name = name.capitalize()
                 if hasattr(m, cls_name):
                     cls = getattr(m, cls_name)
-                    path = Path(importer.find_module(name).path).parent
+                    path = Path(spec.origin).parent
                     installed[name] = (cls, path)
 
         return installed
