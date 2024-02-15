@@ -1919,10 +1919,10 @@ Author: Dmitriy Yefremov
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkBox" id="enigma_lock_hide_box">
+                                          <object class="GtkButtonBox" id="enigma_lock_hide_box">
                                             <property name="sensitive" bind-source="bouquet_lock_hide_box" bind-property="sensitive" bind-flags="invert-boolean">False</property>
                                             <property name="can-focus">False</property>
-                                            <property name="spacing">5</property>
+                                            <property name="layout-style">expand</property>
                                             <child>
                                               <object class="GtkButton" id="enigma_locked_button">
                                                 <property name="visible">True</property>
