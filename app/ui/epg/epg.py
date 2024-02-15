@@ -119,10 +119,13 @@ class EpgCache(abc.ABC):
     def get_current_event(self, service_name) -> EpgEvent: pass
 
     @abc.abstractmethod
-    def get_current_events(self, service_name) -> list[EpgEvent]: pass
+    def get_current_events(self, service_name) -> list: pass
 
     @staticmethod
     def get_gz_file_name(url, path):
+        if not url:
+            return f"{path}epg{os.sep}epg.gz"
+
         f_sha1 = sha1(url.encode("utf-8", errors="ignore")).hexdigest()
         return f"{path}epg{os.sep}{f_sha1}_epg.gz"
 
@@ -169,12 +172,20 @@ class FavEpgCache(EpgCache):
                 else:
                     process_data()
             else:
-                if not self._canceled:
-                    task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data, )
-                    self._app.emit("add-background-task", task)
+                if not url:
+                    self._is_run = True
+                    self._app.show_info_message("The EPG source for the favorites list is not set!",
+                                                Gtk.MessageType.WARNING)
+                    GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
+                else:
+                    if not self._canceled:
+                        task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, process_data, )
+                        self._app.emit("add-background-task", task)
         elif self._src is EpgSource.DAT:
             self._reader = EPG.DatReader(f"{self._settings.profile_data_path}epg{os.sep}epg.dat")
             self._reader.download()
+        else:
+            GLib.idle_add(self._app.emit, "epg-cache-initialized", self)
 
     def reset(self) -> None:
         self.events.clear()
@@ -259,8 +270,13 @@ class TabEpgCache(EpgCache):
             else:
                 self._task = BGTaskWidget(self._app, "", self.process_data, )
         else:
-            self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
-            self._app.emit("add-background-task", self._task)
+            if not self._xml_src:
+                self._app.emit("epg-cache-initialized", self)
+                self._app.show_info_message("Select a local file to load EPG data or add a web source.",
+                                            Gtk.MessageType.WARNING)
+            else:
+                self._task = BGTaskWidget(self._app, "Downloading EPG...", self._reader.download, self.process_data, )
+                self._app.emit("add-background-task", self._task)
 
     def on_cache_initialized(self, app, cache):
         if isinstance(cache, FavEpgCache):
@@ -306,7 +322,7 @@ class TabEpgCache(EpgCache):
     def get_current_event(self, service_name) -> EpgEvent:
         pass
 
-    def get_current_events(self, service_name) -> list[EpgEvent]:
+    def get_current_events(self, service_name) -> list:
         return self.events.get(service_name, [])
 
 
