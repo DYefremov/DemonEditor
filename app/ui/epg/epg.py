@@ -743,7 +743,7 @@ class EpgTool(Gtk.Box):
             bq, api = self._app.current_bouquet_files.get(self._current_bq, None), self._app.http_api
             if bq and api:
                 tm = datetime.now().timestamp()
-                req = quote(f'FROM BOUQUET "userbouquet.{bq}.{self._current_bq.split(":")[-1]}"&time={tm}')
+                req = quote(f'FROM BOUQUET "{bq}"&time={tm}')
                 api.send(HttpAPI.Request.EPG_MULTI, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_http_epg_data, timeout=15)
         else:
             srvs = self._app.current_services
