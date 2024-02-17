@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -181,6 +181,7 @@ class ServiceType(Enum):
 class BouquetsReader:
     """ Class for reading and parsing bouquets. """
     _BQ_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?([\w-]+)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
+    _BQ_POST_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?(.*)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
     __slots__ = ["_path"]
@@ -209,6 +210,12 @@ class BouquetsReader:
                     mt = re.match(self._BQ_PAT, line)
                     s_data = line.split(":")
                     s_type = ServiceType(s_data[1])
+                    if not mt:
+                        # Additional file name checking.
+                        mt = re.match(self._BQ_POST_PAT, line)
+                        if mt:
+                            log(f"Warning: The bouquet file name may be formed incorrectly. -> {mt.group(1)}")
+
                     if mt:
                         file_name, prefix, b_name = mt.group(1), mt.group(2), mt.group(3)
                         if b_name in b_names:
