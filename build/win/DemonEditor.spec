@@ -57,9 +57,11 @@ exe = EXE(pyz,
           name='DemonEditor',
           debug=False,
           bootloader_ignore_signals=False,
+          contents_directory='.',
           strip=False,
           upx=True,
-          console=False, icon='icon.ico')
+          console=False,
+          icon='icon.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
