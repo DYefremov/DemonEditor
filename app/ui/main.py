@@ -1170,7 +1170,7 @@ class Application(Gtk.Application):
         self._stack.set_visible_child_name(page_name)
 
     def on_page_changed(self, app, page):
-        if not len(self._bouquets_model):
+        if not self._settings.load_last_config and not len(self._bouquets_model):
             self.open_data()
 
     def set_use_alt_layout(self, action, value):
