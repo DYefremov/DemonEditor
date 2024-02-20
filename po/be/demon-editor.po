@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Dmitriy Yefremov
+# Copyright (C) 2018-2024 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1503,3 +1503,42 @@ msgstr "Скарыстаць агульную тэчку для піконаў"
 
 msgid "Activates single folder use for several profiles."
 msgstr "Актывуе выкарыстанне адзінай тэчкі для некалькіх профіляў."
+
+msgid "Events"
+msgstr "Падзеі"
+
+msgid "Markers"
+msgstr "Маркеры"
+
+msgid "IPTV only"
+msgstr "Толькі IPTV"
+
+msgid "No"
+msgstr "Не"
+
+msgid "Not found."
+msgstr "Не знойдзена."
+
+msgid "Current EPG cache contents."
+msgstr "Змесціва бягучага EPG кэша."
+
+msgid "Source error!"
+msgstr "Памылка крыніцы!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "Не ўсталявана крыніца EPG для спіса абранага!"
+
+msgid "Add to EPG sources list"
+msgstr "Дадаць у спіс крыніц EPG"
+
+msgid "Current bouquet"
+msgstr "Абраны букет"
+
+msgid "Single bouquet"
+msgstr "Адзінкавы букет"
+
+msgid "Split by groups"
+msgstr "Падзел па групах"
+
+msgid "Create sub-bouquets"
+msgstr "Стварыць падбукеты"

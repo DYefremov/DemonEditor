@@ -1,8 +1,8 @@
-# Copyright (C) 2018-2021 Dmitriy Yefremov
+# Copyright (C) 2018-2024 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020-2023.
+# Dmitriy Yefremov, 2020-2024.
 # Thomas Schmidt, 2021.
 msgid ""
 msgstr ""
@@ -1517,3 +1517,42 @@ msgstr "Gemeinsamen Ordner für Picons verwenden"
 
 msgid "Activates single folder use for several profiles."
 msgstr "Aktiviert die Verwendung eines einzelnen Ordners für mehrere Profile."
+
+msgid "Events"
+msgstr "Events"
+
+msgid "Markers"
+msgstr "Markers"
+
+msgid "IPTV only"
+msgstr "Nur IPTV"
+
+msgid "No"
+msgstr "Nein"
+
+msgid "Not found."
+msgstr "Nicht gefunden."
+
+msgid "Current EPG cache contents."
+msgstr "Aktueller EPG-Cache-Inhalt."
+
+msgid "Source error!"
+msgstr "Quellfehler!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "Die EPG-Quelle für die Favoritenliste ist nicht eingestellt!"
+
+msgid "Add to EPG sources list"
+msgstr "Zur EPG-Quellenliste hinzufügen"
+
+msgid "Current bouquet"
+msgstr "Aktuelles Bouquet"
+
+msgid "Single bouquet"
+msgstr "Einzel Bouquet"
+
+msgid "Split by groups"
+msgstr "Aufteilung nach Gruppen"
+
+msgid "Create sub-bouquets"
+msgstr "Sub-Bouquets erstellen"

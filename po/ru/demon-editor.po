@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2023 Dmitriy Yefremov
+# Copyright (C) 2018-2024 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1311,7 +1311,7 @@ msgid "Sets the profile folder as default to store picons, backups, etc."
 msgstr "Устанавливает папку профиля по умолчанию для хранения пиконов, резервных копий и т. п."
 
 msgid "New sub-bouquet"
-msgstr "Создать суббукет"
+msgstr "Создать подбукет"
 
 msgid "Mark not presented in Bouquets"
 msgstr "Отметить отсутствующие в букетах"
@@ -1500,3 +1500,42 @@ msgstr "Использовать общую папку для пиконов"
 
 msgid "Activates single folder use for several profiles."
 msgstr "Активирует использование одной папки для нескольких профилей."
+
+msgid "Events"
+msgstr "События"
+
+msgid "Markers"
+msgstr "Маркеры"
+
+msgid "IPTV only"
+msgstr "Только IPTV"
+
+msgid "No"
+msgstr "Нет"
+
+msgid "Not found."
+msgstr "Не найдено."
+
+msgid "Current EPG cache contents."
+msgstr "Содержимое текущего EPG кэша."
+
+msgid "Source error!"
+msgstr "Ошибка источника!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "Не установлен источник EPG для списка избранного!"
+
+msgid "Add to EPG sources list"
+msgstr "Добавить в список источников EPG"
+
+msgid "Current bouquet"
+msgstr "Текущий букет"
+
+msgid "Single bouquet"
+msgstr "Одиночный букет"
+
+msgid "Split by groups"
+msgstr "Разбить по группам"
+
+msgid "Create sub-bouquets"
+msgstr "Создать подбукеты"
