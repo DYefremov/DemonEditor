@@ -42,7 +42,7 @@ from gi.repository import GLib, Gio, GdkPixbuf
 from app.commons import run_idle, run_task, log
 from app.eparser.ecommons import BqServiceType, BouquetService, Service
 from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID_FORMAT, get_fav_id, MARKER_FORMAT,
-                              parse_m3u, PICON_FORMAT, export_to_m3u)
+                              parse_m3u, PICON_FORMAT)
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder, BaseDialog
@@ -52,7 +52,8 @@ from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, Ke
 _DIGIT_ENTRY_NAME = "digit-entry"
 _ENIGMA2_REFERENCE = "{}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 _PATTERN = re.compile("(?:^[\\s]*$|\\D)")
-_UI_PATH = UI_RESOURCES_PATH + "iptv.glade"
+_UI_PATH = f"{UI_RESOURCES_PATH}iptv.glade"
+_CSS_PATH = f"{UI_RESOURCES_PATH}style.css"
 _URL_PREFIXES = {"YT-DLP": "YT-DLP://", "YT-DL": "YT-DL://", "STREAMLINK": "streamlink://", "No": None}
 
 
@@ -126,7 +127,7 @@ class IptvDialog:
         self._model, self._paths = view.get_selection().get_selected_rows()
         # Style.
         self._style_provider = Gtk.CssProvider()
-        self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        self._style_provider.load_from_path(_CSS_PATH)
         self._digit_elems = (self._srv_id_entry, self._srv_type_entry, self._sid_entry, self._tr_id_entry,
                              self._net_id_entry, self._namespace_entry)
         for el in self._digit_elems:
@@ -249,11 +250,8 @@ class IptvDialog:
         return get_stream_type(self._stream_type_combobox)
 
     def on_entry_changed(self, entry):
-        if _PATTERN.search(entry.get_text()):
-            entry.set_name(_DIGIT_ENTRY_NAME)
-        else:
-            entry.set_name("GtkEntry")
-            self.update_reference_entry()
+        entry.set_name(_DIGIT_ENTRY_NAME if _PATTERN.search(entry.get_text()) else "GtkEntry")
+        self.update_reference_entry()
 
     def on_url_changed(self, entry):
         url_str = entry.get_text()
@@ -532,7 +530,7 @@ class IptvListDialog:
         self._ok_button.bind_property("visible", self._cancel_button, "visible", 4)
         # Style
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
+        style_provider.load_from_path(_CSS_PATH)
         self._default_elems = (self._stream_type_check_button, self._id_default_check_button, self._type_check_button,
                                self._sid_auto_check_button, self._tid_check_button, self._nid_check_button,
                                self._namespace_check_button)
@@ -830,7 +828,7 @@ class M3uImportDialog(IptvListDialog):
         def_bq_name = gen_bouquet_name(bqs, f"IPTV {date.today()} ", bq_type)
 
         if self._single_bq_button.get_active():
-            self.append_bouquet(def_bq_name,  bq_type, bqs, model, itr, services)
+            self.append_bouquet(def_bq_name, bq_type, bqs, model, itr, services)
         else:
             # Sub-bouquets.
             if self._sub_bq_button.get_active():
@@ -841,7 +839,7 @@ class M3uImportDialog(IptvListDialog):
             gr = self.get_services_groups(filter(lambda s: s.service_type != m_name, services), def_bq_name)
             [self.append_bouquet(gen_bouquet_name(bqs, g, bq_type), bq_type, bqs, model, itr, s) for g, s in gr.items()]
 
-    def append_bouquet(self, bq_name,  bq_type, bqs, model, itr, services):
+    def append_bouquet(self, bq_name, bq_type, bqs, model, itr, services):
         """ Adds new bouquet and returns iter of appended row. """
         cur_services = self._app.current_services
         bqs[f"{bq_name}:{bq_type}"] = [s.fav_id for s in services]
@@ -981,6 +979,7 @@ class ExportM3uDialog(BaseDialog):
         self._app = app
         self._bouquets = bouquets
         self._url = None
+        self._default_port = "8001"
 
         builder = get_builder(f"{UI_RESOURCES_PATH}m3u.glade", use_str=True, objects=("export_m3u_box",))
         self._main_grid = builder.get_object("export_m3u_grid")
@@ -1007,12 +1006,36 @@ class ExportM3uDialog(BaseDialog):
         self._bq_count_label.set_text(str(len(self._bouquets)))
         self._services_count_label.set_text(str(len(list(chain.from_iterable(self._bouquets.values())))))
 
+        if self._app.is_enigma:
+            self._port_entry.connect("changed", self.on_port_changed)
+            self._port_auto_button.connect("toggled", self.on_port_auto_toggled)
+            # Add style for the port entry.
+            style_provider = Gtk.CssProvider()
+            style_provider.load_from_path(_CSS_PATH)
+            context = self._port_entry.get_style_context()
+            context.add_provider_for_screen(Gdk.Screen.get_default(), style_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+
+    def on_port_changed(self, entry):
+        entry.set_name(_DIGIT_ENTRY_NAME if _PATTERN.search(entry.get_text()) else "GtkEntry")
+
+    def on_port_auto_toggled(self, button):
+        if not button.get_active() and not self._port_entry.get_text():
+            self._port_entry.set_text(self._default_port)
+
     def on_response(self, dialog, response):
         if response != Gtk.ResponseType.OK:
             self.destroy()
         else:
-            if self._app.is_enigma and self._port_auto_button.get_active():
-                self.do_export_auto()
+            if self._app.is_enigma:
+                if self._port_auto_button.get_active():
+                    self.do_export_auto()
+                else:
+                    if self._port_entry.get_name() == _DIGIT_ENTRY_NAME:
+                        self._app.show_error_message("Error. Verify the data!")
+                    else:
+                        st = self._app.app_settings
+                        self._url = f"http{'s' if st.http_use_ssl else ''}://{st.host}:{self._port_entry.get_text()}/"
+                        self.do_export()
             else:
                 self.do_export()
         return True
@@ -1142,7 +1165,7 @@ class YtListImportDialog:
             self._dialog.resize(*window_size)
         # Style.
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(f"{UI_RESOURCES_PATH}style.css")
+        style_provider.load_from_path(_CSS_PATH)
         self._url_entry.get_style_context().add_provider_for_screen(Gdk.Screen.get_default(), style_provider,
                                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
