@@ -134,18 +134,18 @@ def export_to_m3u(path, bouquet, s_type, url=None):
     current_grp = None
 
     for s in bouquet.services:
-        s_type = s.type
-        if s_type is BqServiceType.IPTV:
+        srv_type = s.type
+        if srv_type is BqServiceType.IPTV:
             res = re.match(pattern, s.data)
             if not res:
                 continue
             lines.append(f"#EXTINF:-1,{s.name}\n")
             lines.append(current_grp) if current_grp else None
             u = res.group(1)
-            lines.append(f"{unquote(u[:u.rfind(':')])}\n")
-        elif s_type is BqServiceType.MARKER:
+            lines.append(f"{unquote(u[:u.rfind(':')]) if s_type is SettingsType.ENIGMA_2 else u}\n")
+        elif srv_type is BqServiceType.MARKER:
             current_grp = f"#EXTGRP:{s.name}\n"
-        elif s_type is BqServiceType.DEFAULT and url:
+        elif srv_type is BqServiceType.DEFAULT and url:
             lines.append(f"#EXTINF:-1,{s.name}\n")
             lines.append(current_grp) if current_grp else None
             lines.append(f"{url}{s.data}\n")
