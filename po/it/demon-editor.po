@@ -1,11 +1,11 @@
-# Copyright (C) 2018-2022 Dmitriy Yefremov
+# Copyright (C) 2018-2024 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
-# SPDX-FileCopyrightText: 2022, 2023 Massimo Pissarello <mapi68@gmail.com>
+# SPDX-FileCopyrightText: 2022, 2023, 2024 Massimo Pissarello <mapi68@gmail.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2023-12-18 05:40+0100\n"
+"PO-Revision-Date: 2024-02-20 21:33+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -824,7 +824,7 @@ msgstr "Abilita barra di riproduzione diretta"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr ""
-"Consenti l'invio diretto e la riproduzione di collegamenti multimediali sul"
+"Abilita l'invio e la riproduzione diretta di collegamenti multimediali sul"
 " ricevitore"
 
 msgid "Watch the channel in the program"
@@ -1412,8 +1412,8 @@ msgstr "Riproduci dall'elenco principale"
 
 msgid "Enables URL parsing using yt-dlp to get direct links to media."
 msgstr ""
-"Abilita l'analisi degli URL usando yt-dlp per ottenere collegamenti"
-" diretti ai media."
+"Abilita l'analisi degli URL utilizzando yt-dlp per ottenere collegamenti"
+" diretti ai contenuti multimediali."
 
 msgid "Permissions..."
 msgstr "Permessi..."
@@ -1509,10 +1509,11 @@ msgid "Removed"
 msgstr "Rimosso"
 
 msgid "Enables overwriting existing main list services."
-msgstr "Consente di sovrascrivere i servizi esistenti dell'elenco principale."
+msgstr ""
+"Abilita la sovrascrittura dei servizi esistenti dell'elenco principale."
 
 msgid "Enables skipping services import from lamedb."
-msgstr "Consente di saltare l'importazione dei servizi da lamedb."
+msgstr "Abilita il salto dell'importazione dei servizi da lamedb."
 
 msgid "Bouquets data only"
 msgstr "Bouquet solo dati"
@@ -1565,4 +1566,41 @@ msgstr "Usa la cartella comune per i picon"
 msgid "Activates single folder use for several profiles."
 msgstr "Attiva l'uso di una singola cartella per diversi profili."
 
+msgid "Events"
+msgstr "Eventi"
 
+msgid "Markers"
+msgstr "Marcatori"
+
+msgid "IPTV only"
+msgstr "Solo IPTV"
+
+msgid "No"
+msgstr "No"
+
+msgid "Not found."
+msgstr "Non trovato."
+
+msgid "Current EPG cache contents."
+msgstr "Contenuto attuale cache EPG."
+
+msgid "Source error!"
+msgstr "Errore fonte!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "La fonte EPG per l'elenco dei preferiti non è impostata!"
+
+msgid "Add to EPG sources list"
+msgstr "Aggiungi all'elenco delle fonti EPG"
+
+msgid "Current bouquet"
+msgstr "Bouquet attuale"
+
+msgid "Single bouquet"
+msgstr "Bouquet singolo"
+
+msgid "Split by groups"
+msgstr "Dividi per gruppi"
+
+msgid "Create sub-bouquets"
+msgstr "Crea sotto-bouquet"
