@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2022 Dmitriy Yefremov
+# Copyright (C) 2018-2024 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # SPDX-FileCopyrightText: 2022, 2023, 2024 Massimo Pissarello <mapi68@gmail.com>
@@ -16,7 +16,9 @@ msgstr ""
 "X-Generator: Lokalize 23.08.4\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello"
+msgstr ""
+"Nicola Fanghella\n"
+"Massimo Pissarello"
 
 # Main
 msgid "Service"
@@ -1602,5 +1604,3 @@ msgstr "Dividi per gruppi"
 
 msgid "Create sub-bouquets"
 msgstr "Crea sotto-bouquet"
-
-
