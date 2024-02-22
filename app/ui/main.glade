@@ -749,6 +749,7 @@ Author: Dmitriy Yefremov
             </child>
             <child>
               <object class="GtkModelButton" id="save_as_menu_button">
+                <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
                 <property name="action-name">app.on_data_save_as</property>
