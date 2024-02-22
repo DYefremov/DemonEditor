@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDE
 _FILE = "bouquets.xml"
 _U_FILE = "ubouquets.xml"
 _W_FILE = "webtv_usr.xml"
+_WEB_TV_NAME = "[Web TV]"
 
 _COMMENT = " File was created in DemonEditor. Enjoy watching! "
 
@@ -100,13 +101,20 @@ def parse_webtv(path, name, bq_type):
         return bouquets
 
     dom = XmlHandler.parse(path)
+    # Display name.
+    name = None
+    for e in dom.childNodes:
+        if e.nodeType == e.ELEMENT_NODE:
+            name = e.getAttribute("name")
+            break
+
     services = []
     for elem in dom.getElementsByTagName("webtv"):
         if elem.hasAttributes():
             web_attrs = get_xml_attributes(elem)
             services.append(get_webtv_service(web_attrs))
 
-    bouquet = Bouquet(name="default", type=bq_type, services=services, locked=None, hidden=None, file=None)
+    bouquet = Bouquet(name=name or _WEB_TV_NAME, type=bq_type, services=services, locked=None, hidden=None, file=None)
     bouquets[2].append(bouquet)
 
     return bouquets
@@ -195,6 +203,7 @@ def write_webtv(file, bouquet):
     doc.appendChild(comment)
 
     for bq in bouquet.bouquets:
+        root.setAttribute("name", bq.name or _WEB_TV_NAME)
         for srv in bq.services:
             url, description, urlkey, account, usrname, psw, s_type, iconsrc, iconsrc_b, group = srv.fav_id.split("::")
             srv_elem = doc.createElement("webtv")
