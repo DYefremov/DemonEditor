@@ -211,7 +211,7 @@ class FavEpgCache(EpgCache):
     @run_task
     def update_xml_data(self):
         services = self._app.current_services
-        names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, [])}
+        names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, []) if s in services}
         for name, events in self._reader.get_current_events(names).items():
             ev = min(events, key=lambda x: x.start, default=None)
             if ev:
@@ -311,7 +311,7 @@ class TabEpgCache(EpgCache):
 
     def update_epg_data(self) -> bool:
         services = self._app.current_services
-        names = {services[s].service for s in chain.from_iterable(self._app.current_bouquets.values())}
+        names = {services[s].service for s in chain.from_iterable(self._app.current_bouquets.values()) if s in services}
         for name, events in self._reader.get_current_events(names).items():
             self.events[name] = events
 
@@ -747,7 +747,8 @@ class EpgTool(Gtk.Box):
                 api.send(HttpAPI.Request.EPG_MULTI, f'1:7:1:0:0:0:0:0:0:0:{req}', self.update_http_epg_data, timeout=15)
         else:
             srvs = self._app.current_services
-            self.update_xmltv_epg_data(srvs[s].service for s in self._app.current_bouquets.get(self._current_bq, []))
+            bq_names = (srvs[s].service for s in self._app.current_bouquets.get(self._current_bq, []) if s in srvs)
+            self.update_xmltv_epg_data(bq_names)
 
     # ****************** Timers ***************** #
 
