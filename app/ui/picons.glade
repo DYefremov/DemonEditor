@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2023 Dmitriy Yefremov
+Copyright (c) 2018-2024 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkMenu" id="add_menu">
     <property name="visible">True</property>
@@ -428,8 +428,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkImage">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="icon-name">list-add</property>
-                            <property name="icon_size">0</property>
+                            <property name="icon-name">list-add-symbolic</property>
                           </object>
                         </child>
                       </object>
@@ -451,7 +450,7 @@ Author: Dmitriy Yefremov
                           <object class="GtkImage" id="receive_button_image">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="stock">gtk-goto-bottom</property>
+                            <property name="icon-name">go-bottom-symbolic</property>
                           </object>
                         </child>
                       </object>
@@ -499,7 +498,7 @@ Author: Dmitriy Yefremov
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="icon-name">window-new</property>
+                        <property name="icon-name">window-new-symbolic</property>
                       </object>
                     </child>
                   </object>
