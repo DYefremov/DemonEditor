@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -119,7 +119,10 @@ class LameDbReader:
                     srv_data[1] = srv_data[1].strip("\"\n")
                     data_len = len(srv_data)
                     if data_len == 3:
-                        srv_data[2] = srv_data[2].strip()
+                        s_data = srv_data[2].strip()
+                        if not s_data.startswith("p:"):
+                            s_data = f"p:,{s_data}"
+                        srv_data[2] = s_data
                     elif data_len == 2:
                         srv_data.append("p:")
                     srvs.extend(srv_data)
