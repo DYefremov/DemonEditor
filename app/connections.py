@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -59,10 +59,15 @@ PICONS_MAX_NUM = 1000  # Maximum picon number for sending without compression.
 class DownloadType(Enum):
     ALL = 0
     BOUQUETS = 1
-    SATELLITES = 2
-    PICONS = 3
-    WEBTV = 4
-    EPG = 5
+    SERVICES = 2
+    SATELLITES = 3
+    PICONS = 4
+    WEBTV = 5
+    EPG = 6
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.ALL
 
 
 class TestException(Exception):
@@ -373,9 +378,11 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
         save_path = settings.profile_data_path
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         # bouquets
-        if download_type is DownloadType.ALL or download_type is DownloadType.BOUQUETS:
+        if download_type in (DownloadType.ALL, DownloadType.BOUQUETS, DownloadType.SERVICES):
             ftp.cwd(settings.services_path)
-            file_list = BQ_FILES_LIST + DATA_FILES_LIST if download_type is DownloadType.ALL else BQ_FILES_LIST
+            file_list = BQ_FILES_LIST
+            if download_type is DownloadType.ALL or DownloadType.SERVICES:
+                file_list += DATA_FILES_LIST
             ftp.download_files(save_path, file_list, callback)
         # *.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
@@ -426,7 +433,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
 
             ht.send((f"{url}message?{params}", "Sending info message... "))
 
-            if s_type is SettingsType.ENIGMA_2 and download_type is DownloadType.ALL:
+            if s_type is SettingsType.ENIGMA_2 and download_type in (DownloadType.ALL, DownloadType.SERVICES):
                 time.sleep(5)
                 if not settings.keep_power_mode:
                     ht.send((f"{url}powerstate?newstate=0", "Toggle Standby "))
@@ -457,8 +464,10 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
                 ftp.cwd(services_path)
                 ftp.upload_bouquets(data_path, settings.remove_unused_bouquets, callback)
 
-            if download_type is DownloadType.ALL:
-                ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
+            if download_type is DownloadType.ALL or download_type is DownloadType.SERVICES:
+                if download_type is DownloadType.ALL:
+                    ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
+
                 if s_type is SettingsType.NEUTRINO_MP:
                     ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
 
@@ -518,7 +527,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
                 if s_type is SettingsType.ENIGMA_2:
                     if download_type is DownloadType.BOUQUETS:
                         ht.send((f"{url}servicelistreload?mode=2", "Reloading Userbouquets."))
-                    elif download_type is DownloadType.ALL:
+                    elif download_type is DownloadType.ALL or download_type is DownloadType.SERVICES:
                         ht.send((f"{url}servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
                         if not settings.keep_power_mode:
                             ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
@@ -537,6 +546,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
 def get_upload_info_message(download_type):
     if download_type is DownloadType.BOUQUETS:
         return "User bouquets will be updated!"
+    if download_type is DownloadType.SERVICES:
+        return "User bouquets and services list will be updated!"
     elif download_type is DownloadType.ALL:
         return "All user data will be reloaded!"
     elif download_type is DownloadType.SATELLITES:
