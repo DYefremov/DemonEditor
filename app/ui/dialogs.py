@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ class BaseDialog(Gtk.Dialog):
                          title=translate(title),
                          modal=True,
                          resizable=False,
-                         default_width=240,
+                         default_width=255,
                          skip_taskbar_hint=True,
                          skip_pager_hint=True,
                          destroy_with_parent=True,
@@ -61,12 +61,12 @@ class Dialog(Enum):
     MESSAGE = """
     <?xml version="1.0" encoding="UTF-8"?>
     <interface>
-      <requires lib="gtk+" version="3.16"/>
+      <requires lib="gtk+" version="3.22"/>
       <object class="GtkMessageDialog" id="message_dialog">
         <property name="use-header-bar">{use_header}</property>
         <property name="can_focus">False</property>
         <property name="modal">True</property>
-        <property name="width_request">250</property>
+        <property name="width_request">255</property>
         <property name="destroy_with_parent">True</property>
         <property name="type_hint">dialog</property>
         <property name="skip_taskbar_hint">True</property>

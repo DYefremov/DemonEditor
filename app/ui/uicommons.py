@@ -120,7 +120,7 @@ HIDE_ICON = get_icon("go-jump", 16, _IMAGE_MISSING)
 TV_ICON = get_icon("tv-symbolic", 16, _IMAGE_MISSING)
 IPTV_ICON = get_icon("emblem-shared", 16, _IMAGE_MISSING)
 EPG_ICON = get_icon("gtk-index", 16, _IMAGE_MISSING)
-DEFAULT_ICON = get_icon("emblem-default", 16, _IMAGE_MISSING)
+DEFAULT_ICON = get_icon("emblem-default-symbolic", 16, _IMAGE_MISSING)
 
 
 @lru_cache(maxsize=1)

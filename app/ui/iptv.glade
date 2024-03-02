@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2023 Dmitriy Yefremov
+Copyright (c) 2018-2024 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2023 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkImage" id="remove_selection_image">
     <property name="visible">True</property>
@@ -277,6 +277,7 @@ Author: Dmitriy Yefremov
     <property name="modal">True</property>
     <property name="window-position">center</property>
     <property name="destroy-with-parent">True</property>
+    <property name="icon-name">demon-editor</property>
     <property name="type-hint">dialog</property>
     <property name="skip-taskbar-hint">True</property>
     <property name="skip-pager-hint">True</property>
@@ -879,6 +880,7 @@ Author: Dmitriy Yefremov
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="destroy-with-parent">True</property>
+    <property name="icon-name">demon-editor</property>
     <property name="type-hint">dialog</property>
     <property name="skip-taskbar-hint">True</property>
     <property name="skip-pager-hint">True</property>
