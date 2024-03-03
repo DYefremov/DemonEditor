@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from urllib.parse import quote
 
-from app.settings import USE_HEADER_BAR
 from app.ui.main_helper import on_popup_menu
-from .dialogs import get_builder, translate, show_dialog, DialogType
+from .dialogs import get_builder, translate, show_dialog, DialogType, BaseDialog
 from .uicommons import Gtk, Gdk, GLib, UI_RESOURCES_PATH, Page, Column, KeyboardKey, MOD_MASK
 from ..commons import run_idle, log
 from ..connections import HttpAPI
@@ -55,9 +54,11 @@ class TimerTool(Gtk.Box):
         EVENT = 1
         CHANGE = 2
 
-    class TimerDialog(Gtk.Dialog):
+    class TimerDialog(BaseDialog):
         def __init__(self, parent, action=None, timer_data=None, *args, **kwargs):
-            super().__init__(use_header_bar=USE_HEADER_BAR, *args, **kwargs)
+            super().__init__(parent=parent, title="Timer",
+                             buttons=(translate("Cancel"), Gtk.ResponseType.CANCEL,
+                                      translate("Save"), Gtk.ResponseType.OK), *args, **kwargs)
 
             self._action = action or TimerTool.TimerAction.ADD
             self._timer_data = timer_data or {}
@@ -70,14 +71,6 @@ class TimerTool(Gtk.Box):
                                   objects=("timer_dialog_frame", "timer_ends_popover", "end_hour_adjustment",
                                            "min_end_adjustment", "timer_begins_popover", "begins_hour_adjustment",
                                            "min_begins_adjustment"))
-
-            self.set_title(translate("Timer"))
-            self.set_modal(True)
-            self.set_skip_pager_hint(True)
-            self.set_skip_taskbar_hint(True)
-            self.set_transient_for(parent)
-            self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
-            self.set_resizable(False)
 
             self._timer_name_entry = builder.get_object("timer_name_entry")
             self._timer_desc_entry = builder.get_object("timer_desc_entry")
@@ -111,8 +104,7 @@ class TimerTool(Gtk.Box):
             self._timer_desc_entry.drag_dest_unset()
             self._timer_service_entry.drag_dest_unset()
 
-            self.add_buttons(translate("Cancel"), Gtk.ResponseType.CANCEL, translate("Save"), Gtk.ResponseType.OK)
-            self.get_content_area().pack_start(builder.get_object("timer_dialog_frame"), True, True, 5)
+            self.get_content_area().pack_start(builder.get_object("timer_dialog_frame"), True, True, 0)
 
             if self._action is TimerTool.TimerAction.ADD:
                 self.set_timer_for_add()
