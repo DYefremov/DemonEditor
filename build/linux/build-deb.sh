@@ -1,5 +1,5 @@
 #!/bin/bash
-VER="3.9.0_Beta"
+VER="3.9.1_Beta"
 B_PATH="dist/DemonEditor"
 DEB_PATH="$B_PATH/usr/share/demoneditor"
 
