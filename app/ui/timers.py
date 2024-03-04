@@ -355,9 +355,11 @@ class TimerTool(Gtk.Box):
 
         if p_count == 1:
             service = self._app.current_services.get(model[paths][Column.FAV_ID], None)
-            if service:
+            if service and service.picon_id:
                 self.add_timer({"e2servicename": service.service,
                                 "e2servicereference": service.picon_id.rstrip(".png").replace("_", ":")})
+            else:
+                self._app.show_error_message("Not allowed in this context!")
         elif p_count > 1:
             self._app.show_error_message("Please, select only one item!")
         else:
