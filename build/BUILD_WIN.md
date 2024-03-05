@@ -8,8 +8,14 @@ The best way to run this program from source is using of [MSYS2](https://www.msy
    `pacman -S mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-gobject mingw-w64-x86_64-python3-pip mingw-w64-x86_64-python3-requests`  
 Optional: `pacman -S mingw-w64-x86_64-python3-pillow`  
 To support streams playback, install the following packages (the list may not be complete):   
-For [MPV](https://mpv.io/) `pacman -S mingw-w64-x86_64-mpv`,  
-For  [GStreamer](https://gstreamer.freedesktop.org/)  `pacman -S mingw-w64-x86_64-gst-libav mingw-w64-x86_64-gst-plugins-bad mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good mingw-w64-x86_64-gstreamer`  
+* For  [GStreamer](https://gstreamer.freedesktop.org/)  `pacman -S mingw-w64-x86_64-gst-libav mingw-w64-x86_64-gst-plugins-bad mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good mingw-w64-x86_64-gstreamer`  
+* For [MPV](https://mpv.io/) `pacman -S mingw-w64-x86_64-mpv`,  
+ To reduce installation size or try the latest changes, we can install the *libmpv* [build](https://github.com/shinchiro/mpv-winbuild-cmake/releases) (**mpv-dev**-x86_64-v3-*.7z) by [shinchiro](https://github.com/shinchiro).  
+    * Download and extract 7z archive.    
+    * Copy libmpv-2.dll to *C:\msys64\mingw64\bin*    
+    * libmpv.dll.a to *C:\msys64\mingw64\lib*    
+      and folder *include\mpv to *C:\msys64\mingw64\include* path.
+   
 5. Download and unzip the archive with sources from preferred branch (e.g. [master](https://github.com/DYefremov/DemonEditor/archive/refs/heads/master.zip)) in to folder where MSYS2 is installed. E.g: `c:\msys64\home\username\`
 6. Run mingw64 shell. Go to the folder where the program was unpacked. E.g: `cd DemonEditor/`
 And run: `./start.py`
