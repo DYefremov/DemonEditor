@@ -41,6 +41,10 @@ from app.ui.dialogs import show_dialog, DialogType, get_builder
 from app.ui.main_helper import append_text_to_tview, show_info_bar_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, HeaderBar
 
+KEEP_DATA = {"satellites.xml",
+             "terrestrial.xml",
+             "cables.xml"}
+
 
 class RestoreType(Enum):
     BOUQUETS = 0
@@ -232,18 +236,19 @@ class BackupDialog:
             self.restore(RestoreType.BOUQUETS)
 
 
-def backup_data(path, backup_path, move=True):
+def backup_data(path, backup_path, move=True, keep=None):
     """ Creating data backup from a folder at the specified path
 
         Returns full path to the compressed file.
     """
+    keep = keep or KEEP_DATA
     backup_path = f"{backup_path}{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}{SEP}"
     os.makedirs(os.path.dirname(backup_path), exist_ok=True)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     # Backup files in data dir.
     for file in filter(lambda f: os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         src, dst = os.path.join(path, file), backup_path + file
-        shutil.move(src, dst) if move else shutil.copy(src, dst)
+        shutil.move(src, dst) if move and file not in keep else shutil.copy(src, dst)
     # Compressing to zip and delete remaining files.
     zip_file = shutil.make_archive(backup_path.rstrip(SEP), "zip", backup_path)
     shutil.rmtree(backup_path)
