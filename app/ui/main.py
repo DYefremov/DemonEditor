@@ -623,7 +623,7 @@ class Application(Gtk.Application):
         self._main_window.set_wmclass("DemonEditor", "DemonEditor")
         self._main_window.present()
 
-        self.init_profiles()
+        self.init_profiles(True)
         gen = self.init_http_api()
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
@@ -875,9 +875,9 @@ class Application(Gtk.Application):
         self.set_accels_for_action("app.on_logs_show", ["<shift><primary>l"])
         self.set_accels_for_action("win.filter", ["<shift><primary>f"])
 
-    def init_profiles(self):
+    def init_profiles(self, last_config=False):
         self.update_profiles()
-        if self._settings.load_last_config:
+        if last_config and self._settings.load_last_config:
             config = self._settings.get("last_config") or {}
             if config.get("last_bouquet", None):
                 self.connect("data-load-done", self.open_last_bouquet)
