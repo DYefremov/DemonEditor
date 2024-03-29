@@ -4105,8 +4105,8 @@ class Application(Gtk.Application):
 
         for index, row in enumerate(self._services_model):
             fav_id = row[Column.SRV_FAV_ID]
-            if fav_id not in ids:
-                row[Column.SRV_BACKGROUND] = self._EXTRA_COLOR
+            bg = self.get_new_background(row[Column.SRV_CAS_FLAGS]) if fav_id in ids else self._EXTRA_COLOR
+            row[Column.SRV_BACKGROUND] = bg
 
             if index % self.FAV_FACTOR == 0:
                 yield True
