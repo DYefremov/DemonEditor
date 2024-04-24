@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 
 
 def update_icon():
@@ -25,5 +26,7 @@ def update_icon():
 if __name__ == "__main__":
     from app.ui.main import start_app
 
-    update_icon()
+    if sys.platform == "linux":
+        update_icon()
+
     start_app()

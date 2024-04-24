@@ -47,9 +47,9 @@ from urllib.parse import unquote
 
 from gi.repository import GdkPixbuf, GLib, Gio
 
-from app.eparser import Service
-from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
-from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
+from app.data import Service
+from app.data.ecommons import Flag, BouquetService, Bouquet, BqType
+from app.data.enigma.bouquets import BqServiceType, to_bouquet_id
 from app.settings import SettingsType, SEP, IS_WIN, IS_DARWIN, IS_LINUX
 from .dialogs import show_dialog, DialogType, translate
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column

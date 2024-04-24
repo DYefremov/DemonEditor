@@ -38,9 +38,9 @@ from html.parser import HTMLParser
 import requests
 
 from app.commons import log
-from app.eparser import Satellite, Transponder, is_transponder_valid
-from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
-                                  Service, CAS)
+from app.data import Satellite, Transponder, is_transponder_valid
+from app.data.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
+                               Service, CAS)
 
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0"}
 _TIMEOUT = 10

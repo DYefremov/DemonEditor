@@ -33,7 +33,7 @@ from enum import Enum
 from pathlib import Path
 
 from app.commons import log
-from app.eparser.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
+from app.data.ecommons import BqServiceType, BouquetService, Bouquets, Bouquet, BqType
 
 _TV_FILE = "bouquets.tv"
 _RADIO_FILE = "bouquets.radio"

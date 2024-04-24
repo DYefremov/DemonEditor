@@ -29,10 +29,10 @@
 from collections import defaultdict
 
 from app.commons import log
-from app.eparser.ecommons import (Service, POLARIZATION, FEC, SYSTEM, SERVICE_TYPE, PROVIDER, T_SYSTEM, TrType,
-                                  SystemCable)
-from app.eparser.neutrino import get_xml_attributes, SP, KSP, get_attributes, API_VER
-from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
+from app.data.ecommons import (Service, POLARIZATION, FEC, SYSTEM, SERVICE_TYPE, PROVIDER, T_SYSTEM, TrType,
+                               SystemCable)
+from app.data.neutrino import get_xml_attributes, SP, KSP, get_attributes, API_VER
+from app.data.neutrino.nxml import XmlHandler, NeutrinoDocument
 
 _FILE = "services.xml"
 

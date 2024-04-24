@@ -32,7 +32,7 @@ from enum import Enum
 from urllib.parse import unquote, quote
 
 from app.commons import log
-from app.eparser.ecommons import BqServiceType, Service
+from app.data.ecommons import BqServiceType, Service
 from app.settings import SettingsType
 from app.ui.uicommons import IPTV_ICON
 

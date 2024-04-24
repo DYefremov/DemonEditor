@@ -29,9 +29,9 @@
 import os
 
 from app.commons import log
-from app.eparser.iptv import NEUTRINO_FAV_ID_FORMAT
-from app.eparser.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
-from app.eparser.neutrino.nxml import XmlHandler, NeutrinoDocument
+from app.data.iptv import NEUTRINO_FAV_ID_FORMAT
+from app.data.neutrino import KSP, SP, get_xml_attributes, get_attributes, API_VER
+from app.data.neutrino.nxml import XmlHandler, NeutrinoDocument
 from ..ecommons import Bouquets, Bouquet, BouquetService, BqServiceType, PROVIDER, BqType
 
 _FILE = "bouquets.xml"

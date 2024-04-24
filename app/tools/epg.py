@@ -43,7 +43,7 @@ from xml.dom.minidom import parse, Node, Document
 import requests
 
 from app.commons import log
-from app.eparser.ecommons import BqServiceType, BouquetService
+from app.data.ecommons import BqServiceType, BouquetService
 from app.settings import IS_WIN
 
 ENCODING = "utf-8"

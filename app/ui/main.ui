@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-name main.ui -->
+  <requires lib="gtk" version="4.12"/>
+  <requires lib="libadwaita" version="1.5"/>
+  <template class="AppWindow" parent="AdwApplicationWindow">
+    <property name="default-width">720</property>
+    <property name="default-height">560</property>
+    <property name="width-request">720</property>
+    <property name="height-request">560</property>
+    <property name="icon-name">document-open-symbolic</property>
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 500sp</condition>
+        <setter object="split_view" property="collapsed">True</setter>
+      </object>
+    </child>
+    <property name="content">
+      <object class="AdwToastOverlay" id="messages_overlay">
+        <child>
+          <object class="AdwNavigationSplitView" id="split_view">
+            <property name="min-sidebar-width">350</property>
+            <property name="sidebar">
+              <object class="AdwNavigationPage">
+                <property name="title" translatable="yes">Profiles</property>
+                <property name="tag">sidebar</property>
+                <property name="child">
+                  <object class="AdwToolbarView">
+                    <child type="top">
+                      <object class="AdwHeaderBar">
+                        <property name="show-title">False</property>
+                        <child type="end">
+                          <object class="GtkMenuButton" id="main_menu_button">
+                            <property name="icon-name">open-menu-symbolic</property>
+                            <property name="menu-model">main-menu</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <property name="content">
+                      <object class="GtkBox" id="sidebar_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">24</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="margin-top">6</property>
+                        <property name="margin-bottom">12</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">12</property>
+                            <child>
+                              <object class="GtkScrolledWindow">
+                                <property name="vexpand">True</property>
+                                <child>
+                                  <object class="AdwPreferencesGroup" id="profile_group">
+                                    <property name="title">Profiles</property>
+                                    <child type="header-suffix">
+                                      <object class="GtkButton" id="add_fav_button">
+                                        <property name="icon-name">document-new-symbolic</property>
+                                        <property name="tooltip-text" translatable="yes">Add</property>
+                                        <style>
+                                          <class name="flat"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <property name="title">Default</property>
+                                        <property name="subtitle">Connected</property>
+                                        <property name="activatable">True</property>
+                                        <property name="icon-name">emblem-default-symbolic</property>
+                                        <child type="suffix">
+                                          <object class="GtkBox">
+                                            <property name="valign">center</property>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="icon-name">document-edit-symbolic</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="icon-name">edit-delete-symbolic</property>
+                                                <style>
+                                                  <class name="flat"/>
+                                                </style>
+                                              </object>
+                                            </child>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="boxed-list"/>
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="status_box">
+                            <property name="spacing">6</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkBox">
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label">Signal</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLevelBar">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLevelBar">
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+            <property name="content">
+              <object class="AdwNavigationPage">
+                <property name="title" translatable="yes">Tools</property>
+                <property name="tag">content</property>
+                <property name="child">
+                  <object class="AdwToolbarView">
+                    <property name="content">
+                      <object class="AdwNavigationView" id="navigation_view">
+                        <property name="animate-transitions">False</property>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Tools</property>
+                            <property name="tag">start-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="GtkBox" id="tasks_box">
+                                    <property name="orientation">vertical</property>
+                                    <property name="vexpand">True</property>
+                                    <property name="spacing">12</property>
+                                    <property name="margin-start">24</property>
+                                    <property name="margin-end">24</property>
+                                    <property name="margin-top">24</property>
+                                    <property name="margin-bottom">24</property>
+                                    <property name="valign">center</property>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">Bouquets</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'bouquets-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">Satellites</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'satellites-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">Picons</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'picons-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">EPG</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'epg-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">Recordings</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'recordings-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">Timers</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'timers-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="label">FTP</property>
+                                        <property name="action-name">navigation.push</property>
+                                        <property name="action-target">'ftp-page'</property>
+                                        <style>
+                                          <class name="pill"/>
+                                        </style>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="boxed-list"/>
+                                    </style>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Bouquets</property>
+                            <property name="tag">bouquets-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Satellites</property>
+                            <property name="tag">satellites-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Picons</property>
+                            <property name="tag">picons-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">EPG</property>
+                            <property name="tag">epg-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Recordings</property>
+                            <property name="tag">recordings-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">Timers</property>
+                            <property name="tag">timers-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwNavigationPage">
+                            <property name="title" translatable="yes">FTP</property>
+                            <property name="tag">ftp-page</property>
+                            <property name="child">
+                              <object class="AdwToolbarView">
+                                <child type="top">
+                                  <object class="AdwHeaderBar"/>
+                                </child>
+                                <property name="content">
+                                  <object class="AdwStatusPage">
+                                    <property name="title">Not implemented yet!</property>
+                                    <property name="icon-name">face-sad-symbolic</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </property>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+  <menu id="main-menu">
+    <!--Main menu -->
+  </menu>
+</interface>
