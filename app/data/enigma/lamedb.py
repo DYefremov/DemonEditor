@@ -31,7 +31,7 @@ import re
 
 from app.commons import log
 from app.data.satxml import get_pos_str
-from app.ui.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
+from app.uicommons import CODED_ICON, LOCKED_ICON, HIDE_ICON
 from .blacklist import get_blacklist
 from ..ecommons import Service, POLARIZATION, FEC, SERVICE_TYPE, Flag, T_FEC, TrType, FEC_DEFAULT, T_SYSTEM
 

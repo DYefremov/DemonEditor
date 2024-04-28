@@ -41,7 +41,7 @@ from urllib.request import Request, urlopen, urlretrieve
 
 from app.commons import log
 from app.settings import SEP
-from app.ui.uicommons import show_notification
+from app.uicommons import show_notification
 
 _TIMEOUT = 5
 _HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0",

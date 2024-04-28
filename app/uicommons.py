@@ -46,7 +46,7 @@ GLib.set_application_name(APP_NAME)
 
 # Paths.
 BASE_PATH = "app/ui/"
-EX_PATH = f"/usr/share/{APP}/app/ui/" if IS_LINUX else "ui/"
+EX_PATH = f"/usr/share/{APP}/" if IS_LINUX else "ui/"
 # Path to *.ui files.
 UI_PATH = BASE_PATH if os.path.exists(BASE_PATH) else EX_PATH
 # Translation.

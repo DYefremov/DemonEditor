@@ -4,7 +4,7 @@ import ssl
 
 if __name__ == "__main__":
     from multiprocessing import freeze_support
-    from app.ui.main import start_app
+    from app.main import start_app
 
     os.environ["PYTHONUTF8"] = "1"
     # TODO There needs to be a more "correct" way.

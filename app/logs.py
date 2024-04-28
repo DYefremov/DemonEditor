@@ -31,9 +31,9 @@ import logging
 from gi.repository import GLib
 
 from app.commons import LOGGER_NAME, LOG_FORMAT, LOG_DATE_FORMAT
-from app.ui.dialogs import get_builder
-from app.ui.utils import append_text_to_tview
-from app.ui.uicommons import Gtk, UI_RESOURCES_PATH
+from app import get_builder
+from app.utils import append_text_to_tview
+from app.uicommons import Gtk, UI_RESOURCES_PATH
 
 
 class LogsClient(Gtk.Box):

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,16 +40,13 @@ from textwrap import dedent
 SEP = os.sep
 HOME_PATH = str(Path.home())
 CONFIG_PATH = HOME_PATH + f"{SEP}.config{SEP}demon-editor{SEP}"
-CONFIG_FILE = CONFIG_PATH + "config.json"
+CONFIG_FILE = f"{CONFIG_PATH}config"
 DATA_PATH = HOME_PATH + f"{SEP}DemonEditor{SEP}"
 GTK_PATH = os.environ.get("GTK_PATH", None)
 
 IS_DARWIN = sys.platform == "darwin"
 IS_WIN = sys.platform == "win32"
 IS_LINUX = sys.platform == "linux"
-
-USE_HEADER_BAR = int(bool(os.environ.get("GNOME_DESKTOP_SESSION_ID")))
-
 
 class Defaults:
     """ Default program settings. """
@@ -731,14 +728,6 @@ class Settings:
         self._settings["show_bq_hints"] = value
 
     # *********** Appearance *********** #
-
-    @property
-    def use_header_bar(self):
-        return self._settings.get("use_header_bar", USE_HEADER_BAR)
-
-    @use_header_bar.setter
-    def use_header_bar(self, value):
-        self._settings["use_header_bar"] = value
 
     @property
     def list_font(self):

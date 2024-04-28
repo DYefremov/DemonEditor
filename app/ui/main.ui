@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+The MIT License (MIT)
+
+Copyright (c) 2018-2024 Dmitriy Yefremov
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Author: Dmitriy Yefremov
+
+-->
 <interface>
   <!-- interface-name main.ui -->
   <requires lib="gtk" version="4.12"/>
@@ -19,7 +45,7 @@
       <object class="AdwToastOverlay" id="messages_overlay">
         <child>
           <object class="AdwNavigationSplitView" id="split_view">
-            <property name="min-sidebar-width">350</property>
+            <property name="min-sidebar-width">325</property>
             <property name="sidebar">
               <object class="AdwNavigationPage">
                 <property name="title" translatable="yes">Profiles</property>
@@ -27,15 +53,7 @@
                 <property name="child">
                   <object class="AdwToolbarView">
                     <child type="top">
-                      <object class="AdwHeaderBar">
-                        <property name="show-title">False</property>
-                        <child type="end">
-                          <object class="GtkMenuButton" id="main_menu_button">
-                            <property name="icon-name">open-menu-symbolic</property>
-                            <property name="menu-model">main-menu</property>
-                          </object>
-                        </child>
-                      </object>
+                      <object class="AdwHeaderBar" id="sidebar_header"/>
                     </child>
                     <property name="content">
                       <object class="GtkBox" id="sidebar_box">
@@ -53,46 +71,7 @@
                               <object class="GtkScrolledWindow">
                                 <property name="vexpand">True</property>
                                 <child>
-                                  <object class="AdwPreferencesGroup" id="profile_group">
-                                    <property name="title">Profiles</property>
-                                    <child type="header-suffix">
-                                      <object class="GtkButton" id="add_fav_button">
-                                        <property name="icon-name">document-new-symbolic</property>
-                                        <property name="tooltip-text" translatable="yes">Add</property>
-                                        <style>
-                                          <class name="flat"/>
-                                        </style>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="AdwActionRow">
-                                        <property name="title">Default</property>
-                                        <property name="subtitle">Connected</property>
-                                        <property name="activatable">True</property>
-                                        <property name="icon-name">emblem-default-symbolic</property>
-                                        <child type="suffix">
-                                          <object class="GtkBox">
-                                            <property name="valign">center</property>
-                                            <child>
-                                              <object class="GtkButton">
-                                                <property name="icon-name">document-edit-symbolic</property>
-                                                <style>
-                                                  <class name="flat"/>
-                                                </style>
-                                              </object>
-                                            </child>
-                                            <child>
-                                              <object class="GtkButton">
-                                                <property name="icon-name">edit-delete-symbolic</property>
-                                                <style>
-                                                  <class name="flat"/>
-                                                </style>
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                      </object>
-                                    </child>
+                                  <object class="GtkListBox" id="profiles_list">
                                     <style>
                                       <class name="boxed-list"/>
                                     </style>
@@ -386,6 +365,15 @@
       </object>
     </property>
   </template>
+   <!--Sidebar buttons -->
+  <object class="GtkButton" id="add_profile_button">
+    <property name="icon-name">document-new-symbolic</property>
+    <property name="tooltip-text">Add profile</property>
+  </object>
+  <object class="GtkMenuButton" id="main_menu_button">
+    <property name="icon-name">open-menu-symbolic</property>
+    <property name="menu-model">main-menu</property>
+  </object>
   <menu id="main-menu">
     <!--Main menu -->
   </menu>

@@ -28,14 +28,31 @@
 
 import sys
 
-from app.commons import log, init_logger
-from app.settings import Settings
+from .commons import log, init_logger
+from .settings import Settings, IS_DARWIN
+from .widgets import ProfileActionRow
 from .uicommons import *
 
 
-@Gtk.Template(filename=f'{UI_PATH}main.ui')
+@Gtk.Template(filename=f"{UI_PATH}main.ui")
 class AppWindow(Adw.ApplicationWindow):
-    __gtype_name__ = 'AppWindow'
+    __gtype_name__ = "AppWindow"
+
+    # Sidebar
+    sidebar_header = Gtk.Template.Child()
+    add_profile_button = Gtk.Template.Child()
+    main_menu_button = Gtk.Template.Child()
+    profiles_list = Gtk.Template.Child()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if IS_DARWIN:
+            self.sidebar_header.pack_end(self.add_profile_button)
+        else:
+            self.sidebar_header.pack_start(self.add_profile_button)
+            self.sidebar_header.pack_end(self.main_menu_button)
+
+        self.profiles_list.append(ProfileActionRow())
 
 
 class Application(Adw.Application):

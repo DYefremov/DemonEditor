@@ -24,7 +24,7 @@ def update_icon():
 
 
 if __name__ == "__main__":
-    from app.ui.main import start_app
+    from app.main import start_app
 
     if sys.platform == "linux":
         update_icon()
