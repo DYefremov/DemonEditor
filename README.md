@@ -41,10 +41,7 @@ Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
 * **Ctrl + Alt + R** - rename for bouquet.    
 * **Ctrl + S, T** in Satellites edit tool for create satellite or transponder.                                                                 
 * **Ctrl + L** - parental lock.                                                                                                          
-* **Ctrl + H** - hide/skip.                                                                                                                                                                                                 
-* **Ctrl + P** - start play IPTV or other stream in the bouquet list.                                                                                        
-* **Ctrl + Z** - switch(**zap**) the channel(works when the HTTP API is enabled, Enigma2 only).                         
-* **Ctrl + W** - switch to the channel and watch in the program.                                                                                                                                                                                                                                                                                                                                                                                                     
+* **Ctrl + H** - hide/skip.                                                                                                                                                                                                  
 * **Space** - select/deselect.                                                                                                                                                                                                                                                                                                           
 * **Left/Right** - remove selection.                                                                                       
 * **Ctrl + Up, Down, PageUp, PageDown, Home, End**- move selected items in the list.  
@@ -56,6 +53,9 @@ Experimental support of Neutrino-MP or others on the same basis (BPanther, etc).
 * **Ctrl + Shift + F** - show/hide filter bar.
 * **Ctrl + T** - show/hide built-in Telnet client.
 * **Ctrl + Shift + L** - show/hide logging panel.
+* **Shift + P** - start play IPTV or other stream in the bouquet list.                                                                                        
+* **Shift + Z** - switch(**zap**) the channel(works when the HTTP API is enabled, Enigma2 only).                         
+* **Shift + W** - switch to the channel and watch in the program.        
                                                                           
 For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 
