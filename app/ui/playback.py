@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -158,7 +158,14 @@ class PlayerBox(Gtk.Overlay):
                 return
 
             ref = self._app.get_service_ref_data(srv)
-            self.zap(ref, self.play_current)
+            if mode is PlaybackMode.PLAY:
+                self.play_service(ref)
+            elif mode is PlaybackMode.ZAP:
+                self.zap(ref)
+            elif mode is PlaybackMode.ZAP_PLAY:
+                self.zap(ref, self.play_current)
+            elif mode is PlaybackMode.STREAM:
+                self._app.show_error_message("Not allowed in this context!")
 
     def on_iptv_clicked(self, app, mode):
         if not self._app.http_api:
@@ -439,15 +446,17 @@ class PlayerBox(Gtk.Overlay):
             self.play(url) if url else self.on_error(None, "No reference is present!")
 
     def on_play_service(self, item=None):
-        """ Playback without switching channel on the Box [returns current reference]"""
+        """ Playback without switching channel on the Box."""
         ref, path = self.get_ref()
         if not ref:
             return
 
+        self.play_service(ref)
+
+    def play_service(self, ref):
         s_type = self._app.app_settings.setting_type
         req = HttpAPI.Request.STREAM if s_type is SettingsType.ENIGMA_2 else HttpAPI.Request.N_STREAM
         self._app.http_api.send(req, ref, self.watch)
-        return ref
 
     def on_zap(self, callback=None):
         """ Switch(zap) the channel.  """
