@@ -2949,20 +2949,32 @@ class Application(Gtk.Application):
 
         key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
+        shift = event.state & Gdk.ModifierType.SHIFT_MASK
         model_name, model = get_model_data(view)
 
         if key is KeyboardKey.LEFT or key is KeyboardKey.RIGHT:
             view.do_unselect_all(view)
-        elif ctrl and model_name == self.FAV_MODEL:
-            if key is KeyboardKey.P:
-                self.emit("fav-clicked", PlaybackMode.STREAM)
-            if key is KeyboardKey.W:
-                self.emit("fav-clicked", PlaybackMode.ZAP_PLAY)
-            if key is KeyboardKey.Z:
-                self.emit("fav-clicked", PlaybackMode.ZAP)
-            elif key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
+
+        if model_name == self.FAV_MODEL:
+            if ctrl and key in (KeyboardKey.CTRL_L, KeyboardKey.CTRL_R):
                 self.update_fav_num_column(model)
                 self.update_bouquet_list()
+
+            if shift:
+                if key is KeyboardKey.P:
+                    self.emit("fav-clicked", PlaybackMode.STREAM)
+                if key is KeyboardKey.W:
+                    self.emit("fav-clicked", PlaybackMode.ZAP_PLAY)
+                if key is KeyboardKey.Z:
+                    self.emit("fav-clicked", PlaybackMode.ZAP)
+        elif model_name == self.SERVICE_MODEL:
+            if shift:
+                if key is KeyboardKey.P:
+                    self.emit("srv-clicked", PlaybackMode.STREAM)
+                if key is KeyboardKey.W:
+                    self.emit("srv-clicked", PlaybackMode.ZAP_PLAY)
+                if key is KeyboardKey.Z:
+                    self.emit("srv-clicked", PlaybackMode.ZAP)
 
     def on_view_focus(self, view, focus_event=None):
         # Preventing focus lack for some cases.
