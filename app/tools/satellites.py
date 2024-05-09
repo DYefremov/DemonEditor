@@ -443,9 +443,9 @@ class ServicesParser(HTMLParser):
 
         self._POS_PAT = re.compile(r".*?(\d+\.\d°[EW]).*")
         # LyngSat.
-        self._TR_PAT = re.compile((r".*?(\d+)\.?\d?\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s"
+        self._TR_PAT = re.compile((r".*?(\d{4,5})\.?\d?\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s"
                                    r"?(T2-MI)?\s?(PLS\s+Multistream)?\s?"
-                                   r"SR-FEC:\s(\d+)-(\d/\d)\s+.*ONID-TID:\s+(\d+)-(\d+).*"))
+                                   r"SR-FEC:\s(\d+)-(\d+/\d+)\s+?(?:.*ONID-TID:\s+(\d+)-(\d+))?"))
 
         self._MULTI_PAT = re.compile(r"PLS\s+(Root|Gold|Combo)+\s(\d+)?\s+(?:Stream\s(\d+))")
         # KingOfSat.
@@ -635,12 +635,18 @@ class ServicesParser(HTMLParser):
             if pos_found:
                 text = " ".join(c.text for c in r[1:])
                 td = re.match(self._TR_PAT, text)
+
                 if td:
                     freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
                     sys, mod, sr, _fec, = td.group(3), td.group(4), td.group(7), td.group(8)
-                    nid, tid = td.group(9), td.group(10)
                     sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, _fec, sys, mod)
-                    nid, tid = int(nid), int(tid)
+                    # The ONID-TID values may not present!
+                    _nid, _tid = td.group(9), td.group(10)
+                    if _nid and _tid:
+                        nid, tid = int(_nid), int(_tid)
+                    else:
+                        log((f"Values 'ONID-TID' for transponder [{self._t_url}] are not present."
+                             " Default values are used."))
 
                     if td.group(5):
                         log(f"Detected T2-MI transponder! [{freq} {sr} {pol}]")
