@@ -1172,7 +1172,7 @@ class Application(Gtk.Application):
         self._stack.set_visible_child_name(page_name)
 
     def on_page_changed(self, app, page):
-        if not self._settings.load_last_config and not len(self._bouquets_model):
+        if not self._settings.load_last_config and not self.is_data_loading():
             self.open_data()
 
     def set_use_alt_layout(self, action, value):
@@ -2291,6 +2291,7 @@ class Application(Gtk.Application):
         return tmp_path
 
     def update_data(self, data_path, callback=None):
+        self._services_load_spinner.start()
         self._profile_combo_box.set_sensitive(False)
         self._alt_revealer.set_visible(False)
         self._filter_services_button.set_active(False)
@@ -2483,7 +2484,6 @@ class Application(Gtk.Application):
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
         self._wait_dialog.hide()
-        self._services_load_spinner.start()
         factor = self.DEL_FACTOR / 4
 
         for index, srv in enumerate(to_add):
