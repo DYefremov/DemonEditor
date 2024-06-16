@@ -2229,7 +2229,7 @@ class Application(Gtk.Application):
 
     def on_data_extract(self, app, page):
         """ Opening the data archive via "File/Extract...". """
-        if page is Page.SERVICES:
+        if page is Page.INFO or page is Page.SERVICES:
             file_filter = None
             if IS_DARWIN:
                 file_filter = Gtk.FileFilter()
