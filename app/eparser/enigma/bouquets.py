@@ -181,6 +181,7 @@ class ServiceType(Enum):
 class BouquetsReader:
     """ Class for reading and parsing bouquets. """
     _BQ_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?([\w-]+)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
+    _BQ_PAT2 = re.compile(r"#SERVICE:+\s+(?:[0-9a-f]+:+)+([^:]+[.](?:tv|radio))$", re.IGNORECASE)
     _BQ_POST_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?(.*)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
@@ -207,9 +208,10 @@ class BouquetsReader:
 
             for line in file.readlines():
                 if "#SERVICE" in line:
-                    mt = re.match(self._BQ_PAT, line)
                     s_data = line.split(":")
-                    s_type = ServiceType(s_data[1])
+                    s_type = ServiceType.BOUQUET
+
+                    mt = re.match(self._BQ_PAT, line) or re.match(self._BQ_PAT2, line)
                     if not mt:
                         # Additional file name checking.
                         mt = re.match(self._BQ_POST_PAT, line)
@@ -217,7 +219,13 @@ class BouquetsReader:
                             log(f"Warning: The bouquet file name may be formed incorrectly. -> {mt.group(1)}")
 
                     if mt:
-                        file_name, prefix, b_name = mt.group(1), mt.group(2), mt.group(3)
+                        if len(mt.groups()) > 1:
+                            file_name, prefix, b_name = mt.group(1), mt.group(2), mt.group(3)
+                            s_data[:2] = "10"
+                        else:
+                            file_name, prefix, b_name = mt.group(1), "", ""
+                            s_type = ServiceType(s_data[2])
+
                         if b_name in b_names:
                             log(f"The list of bouquets contains duplicate [{b_name}] names!")
                         else:
@@ -231,7 +239,6 @@ class BouquetsReader:
                         else:
                             real_b_names[rb_name] = 0
                         # Locked, hidden.
-                        s_data[:2] = "10"
                         locked = ":".join(s_data).rstrip()
                         hidden = s_type is ServiceType.HIDDEN
                         bouquets[2].append(Bouquet(rb_name, bq_type, services, locked, hidden, file_name))
