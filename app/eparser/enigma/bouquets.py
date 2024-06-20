@@ -221,6 +221,7 @@ class BouquetsReader:
                     if mt:
                         if len(mt.groups()) > 1:
                             file_name, prefix, b_name = mt.group(1), mt.group(2), mt.group(3)
+                            s_type = ServiceType(s_data[1])
                             s_data[:2] = "10"
                         else:
                             file_name, prefix, b_name = mt.group(1), "", ""
