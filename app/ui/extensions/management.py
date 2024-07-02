@@ -132,8 +132,8 @@ class ExtensionManager(Gtk.Window):
         self._load_spinner.bind_property("active", self._view, "sensitive", GObject.BindingFlags.INVERT_BOOLEAN)
         load_box.pack_end(self._load_spinner, False, False, 0)
         status_box.pack_end(load_box, False, False, 0)
-
         data_box.pack_end(status_box, False, True, 0)
+
         scrolled = Gtk.ScrolledWindow(shadow_type=Gtk.ShadowType.IN)
         scrolled.add(self._view)
         data_box.pack_start(scrolled, True, True, 0)
@@ -142,19 +142,19 @@ class ExtensionManager(Gtk.Window):
         self.add(main_box)
         # Popup menu.
         menu = Gtk.Menu()
-        item = Gtk.MenuItem.new_with_label(translate("Download"))
-        item.connect("activate", self.on_download)
-        menu.append(item)
-        item = Gtk.MenuItem.new_with_label(translate("Remove"))
-        item.connect("activate", self.on_remove)
-        menu.append(item)
+        download_menu_item = Gtk.MenuItem.new_with_label(translate("Download"))
+        download_menu_item.connect("activate", self.on_download)
+        menu.append(download_menu_item)
+        remove_menu_item = Gtk.MenuItem.new_with_label(translate("Remove"))
+        remove_menu_item.connect("activate", self.on_remove)
+        menu.append(remove_menu_item)
         menu.show_all()
         self._view.connect("button-press-event", self.on_view_popup_menu, menu)
         # Header and toolbar.
-        download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
-        download_button.set_label(translate("Download"))
-        download_button.set_always_show_image(True)
-        download_button.connect("clicked", self.on_download)
+        self._download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
+        self._download_button.set_label(translate("Download"))
+        self._download_button.set_always_show_image(True)
+        self._download_button.connect("clicked", self.on_download)
         remove_button = Gtk.Button.new_from_icon_name("user-trash-symbolic", Gtk.IconSize.BUTTON)
         remove_button.set_label(translate("Remove"))
         remove_button.set_always_show_image(True)
@@ -162,7 +162,7 @@ class ExtensionManager(Gtk.Window):
 
         if app.app_settings.use_header_bar:
             header = HeaderBar()
-            header.pack_start(download_button)
+            header.pack_start(self._download_button)
             header.pack_start(remove_button)
 
             self.set_titlebar(header)
@@ -171,13 +171,18 @@ class ExtensionManager(Gtk.Window):
             toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             toolbar.get_style_context().add_class("primary-toolbar")
             button_box = Gtk.Box(spacing=2, orientation=Gtk.Orientation.HORIZONTAL, **margin)
-            button_box.pack_start(download_button, False, False, 0)
+            button_box.pack_start(self._download_button, False, False, 0)
             button_box.pack_start(remove_button, False, False, 0)
             toolbar.pack_start(button_box, True, True, 0)
             main_box.pack_start(toolbar, False, False, 0)
 
         main_box.pack_start(frame, True, True, 0)
         main_box.show_all()
+        # Connection status.
+        self._connection_status_image = Gtk.Image.new_from_icon_name("network-offline-symbolic", Gtk.IconSize.BUTTON)
+        status_box.pack_end(self._connection_status_image, False, False, 0)
+        self._download_button.bind_property("visible", self._connection_status_image, "visible", 4)
+        self._download_button.bind_property("visible", download_menu_item, "visible")
 
         ws_property = "extension_manager_window_size"
         window_size = self._app.app_settings.get(ws_property, None)
@@ -225,26 +230,39 @@ class ExtensionManager(Gtk.Window):
 
     @run_task
     def update(self):
-        with requests.get(url=EXT_LIST_FILE, stream=True) as resp:
-            error_msg = None
-            if resp.status_code == 200:
-                try:
-                    self.update_data(resp.json())
-                except ValueError as e:
-                    error_msg = f"{self.__class__.__name__} [update] error: {e}"
-            else:
-                error_msg = f"{self.__class__.__name__} [update] error: {resp.reason}"
+        error_msg = None
+        try:
+            with requests.get(url=EXT_LIST_FILE, stream=True) as resp:
+                if resp.status_code == 200:
+                    try:
+                        self.update_data(resp.json())
+                    except ValueError as e:
+                        error_msg = f"{self.__class__.__name__} [update] error: {e}"
+                else:
+                    error_msg = f"{self.__class__.__name__} [update] error: {resp.reason}"
+                    GLib.idle_add(self._app.show_error_message, "Data loading error!")
+        except OSError as e:
+            error_msg = f"{self.__class__.__name__} [update] error: Connection error. {e}"
 
-            if error_msg:
-                log(error_msg)
-                GLib.idle_add(self._load_spinner.stop)
-                GLib.idle_add(self._app.show_error_message, "Data loading error!")
+        if error_msg:
+            log(error_msg)
+            self.update_local_data()
 
     @run_idle
     def update_data(self, data):
         self._model.clear()
         gen = self.append_data(data)
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    @run_idle
+    def update_local_data(self):
+        self._download_button.set_visible(False)
+        self._load_spinner.stop()
+        self._model.clear()
+
+        for ext, d in self.get_installed().items():
+            e, path = d
+            self._model.append((e.LABEL, None, e.VERSION, None, path, ext, None, path))
 
     def append_data(self, data):
         installed = self.get_installed()
