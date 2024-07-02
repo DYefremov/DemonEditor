@@ -686,8 +686,15 @@ class SatellitesUpdateDialog(UpdateDialog):
         box.pack_start(Gtk.Label(translate("Merge satellites by positions")), False, True, 0)
         box.pack_end(self._merge_sat_switch, False, True, 0)
         self._general_options_box.pack_start(box, True, True, 0)
-        self._general_options_box.show_all()
 
+        self._split_band_switch = Gtk.Switch(active=self._dialog_settings.get("split_by_band", False))
+        self._split_band_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"split_by_band": s}))
+        box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL)
+        box.pack_start(Gtk.Label(translate("Split satellites by bands (C/KU)")), False, True, 0)
+        box.pack_end(self._split_band_switch, False, True, 0)
+        self._general_options_box.pack_start(box, True, True, 0)
+
+        self._general_options_box.show_all()
         self._skip_c_band_switch.get_parent().set_visible(False)
 
     @run_idle
@@ -757,6 +764,28 @@ class SatellitesUpdateDialog(UpdateDialog):
                 appender.send("-" * _len + "\n")
             else:
                 sats = {s.name: s for s in sats}  # key = name, v = satellite
+
+            # Post-processing if band separation is active.
+            if self._split_band_switch.get_active():
+                appender.send(f"Checking and splitting satellites by band...\n")
+                to_remove = []
+                new_sats = {}
+                for name, sat in sats.items():
+                    # Checking for C/KU-transponders.
+                    c_tr = []
+                    ku_tr = []
+                    [c_tr.append(t) if int(t.frequency) < 10000000 else ku_tr.append(t) for t in sat.transponders]
+
+                    if ku_tr and c_tr:
+                        c_sat = Satellite(f"{name} (C)", sat.flags, sat.position, c_tr)
+                        ku_sat = Satellite(f"{name} (KU)", sat.flags, sat.position, ku_tr)
+                        new_sats[c_sat.name] = c_sat
+                        new_sats[ku_sat.name] = ku_sat
+                        to_remove.append(name)
+
+                [sats.pop(n) for n in to_remove]
+                sats.update(new_sats)
+                appender.send("-" * _len + "\n")
 
             for row in self._main_model:
                 pos = row[0]
