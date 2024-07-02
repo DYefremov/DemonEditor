@@ -587,7 +587,7 @@ class SatellitesTool(Gtk.Box):
             self._app.upload_data(DownloadType.SATELLITES)
 
     @run_idle
-    def on_update(self, item):
+    def on_update(self, item=None):
         SatellitesUpdateDialog(self._app.get_active_window(), self._settings, self._satellite_view.get_model()).show()
 
 

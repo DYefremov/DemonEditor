@@ -545,6 +545,8 @@ class UpdateDialog:
     @run_idle
     def append_satellites(self, sats):
         model = get_base_model(self._sat_view.get_model())
+        if not model:
+            return
 
         for sat in sats:
             itr = model.append(sat)

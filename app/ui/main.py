@@ -770,7 +770,8 @@ class Application(Gtk.Application):
         self.set_action("on_import_bouquet", self.on_import_bouquet)
         self.set_action("on_import_bouquets", self.on_import_bouquets)
         self.set_action("on_new_configuration", self.on_new_configuration)
-        self.set_action("on_import_from_web", self.on_import_from_web)
+        sa = self.set_action("on_import_from_web", self.on_import_from_web)
+        self.bind_property("is-data-save-enabled", sa, "enabled")
         # Tools.
         self.set_action("on_backup_tool_show", self.on_backup_tool_show)
         self.set_state_action("on_telnet_show", self.on_telnet_show, False)
@@ -3334,7 +3335,11 @@ class Application(Gtk.Application):
         if self._s_type is not SettingsType.ENIGMA_2:
             self.show_error_message("Not allowed in this context!")
             return
-        ServicesUpdateDialog(self).show()
+
+        if self._page is Page.SATELLITE:
+            self._satellite_tool.on_update()
+        else:
+            ServicesUpdateDialog(self).show()
 
     @run_idle
     def on_import_data_from_web(self, services, bouquets=None):
