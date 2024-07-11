@@ -401,8 +401,6 @@ class UpdateDialog:
                     "on_satellite_changed": self.on_satellite_changed,
                     "on_transponder_toggled": self.on_transponder_toggled,
                     "on_info_bar_close": self.on_info_bar_close,
-                    "on_filter_toggled": self.on_filter_toggled,
-                    "on_find_toggled": self.on_find_toggled,
                     "on_popup_menu": on_popup_menu,
                     "on_select_all": self.on_select_all,
                     "on_unselect_all": self.on_unselect_all,
@@ -441,7 +439,7 @@ class UpdateDialog:
         self._left_action_box = builder.get_object("sat_update_left_action_box")
         self._right_action_box = builder.get_object("sat_update_right_action_box")
         # Filter
-        self._filter_bar = builder.get_object("sat_update_filter_bar")
+        self._filter_bar_box = builder.get_object("filter_bar_box")
         self._from_pos_button = builder.get_object("from_pos_button")
         self._to_pos_button = builder.get_object("to_pos_button")
         self._filter_from_combo_box = builder.get_object("filter_from_combo_box")
@@ -449,18 +447,16 @@ class UpdateDialog:
         self._filter_model = builder.get_object("update_sat_list_model_filter")
         self._filter_model.set_visible_func(self.filter_function)
         self._filter_positions = (0, 0)
-        self._filter_bar.bind_property("search-mode-enabled", self._filter_bar, "visible")
         # Log.
         self._log_frame = builder.get_object("log_frame")
         builder.get_object("log_info_bar").connect("response", lambda b, r: self._log_frame.set_visible(False))
         # Search.
-        self._search_bar = builder.get_object("sat_update_search_bar")
-        self._search_bar.bind_property("search-mode-enabled", self._search_bar, "visible")
+        self._search_bar_box = builder.get_object("search_bar_box")
         search_provider = SearchProvider(self._sat_view,
                                          builder.get_object("sat_update_search_entry"),
                                          builder.get_object("sat_update_search_down_button"),
                                          builder.get_object("sat_update_search_up_button"))
-        builder.get_object("sat_update_find_button").connect("toggled", search_provider.on_search_toggled)
+        builder.get_object("search_button").connect("toggled", search_provider.on_search_toggled)
         # Satellite lists init on dialog start.
         self._sat_view.connect("realize", self.on_update_satellites_list)
         # Options.
@@ -599,10 +595,10 @@ class UpdateDialog:
         self._sat_update_info_bar.set_visible(False)
 
     def on_find_toggled(self, button: Gtk.ToggleToolButton):
-        self._search_bar.set_search_mode(button.get_active())
+        self._search_bar_box.set_visible(button.get_active())
 
     def on_filter_toggled(self, button: Gtk.ToggleToolButton):
-        self._filter_bar.set_search_mode(button.get_active())
+        self._filter_bar_box.set_visible(button.get_active())
 
     @run_idle
     def on_filter(self, item):
