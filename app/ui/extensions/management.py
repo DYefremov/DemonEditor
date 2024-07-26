@@ -152,11 +152,11 @@ class ExtensionManager(Gtk.Window):
         self._view.connect("button-press-event", self.on_view_popup_menu, menu)
         # Header and toolbar.
         self._download_button = Gtk.Button.new_from_icon_name("go-bottom-symbolic", Gtk.IconSize.BUTTON)
-        self._download_button.set_label(translate("Download"))
+        self._download_button.set_tooltip_text(translate("Download"))
         self._download_button.set_always_show_image(True)
         self._download_button.connect("clicked", self.on_download)
         remove_button = Gtk.Button.new_from_icon_name("user-trash-symbolic", Gtk.IconSize.BUTTON)
-        remove_button.set_label(translate("Remove"))
+        remove_button.set_tooltip_text(translate("Remove"))
         remove_button.set_always_show_image(True)
         remove_button.connect("clicked", self.on_remove)
 
