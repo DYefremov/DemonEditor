@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2024 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,14 +32,8 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
-  <object class="GtkImage" id="details_image">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">emblem-important-symbolic</property>
-    <property name="icon_size">1</property>
-  </object>
   <object class="GtkListStore" id="main_list_store">
     <columns>
       <!-- column-name name -->
@@ -47,61 +41,6 @@ Author: Dmitriy Yefremov
       <!-- column-name size -->
       <column type="gchararray"/>
     </columns>
-  </object>
-  <object class="GtkMenu" id="popup_menu">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkMenuItem" id="restore_bouquets_popup_menu_item">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Restore bouquets</property>
-        <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
-        <accelerator key="r" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="restore_all_popup_menu_item">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Restore all</property>
-        <signal name="activate" handler="on_restore_all" swapped="no"/>
-        <accelerator key="e" signal="activate" modifiers="Primary"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="remove_popup_menu_item">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="label" translatable="yes">Remove</property>
-        <signal name="activate" handler="on_remove" swapped="no"/>
-        <accelerator key="Delete" signal="activate"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkImage" id="remove_image">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">user-trash-symbolic</property>
-    <property name="icon_size">1</property>
-  </object>
-  <object class="GtkImage" id="restore_all_image">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">edit-select-all-symbolic</property>
-    <property name="icon_size">1</property>
-  </object>
-  <object class="GtkImage" id="restore_bouquets_image">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="icon-name">document-revert-symbolic</property>
-    <property name="icon_size">1</property>
   </object>
   <object class="GtkWindow" id="dialog_window">
     <property name="width-request">560</property>
@@ -111,7 +50,7 @@ Author: Dmitriy Yefremov
     <property name="modal">True</property>
     <property name="window-position">center-on-parent</property>
     <property name="destroy-with-parent">True</property>
-    <property name="icon-name">document-revert</property>
+    <property name="icon-name">document-revert-symbolic</property>
     <signal name="check-resize" handler="on_resize" swapped="no"/>
     <child>
       <object class="GtkBox" id="main_box">
@@ -133,14 +72,21 @@ Author: Dmitriy Yefremov
                 <property name="layout-style">expand</property>
                 <child>
                   <object class="GtkButton" id="restore_bouquets_header_button">
-                    <property name="label" translatable="yes">Restore bouquets</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Restore bouquets</property>
                     <property name="valign">center</property>
-                    <property name="image">restore_bouquets_image</property>
                     <property name="always-show-image">True</property>
                     <signal name="clicked" handler="on_restore_bouquets" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="restore_bouquets_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">document-revert-symbolic</property>
+                        <property name="icon_size">1</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -150,14 +96,21 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkButton" id="restore_all_header_button">
-                    <property name="label" translatable="yes">Restore all</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Restore all</property>
                     <property name="valign">center</property>
-                    <property name="image">restore_all_image</property>
                     <property name="always-show-image">True</property>
                     <signal name="clicked" handler="on_restore_all" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="restore_all_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">edit-select-all-symbolic</property>
+                        <property name="icon_size">1</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -167,14 +120,21 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkButton" id="remove_header_button">
-                    <property name="label" translatable="yes">Remove</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">Remove</property>
                     <property name="valign">center</property>
-                    <property name="image">remove_image</property>
                     <property name="always-show-image">True</property>
                     <signal name="clicked" handler="on_remove" swapped="no"/>
+                    <child>
+                      <object class="GtkImage" id="remove_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">user-trash-symbolic</property>
+                        <property name="icon_size">1</property>
+                      </object>
+                    </child>
                     <accelerator key="Delete" signal="clicked"/>
                   </object>
                   <packing>
@@ -202,7 +162,7 @@ Author: Dmitriy Yefremov
                 <property name="draw-indicator">False</property>
                 <signal name="toggled" handler="on_info_button_toggled" swapped="no"/>
                 <child>
-                  <object class="GtkImage" id="details_image1">
+                  <object class="GtkImage" id="details_image">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="icon-name">emblem-important-symbolic</property>
@@ -470,6 +430,43 @@ Author: Dmitriy Yefremov
             <property name="position">2</property>
           </packing>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMenu" id="popup_menu">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="restore_bouquets_popup_menu_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Restore bouquets</property>
+        <signal name="activate" handler="on_restore_bouquets" swapped="no"/>
+        <accelerator key="r" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="restore_all_popup_menu_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Restore all</property>
+        <signal name="activate" handler="on_restore_all" swapped="no"/>
+        <accelerator key="e" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="popup_menu_separator">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="remove_popup_menu_item">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <signal name="activate" handler="on_remove" swapped="no"/>
+        <accelerator key="Delete" signal="activate"/>
       </object>
     </child>
   </object>
