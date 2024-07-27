@@ -170,7 +170,9 @@ class ExtensionManager(Gtk.Window):
         else:
             toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             toolbar.get_style_context().add_class("primary-toolbar")
-            button_box = Gtk.Box(spacing=2, orientation=Gtk.Orientation.HORIZONTAL, **margin)
+            margin["margin_start"] = 15
+            margin["margin_top"] = 10
+            button_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, **margin)
             button_box.pack_start(self._download_button, False, False, 0)
             button_box.pack_start(remove_button, False, False, 0)
             toolbar.pack_start(button_box, True, True, 0)
