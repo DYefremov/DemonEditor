@@ -48,7 +48,7 @@ from app.settings import SettingsType
 BQ_FILES_LIST = ("tv", "radio",  # Enigma2.
                  "services.xml", "myservices.xml", "bouquets.xml", "ubouquets.xml")  # Neutrino.
 
-DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist",)
+DATA_FILES_LIST = ("lamedb", "lamedb5", "blacklist", "whitelist", "whitelist_streamrelay")
 
 STC_XML_FILE = ("satellites.xml", "terrestrial.xml", "cables.xml")
 WEB_TV_XML_FILE = ("webtv.xml", "webtv_usr.xml")

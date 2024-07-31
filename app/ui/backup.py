@@ -43,7 +43,9 @@ from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Heade
 
 KEEP_DATA = {"satellites.xml",
              "terrestrial.xml",
-             "cables.xml"}
+             "cables.xml",
+             "whitelist",
+             "whitelist_streamrelay"}
 
 
 class RestoreType(Enum):
@@ -264,7 +266,7 @@ def restore_data(src, dst):
 
 def clear_data_path(path):
     """ Clearing data at the specified path excluding *.xml file. """
-    for file in filter(lambda f: not f.endswith(".xml") and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
+    for file in filter(lambda f: f not in KEEP_DATA and os.path.isfile(os.path.join(path, f)), os.listdir(path)):
         os.remove(os.path.join(path, file))
 
 

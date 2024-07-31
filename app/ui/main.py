@@ -45,6 +45,7 @@ from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService
 from app.eparser.enigma.bouquets import BqServiceType
+from app.eparser.enigma.streamrelay import StreamRelay
 from app.eparser.iptv import export_to_m3u, StreamType
 from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException, IS_DARWIN, IS_LINUX,
@@ -70,7 +71,7 @@ from .search import SearchProvider
 from .service_details_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
-                        MOD_MASK, APP_FONT, Page, HeaderBar)
+                        MOD_MASK, APP_FONT, Page, HeaderBar, LINK_ICON)
 from .xml.dialogs import ServicesUpdateDialog
 from .xml.edit import SatellitesTool
 
@@ -255,6 +256,7 @@ class Application(Gtk.Application):
         # For bouquets with different names of services in bouquet and main list
         self._extra_bouquets = {}
         self._blacklist = set()
+        self._stream_relay = StreamRelay()
         self._current_bq_name = None
         self._bq_selected = ""  # Current selected bouquet
         self._select_enabled = True  # Multiple selection
@@ -2330,6 +2332,7 @@ class Application(Gtk.Application):
 
             prf = self._s_type
             black_list = get_blacklist(data_path)
+            self._stream_relay.refresh(data_path)
             bouquets = get_bouquets(data_path, prf)
             yield True
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
@@ -2777,13 +2780,14 @@ class Application(Gtk.Application):
                 ex_srv_name = ex_services.get(srv_id)
             if srv:
                 background = self._EXTRA_COLOR if self._use_colors and ex_srv_name else None
+                coded = LINK_ICON if srv_id in self._stream_relay else srv.coded
 
                 srv_type = srv.service_type
                 is_marker = srv_type in self.MARKER_TYPES
                 if not is_marker:
                     num += 1
 
-                self._fav_model.append((0 if is_marker else num, srv.coded, ex_srv_name if ex_srv_name else srv.service,
+                self._fav_model.append((0 if is_marker else num, coded, ex_srv_name if ex_srv_name else srv.service,
                                         srv.locked, srv.hide, srv_type, srv.pos, srv.fav_id,
                                         None, None, background))
 

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ from app.connections import UtfFTP
 from app.settings import IS_LINUX, IS_DARWIN, IS_WIN, SEP, USE_HEADER_BAR
 from app.ui.dialogs import show_dialog, DialogType, get_builder, translate
 from app.ui.main_helper import on_popup_menu
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Page
+from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK, Page, LINK_ICON, FOLDER_ICON
 
 File = namedtuple("File", ["icon", "name", "size", "date", "attr", "extra"])
 
@@ -296,12 +296,6 @@ class FtpClientBox(Gtk.HBox):
         # Force Ctrl
         self._ftp_view.connect("key-press-event", self._app.force_ctrl)
         self._file_view.connect("key-press-event", self._app.force_ctrl)
-        # Icons
-        theme = Gtk.IconTheme.get_default()
-        folder_icon = "folder-symbolic" if settings.is_darwin else "folder"
-        self._folder_icon = theme.load_icon(folder_icon, 16, 0) if theme.lookup_icon(folder_icon, 16, 0) else None
-        self._link_icon = theme.load_icon("emblem-symbolic-link", 16, 0) if theme.lookup_icon("emblem-symbolic-link",
-                                                                                              16, 0) else None
         # Initialization
         self.init_drag_and_drop()
         self.init_ftp()
@@ -377,10 +371,10 @@ class FtpClientBox(Gtk.HBox):
                 icon = None
                 if is_dir:
                     r_size = self.FOLDER
-                    icon = self._folder_icon
+                    icon = FOLDER_ICON
                 elif p.is_symlink():
                     r_size = self.LINK
-                    icon = self._link_icon
+                    icon = LINK_ICON
                 else:
                     r_size = get_size_from_bytes(size)
 
@@ -401,10 +395,10 @@ class FtpClientBox(Gtk.HBox):
             icon = None
             if is_dir:
                 r_size = self.FOLDER
-                icon = self._folder_icon
+                icon = FOLDER_ICON
             elif is_link:
                 r_size = self.LINK
-                icon = self._link_icon
+                icon = LINK_ICON
             else:
                 r_size = get_size_from_bytes(size)
 
@@ -675,7 +669,7 @@ class FtpClientBox(Gtk.HBox):
             log(e)
             self._app.show_error_message(str(e))
         else:
-            itr = self._file_model.append(File(self._folder_icon, path.name, self.FOLDER, "", str(path.resolve()), "0"))
+            itr = self._file_model.append(File(FOLDER_ICON, path.name, self.FOLDER, "", str(path.resolve()), "0"))
             renderer.set_property("editable", True)
             self._file_view.set_cursor(self._file_model.get_path(itr), self._file_view.get_column(0), True)
 
@@ -695,7 +689,7 @@ class FtpClientBox(Gtk.HBox):
             log(e)
         else:
             if resp == f"{cur_path}/{name}":
-                itr = self._ftp_model.append(File(self._folder_icon, name, self.FOLDER, "", "drwxr-xr-x", "0"))
+                itr = self._ftp_model.append(File(FOLDER_ICON, name, self.FOLDER, "", "drwxr-xr-x", "0"))
                 renderer.set_property("editable", True)
                 self._ftp_view.set_cursor(self._ftp_model.get_path(itr), self._ftp_view.get_column(0), True)
 
