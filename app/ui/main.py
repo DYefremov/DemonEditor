@@ -107,7 +107,7 @@ class Application(Gtk.Application):
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
                      "fav_edit_popup_item", "fav_picon_popup_item", "fav_copy_popup_item", "fav_add_alt_popup_item",
                      "fav_epg_configuration_popup_item", "fav_mark_dup_popup_item", "fav_remove_dup_popup_item",
-                     "fav_reference_popup_item")
+                     "fav_reference_popup_item", "fav_use_sr_popup_item", "fav_remove_sr_popup_item")
 
     _BOUQUET_ELEMENTS = ("bouquets_new_popup_item", "bouquets_edit_popup_item", "bouquets_cut_popup_item",
                          "bouquets_copy_popup_item", "bouquets_paste_popup_item", "new_header_button",
@@ -220,6 +220,8 @@ class Application(Gtk.Application):
                     "on_create_bouquet_for_current_type": self.on_create_bouquet_for_current_type,
                     "on_create_bouquet_for_each_type": self.on_create_bouquet_for_each_type,
                     "on_add_alternatives": self.on_add_alternatives,
+                    "on_use_streamrelay": self.on_use_streamrelay,
+                    "on_remove_use_streamrelay": self.on_remove_use_streamrelay,
                     "on_satellites_realize": self.on_satellites_realize,
                     "on_picons_realize": self.on_picons_realize,
                     "on_epg_realize": self.on_epg_realize,
@@ -4456,6 +4458,38 @@ class Application(Gtk.Application):
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
                 self.emit("fav-changed", srv)
+
+    # ***************** Stream relay ********************** #
+
+    def on_use_streamrelay(self, item):
+        gen = self.update_streamrelay_use(remove=False)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def on_remove_use_streamrelay(self, item):
+        gen = self.update_streamrelay_use(remove=True)
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def update_streamrelay_use(self, remove):
+        model, paths = self._fav_view.get_selection().get_selected_rows()
+        if not paths:
+            return
+
+        s_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+        for p in paths:
+            if model[p][Column.FAV_TYPE] in s_types:
+                continue
+            srv = self._services.get(model[p][Column.FAV_ID], None)
+            if not srv:
+                continue
+
+            if remove:
+                if self._stream_relay.pop(srv.fav_id, None):
+                    model[p][Column.FAV_CODED] = srv.coded
+            else:
+                model[p][Column.FAV_CODED] = LINK_ICON
+                ref = f"{self.get_service_ref_data(srv)}:"
+                self._stream_relay[srv.fav_id] = ref
+            yield True
 
     # ***************** Profile label ********************* #
 
