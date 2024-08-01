@@ -2630,6 +2630,8 @@ class Application(Gtk.Application):
         if profile is SettingsType.ENIGMA_2:
             # Blacklist.
             write_blacklist(path, self._blacklist)
+            # Stream relay.
+            self._stream_relay.save(path)
 
         self._save_tool_button.set_sensitive(True)
         yield True
@@ -4475,6 +4477,7 @@ class Application(Gtk.Application):
             return
 
         s_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+        count = 0
         for p in paths:
             if model[p][Column.FAV_TYPE] in s_types:
                 continue
@@ -4485,11 +4488,15 @@ class Application(Gtk.Application):
             if remove:
                 if self._stream_relay.pop(srv.fav_id, None):
                     model[p][Column.FAV_CODED] = srv.coded
+                    count += 1
             else:
                 model[p][Column.FAV_CODED] = LINK_ICON
                 ref = f"{self.get_service_ref_data(srv)}:"
                 self._stream_relay[srv.fav_id] = ref
+                count += 1
             yield True
+
+        self.show_info_message(f"{translate('Count of successfully configured services:')} {count}")
 
     # ***************** Profile label ********************* #
 
@@ -4535,6 +4542,7 @@ class Application(Gtk.Application):
         """ Returns the sum of all data hash. """
         return sum(map(hash, map(frozenset, (self._services.items(),
                                              self._bouquets.keys(),
+                                             self._stream_relay.keys(),
                                              map(tuple, self._bouquets.values())))))
 
     # ******************* Properties ***********************#

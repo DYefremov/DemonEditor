@@ -63,7 +63,7 @@ class StreamRelay(dict):
 
             If no refs is present, delites current relay file.
         """
-        f_name = f"{path}{_FILE_NAME}_"
+        f_name = f"{path}{_FILE_NAME}"
         if len(self):
             with open(f_name, "w", encoding="utf-8") as file:
                 file.writelines([f"{v if v else k}{':' if v else ''}\n\n" for k, v in self.items()])
