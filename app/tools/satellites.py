@@ -779,7 +779,8 @@ class ServicesParser(HTMLParser):
         picon_id = f"1_0_{int(s_type):X}_{sid}_{tid}_{nid}_{namespace}_0_0_0.png"
         # Flags.
         flags = f"p:{pkg}"
-        cas = ",".join(get_key_by_value(CAS, c) or "C:0000" for c in cas.split()) if cas else None
+        cas = ",".join(get_key_by_value(CAS, c) or "" for c in cas.split()) if cas else None
+
         if use_pids:
             v_pid = f"c:00{int(v_pid):04x}" if v_pid else None
             a_pid = ",".join([f"c:01{int(p):04x}" for p in a_pid]) if a_pid else None
