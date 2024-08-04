@@ -48,7 +48,7 @@ class StreamRelay(dict):
             log("Updating stream relay cache...")
             with suppress(FileNotFoundError):
                 with open(f"{path}{_FILE_NAME}", "r", encoding="utf-8") as file:
-                    refs = filter(None, (x.rstrip(":\n") for x in file.readlines()))
+                    refs = filter(None, (x.rstrip("\n") for x in file.readlines()))
                     self.update(self.get_ref_data(ref) for ref in refs)
 
     def get_ref_data(self, ref):
@@ -56,6 +56,8 @@ class StreamRelay(dict):
         data = ref.split(":")
         if len(data) == 10:
             return f"{data[3]}:{data[4]}:{data[5]}:{data[6]}", ref
+        elif len(data) > 10:
+            return ref.replace("%3a", "%3A"), ref
         return ref, None
 
     def save(self, path):
@@ -66,7 +68,7 @@ class StreamRelay(dict):
         f_name = f"{path}{_FILE_NAME}"
         if len(self):
             with open(f_name, "w", encoding="utf-8") as file:
-                file.writelines([f"{v if v else k}{':' if v else ''}\n\n" for k, v in self.items()])
+                file.writelines([f"{v if v else k}\n\n" for k, v in self.items()])
         else:
             if os.path.exists(f_name):
                 os.remove(f_name)

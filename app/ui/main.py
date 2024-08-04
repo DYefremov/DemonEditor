@@ -2443,12 +2443,13 @@ class Application(Gtk.Application):
                 locked = None
 
                 if s_type is BqServiceType.IPTV:
-                    icon = IPTV_ICON
                     fav_id_data = fav_id.lstrip().split(":")
                     if len(fav_id_data) > 10:
                         data_id = ":".join(fav_id_data[:11])
                         picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
+                        icon = LINK_ICON if data_id in self._stream_relay else IPTV_ICON
                         locked = LOCKED_ICON if data_id in self._blacklist else None
+
                 srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
                               self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
                 self._services[fav_id] = srv
@@ -4476,23 +4477,31 @@ class Application(Gtk.Application):
         if not paths:
             return
 
-        s_types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name}
+        skip_types = {BqServiceType.MARKER, BqServiceType.SPACE}
         count = 0
         for p in paths:
-            if model[p][Column.FAV_TYPE] in s_types:
+            s_type = BqServiceType(model[p][Column.FAV_TYPE])
+            if s_type in skip_types:
                 continue
+
             srv = self._services.get(model[p][Column.FAV_ID], None)
             if not srv:
                 continue
 
+            srv_id = srv.data_id if s_type is BqServiceType.IPTV else srv.fav_id
+
             if remove:
-                if self._stream_relay.pop(srv.fav_id, None):
+                if self._stream_relay.pop(srv_id, None):
                     model[p][Column.FAV_CODED] = srv.coded
                     count += 1
             else:
                 model[p][Column.FAV_CODED] = LINK_ICON
-                ref = f"{self.get_service_ref_data(srv)}:"
-                self._stream_relay[srv.fav_id] = ref
+                if s_type is BqServiceType.IPTV:
+                    ref = f"{srv_id.replace('%3A', '%3a')}:"
+                else:
+                    ref = f"{self.get_service_ref_data(srv)}:"
+
+                self._stream_relay[srv_id] = ref
                 count += 1
             yield True
 
