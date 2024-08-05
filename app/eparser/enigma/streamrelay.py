@@ -54,10 +54,10 @@ class StreamRelay(dict):
     def get_ref_data(self, ref):
         """ Returns tuple from FAV ID and ref or ref and None for comments. """
         data = ref.split(":")
-        if len(data) == 10:
+        if len(data) == 11:
+            if "http" in data[-1]:
+                return ref.replace("%3a", "%3A"), ref
             return f"{data[3]}:{data[4]}:{data[5]}:{data[6]}", ref
-        elif len(data) > 10:
-            return ref.replace("%3a", "%3A"), ref
         return ref, None
 
     def save(self, path):
