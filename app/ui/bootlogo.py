@@ -28,14 +28,19 @@
 
 import os
 import subprocess
+import sys
+from ftplib import all_errors
 from pathlib import Path
 
-from app.commons import log
+from app.commons import log, run_task
+from app.connections import UtfFTP
 from app.ui.dialogs import translate
+from app.ui.main_helper import get_picon_pixbuf
 from app.ui.uicommons import HeaderBar
-from .uicommons import Gtk
+from .uicommons import Gtk, GLib
 
 _FFMPEG_OUTPUT_FILE = 'bootlogo.m1v'
+_E2_BASE_PATH = "/usr/share"
 
 
 class BootLogoManager(Gtk.Window):
@@ -47,6 +52,7 @@ class BootLogoManager(Gtk.Window):
                          default_width=560, default_height=320, modal=True, **kwargs)
 
         self._app = app
+        self._exe = f"{'./' if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else ''}ffmpeg"
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
@@ -58,9 +64,9 @@ class BootLogoManager(Gtk.Window):
         data_box.set_margin_bottom(margin.get("margin_bottom", 5))
         data_box.set_margin_start(10)
         frame.add(data_box)
-        image = Gtk.Image.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.DIALOG)
-        image.set_pixel_size(128)
-        data_box.pack_end(image, True, True, 0)
+        self._image = Gtk.Image.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.DIALOG)
+        self._image.set_pixel_size(128)
+        data_box.pack_end(self._image, True, True, 0)
         self.add(main_box)
         # Buttons
         add_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
@@ -120,19 +126,20 @@ class BootLogoManager(Gtk.Window):
     def init(self, *args):
         log(f"{self.__class__.__name__} [init] Checking FFmpeg...")
         try:
-            out = subprocess.check_output(["ffprobe", "-version"], stderr=subprocess.STDOUT)
+            out = subprocess.check_output([self._exe, "-version"], stderr=subprocess.STDOUT)
         except FileNotFoundError as e:
             msg = translate("Check if FFmpeg is installed!")
             self._app.show_error_message(f"Error. {e} {msg}")
             log(e)
         else:
-            log(out.decode(errors="ignore"))
+            lines = out.decode(errors="ignore").splitlines()
+            log(lines[0] if lines else lines)
 
     def on_add_image(self, button):
         self._app.show_error_message("Not implemented yet!")
 
     def on_receive(self, button):
-        self._app.show_error_message("Not implemented yet!")
+        self.download_data("bootlogo.mvi")
 
     def on_transmit(self, button):
         self._app.show_error_message("Not implemented yet!")
@@ -140,8 +147,8 @@ class BootLogoManager(Gtk.Window):
     def on_convert(self, button):
         self._app.show_error_message("Not implemented yet!")
 
-    def convert(self, image_path, output="bootlogo.mvi", frame_rate=25, bit_rate=2000, resolution="hd720"):
-        cmd = ["ffmpeg",
+    def convert_to_mvi(self, image_path, output="bootlogo.mvi", frame_rate=25, bit_rate=2000, resolution="hd720"):
+        cmd = [self._exe,
                "-i", image_path,
                "-r", str(frame_rate),
                "-b", str(bit_rate),
@@ -175,6 +182,37 @@ class BootLogoManager(Gtk.Window):
                     tmp_path = Path(cmd[2])
                     if tmp_path.exists():
                         tmp_path.unlink()
+
+    def convert_to_image(self, video_path, img_path):
+        cmd = [self._exe, "-y", "-i", video_path, img_path]
+        subprocess.run(cmd)
+
+    @run_task
+    def download_data(self, f_name, receive=True, clb=None):
+        try:
+            settings = self._app.app_settings
+            with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+                ftp.encoding = "utf-8"
+                ftp.cwd(_E2_BASE_PATH)
+                if receive:
+                    dest = Path(settings.profile_data_path).joinpath("bootlogo")
+                    dest.mkdir(parents=True, exist_ok=True)
+                    path = f"{dest}{os.sep}"
+                    ftp.download_file(f_name, path)
+                    vp = Path(f"{path}{f_name}")
+                    img_path = f"{path}logo.jpg"
+
+                    if vp.exists():
+                        rn_path = f"{path}{_FFMPEG_OUTPUT_FILE}"
+                        vp.rename(rn_path)
+                        self.convert_to_image(rn_path, img_path)
+                        pix = get_picon_pixbuf(img_path, 128)
+                        if pix:
+                            self._image.set_from_pixbuf(pix)
+
+        except all_errors as e:
+            log(e)
+            GLib.iddle_add(self._app.show_error_message, e)
 
 
 if __name__ == "__main__":
