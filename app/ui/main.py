@@ -51,6 +51,7 @@ from app.eparser.neutrino.bouquets import BqType
 from app.settings import (SettingsType, Settings, SettingsException, SettingsReadException, IS_DARWIN, IS_LINUX,
                           PlayStreamsMode, PlaybackMode, USE_HEADER_BAR)
 from app.tools.media import Recorder
+from app.ui.bootlogo import BootLogoManager
 from app.ui.control import ControlTool
 from app.ui.epg.epg import FavEpgCache, EpgSettingsPopover, EpgDialog, EpgTool
 from app.ui.ftp import FtpClientBox
@@ -778,6 +779,8 @@ class Application(Gtk.Application):
         self.bind_property("is-data-save-enabled", sa, "enabled")
         # Tools.
         self.set_action("on_backup_tool_show", self.on_backup_tool_show)
+        sa = self.set_action("on_boot_logo_tool_show", self.on_boot_logo_tool_show)
+        self.bind_property("is-enigma", sa, "enabled")
         self.set_state_action("on_telnet_show", self.on_telnet_show, False)
         self.set_state_action("on_logs_show", self.on_logs_show, False)
         # Filter.
@@ -3444,6 +3447,9 @@ class Application(Gtk.Application):
         BackupDialog(self._main_window, self._settings, self.open_data).show()
 
     # ***************** Extra tools  ******************** #
+
+    def on_boot_logo_tool_show(self, action, value=None):
+        BootLogoManager(self).show()
 
     def on_telnet_show(self, action, value=False):
         action.set_state(value)

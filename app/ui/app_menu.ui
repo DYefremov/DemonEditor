@@ -173,6 +173,11 @@
           <attribute name="action">app.on_backup_tool_show</attribute>
         </item>
         <item>
+          <attribute name="label" translatable="yes">Boot Logo</attribute>
+          <attribute name="action">app.on_boot_logo_tool_show</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
+        </item>
+        <item>
           <attribute name="label" translatable="yes">Telnet</attribute>
           <attribute name="action">app.on_telnet_show</attribute>
         </item>
@@ -392,6 +397,11 @@
         <item>
           <attribute name="label" translatable="yes">Backups</attribute>
           <attribute name="action">app.on_backup_tool_show</attribute>
+        </item>
+        <item>
+          <attribute name="label" translatable="yes">Boot Logo</attribute>
+          <attribute name="action">app.on_boot_logo_tool_show</attribute>
+          <attribute name="hidden-when">action-disabled</attribute>
         </item>
         <item>
           <attribute name="label" translatable="yes">Telnet</attribute>

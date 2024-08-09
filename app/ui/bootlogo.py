@@ -1,0 +1,181 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2024 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov
+#
+
+
+import os
+import subprocess
+from pathlib import Path
+
+from app.commons import log
+from app.ui.dialogs import translate
+from app.ui.uicommons import HeaderBar
+from .uicommons import Gtk
+
+_FFMPEG_OUTPUT_FILE = 'bootlogo.m1v'
+
+
+class BootLogoManager(Gtk.Window):
+
+    def __init__(self, app, **kwargs):
+        super().__init__(title=translate("Boot Logo"), icon_name="demon-editor", application=app,
+                         transient_for=app.app_window, destroy_with_parent=True,
+                         window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
+                         default_width=560, default_height=320, modal=True, **kwargs)
+
+        self._app = app
+
+        margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
+        base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
+
+        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        frame = Gtk.Frame(shadow_type=Gtk.ShadowType.IN, **base_margin)
+        frame.get_style_context().add_class("view")
+        data_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL, **base_margin)
+        data_box.set_margin_bottom(margin.get("margin_bottom", 5))
+        data_box.set_margin_start(10)
+        frame.add(data_box)
+        image = Gtk.Image.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.DIALOG)
+        image.set_pixel_size(128)
+        data_box.pack_end(image, True, True, 0)
+        self.add(main_box)
+        # Buttons
+        add_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
+        add_button.set_tooltip_text(translate("Add image"))
+        add_button.set_always_show_image(True)
+        add_button.connect("clicked", self.on_add_image)
+        receive_button = Gtk.Button.new_from_icon_name("network-receive-symbolic", Gtk.IconSize.BUTTON)
+        receive_button.set_tooltip_text(translate("Download from the receiver"))
+        receive_button.set_always_show_image(True)
+        receive_button.connect("clicked", self.on_receive)
+        transmit_button = Gtk.Button.new_from_icon_name("network-transmit-symbolic", Gtk.IconSize.BUTTON)
+        transmit_button.set_tooltip_text(translate("Transfer to receiver"))
+        transmit_button.set_always_show_image(True)
+        transmit_button.connect("clicked", self.on_transmit)
+        convert_button = Gtk.Button.new_from_icon_name("object-rotate-right-symbolic", Gtk.IconSize.BUTTON)
+        convert_button.set_tooltip_text(translate("Convert"))
+        convert_button.set_always_show_image(True)
+        convert_button.set_sensitive(False)
+        convert_button.connect("clicked", self.on_convert)
+
+        action_box = Gtk.ButtonBox()
+        action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+        action_box.add(add_button)
+        action_box.add(convert_button)
+        data_box.pack_start(action_box, False, False, 0)
+
+        # Header and toolbar.
+        if app.app_settings.use_header_bar:
+            header = HeaderBar()
+            header.pack_start(receive_button)
+            header.pack_start(transmit_button)
+
+            self.set_titlebar(header)
+            header.show_all()
+        else:
+            toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            toolbar.get_style_context().add_class("primary-toolbar")
+            margin["margin_start"] = 15
+            margin["margin_top"] = 10
+            button_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, **margin)
+            button_box.pack_start(receive_button, False, False, 0)
+            button_box.pack_start(transmit_button, False, False, 0)
+            toolbar.pack_start(button_box, True, True, 0)
+            main_box.pack_start(toolbar, False, False, 0)
+
+        main_box.pack_start(frame, True, True, 0)
+        main_box.show_all()
+
+        ws_property = "boot_logo_manager_window_size"
+        window_size = self._app.app_settings.get(ws_property, None)
+        if window_size:
+            self.resize(*window_size)
+
+        self.connect("delete-event", lambda w, e: self._app.app_settings.add(ws_property, w.get_size()))
+        self.connect("realize", self.init)
+
+    def init(self, *args):
+        log(f"{self.__class__.__name__} [init] Checking FFmpeg...")
+        try:
+            out = subprocess.check_output(["ffprobe", "-version"], stderr=subprocess.STDOUT)
+        except FileNotFoundError as e:
+            msg = translate("Check if FFmpeg is installed!")
+            self._app.show_error_message(f"Error. {e} {msg}")
+            log(e)
+        else:
+            log(out.decode(errors="ignore"))
+
+    def on_add_image(self, button):
+        self._app.show_error_message("Not implemented yet!")
+
+    def on_receive(self, button):
+        self._app.show_error_message("Not implemented yet!")
+
+    def on_transmit(self, button):
+        self._app.show_error_message("Not implemented yet!")
+
+    def on_convert(self, button):
+        self._app.show_error_message("Not implemented yet!")
+
+    def convert(self, image_path, output="bootlogo.mvi", frame_rate=25, bit_rate=2000, resolution="hd720"):
+        cmd = ["ffmpeg",
+               "-i", image_path,
+               "-r", str(frame_rate),
+               "-b", str(bit_rate),
+               "-s", resolution,
+               _FFMPEG_OUTPUT_FILE]
+
+        try:
+            from PIL import Image
+        except ImportError as e:
+            self._app.show_error_message(f"{translate('Conversion error.')} {e}")
+        else:
+            with Image.open(image_path) as img:
+                width, height = img.size
+                if width != 1280 and height != 720:
+                    log(f"{self.__class__.__name__} [convert] Resizing image...")
+                    img.resize((1280, 720), Image.Resampling.LANCZOS)
+                    path = Path(image_path)
+                    tmp = path.parent.joinpath(f"{path.name}.tmp.{path.suffix}").absolute()
+                    cmd[2] = tmp
+                    img.save(tmp)
+
+                # Processing image.
+                log(f"{self.__class__.__name__} [convert] Converting...")
+                subprocess.run(cmd)
+
+                if Path(_FFMPEG_OUTPUT_FILE).exists():
+                    os.rename(_FFMPEG_OUTPUT_FILE, output)
+                    log(f"{self.__class__.__name__} [convert] -> '{output}'. Done!")
+
+                if cmd[2] != image_path:
+                    tmp_path = Path(cmd[2])
+                    if tmp_path.exists():
+                        tmp_path.unlink()
+
+
+if __name__ == "__main__":
+    pass
