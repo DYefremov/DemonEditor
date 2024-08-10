@@ -34,8 +34,9 @@ from pathlib import Path
 
 from app.commons import log, run_task
 from app.connections import UtfFTP
-from app.ui.dialogs import translate
-from app.ui.main_helper import get_picon_pixbuf
+from app.settings import IS_DARWIN
+from app.ui.dialogs import translate, get_chooser_dialog
+from app.ui.main_helper import get_picon_pixbuf, redraw_image
 from app.ui.uicommons import HeaderBar
 from .uicommons import Gtk, GLib
 
@@ -53,6 +54,7 @@ class BootLogoManager(Gtk.Window):
 
         self._app = app
         self._exe = f"{'./' if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else ''}ffmpeg"
+        self._pix = None
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
@@ -64,9 +66,9 @@ class BootLogoManager(Gtk.Window):
         data_box.set_margin_bottom(margin.get("margin_bottom", 5))
         data_box.set_margin_start(10)
         frame.add(data_box)
-        self._image = Gtk.Image.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.DIALOG)
-        self._image.set_pixel_size(128)
-        data_box.pack_end(self._image, True, True, 0)
+        self._image_area = Gtk.DrawingArea()
+        self._image_area.connect("draw", self.on_image_draw)
+        data_box.pack_end(self._image_area, True, True, 0)
         self.add(main_box)
         # Buttons
         add_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
@@ -136,7 +138,20 @@ class BootLogoManager(Gtk.Window):
             log(lines[0] if lines else lines)
 
     def on_add_image(self, button):
-        self._app.show_error_message("Not implemented yet!")
+        file_filter = None
+        if IS_DARWIN:
+            file_filter = Gtk.FileFilter()
+            file_filter.set_name("*.jpg, *.jpeg, *.png")
+            file_filter.add_mime_type("image/jpeg")
+            file_filter.add_mime_type("image/png")
+
+        response = get_chooser_dialog(self._app.app_window, self._app.app_settings, "*.jpg, *.jpeg, *.png files",
+                                      ("*.jpg", "*.jpeg", "*.png"), "Select image", file_filter)
+        if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
+            return
+
+        self._pix = get_picon_pixbuf(response, -1)
+        self._image_area.queue_draw()
 
     def on_receive(self, button):
         self.download_data("bootlogo.mvi")
@@ -206,13 +221,16 @@ class BootLogoManager(Gtk.Window):
                         rn_path = f"{path}{_FFMPEG_OUTPUT_FILE}"
                         vp.rename(rn_path)
                         self.convert_to_image(rn_path, img_path)
-                        pix = get_picon_pixbuf(img_path, 128)
-                        if pix:
-                            self._image.set_from_pixbuf(pix)
+                        self._pix = get_picon_pixbuf(img_path, -1)
+                        self._image_area.queue_draw()
 
         except all_errors as e:
             log(e)
             GLib.iddle_add(self._app.show_error_message, e)
+
+    def on_image_draw(self, area, cr):
+        if self._pix:
+            redraw_image(area, cr, self._pix)
 
 
 if __name__ == "__main__":
