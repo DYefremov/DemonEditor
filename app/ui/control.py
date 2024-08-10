@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,9 @@ import re
 
 from gi.repository import GLib
 
+from .main_helper import redraw_image
 from .dialogs import get_builder, translate
-from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH
+from .uicommons import Gtk, UI_RESOURCES_PATH
 from ..commons import run_task, run_with_delay, log, run_idle
 from ..connections import HttpAPI
 from ..settings import IS_DARWIN, IS_LINUX, IS_WIN
@@ -201,11 +202,7 @@ class ControlTool(Gtk.Box):
     def on_screenshot_draw(self, area, cr):
         """ Called to automatically resize the screenshot.  """
         if self._pix:
-            cr.scale(area.get_allocated_width() / self._pix.get_width(),
-                     area.get_allocated_height() / self._pix.get_height())
-            img_surface = Gdk.cairo_surface_create_from_pixbuf(self._pix, 1, None)
-            cr.set_source_surface(img_surface, 0, 0)
-            cr.paint()
+            redraw_image(area, cr, self._pix)
 
     def on_screenshot_all(self, action, value=None):
         if self._app.http_api:

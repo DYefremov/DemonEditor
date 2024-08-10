@@ -855,7 +855,7 @@ def get_iptv_data(fav_id):
 
 
 def on_popup_menu(menu, event):
-    """ Shows popup menu for the view """
+    """ Shows popup menu for the view. """
     if event.get_event_type() == Gdk.EventType.BUTTON_PRESS and event.button == Gdk.BUTTON_SECONDARY:
         menu.popup(None, None, None, None, event.button, event.time)
 
@@ -866,6 +866,15 @@ def show_info_bar_message(bar, label, text, message_type=Gtk.MessageType.INFO):
     label.set_text(translate(text))
     bar.set_message_type(message_type)
     bar.set_visible(True)
+
+
+def redraw_image(area, cr, pixbuf):
+    """ Helper method to redraw (auto resize) image in the Gtk DrawingArea. """
+    cr.scale(area.get_allocated_width() / pixbuf.get_width(),
+             area.get_allocated_height() / pixbuf.get_height())
+    img_surface = Gdk.cairo_surface_create_from_pixbuf(pixbuf, 1, None)
+    cr.set_source_surface(img_surface, 0, 0)
+    cr.paint()
 
 
 if __name__ == "__main__":
