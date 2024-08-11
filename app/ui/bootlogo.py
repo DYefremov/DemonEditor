@@ -50,11 +50,12 @@ class BootLogoManager(Gtk.Window):
         super().__init__(title=translate("Boot Logo"), icon_name="demon-editor", application=app,
                          transient_for=app.app_window, destroy_with_parent=True,
                          window_position=Gtk.WindowPosition.CENTER_ON_PARENT,
-                         default_width=560, default_height=320, modal=True, **kwargs)
+                         default_width=560, default_height=320, modal=False, **kwargs)
 
         self._app = app
         self._exe = f"{'./' if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else ''}ffmpeg"
         self._pix = None
+        self._img_path = None
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
@@ -68,7 +69,7 @@ class BootLogoManager(Gtk.Window):
         frame.add(data_box)
         self._image_area = Gtk.DrawingArea()
         self._image_area.connect("draw", self.on_image_draw)
-        data_box.pack_end(self._image_area, True, True, 0)
+        data_box.pack_end(self._image_area, True, True, 5)
         self.add(main_box)
         # Buttons
         add_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
@@ -83,21 +84,28 @@ class BootLogoManager(Gtk.Window):
         transmit_button.set_tooltip_text(translate("Transfer to receiver"))
         transmit_button.set_always_show_image(True)
         transmit_button.connect("clicked", self.on_transmit)
-        convert_button = Gtk.Button.new_from_icon_name("object-rotate-right-symbolic", Gtk.IconSize.BUTTON)
-        convert_button.set_tooltip_text(translate("Convert"))
-        convert_button.set_always_show_image(True)
-        convert_button.set_sensitive(False)
-        convert_button.connect("clicked", self.on_convert)
+        self._convert_button = Gtk.Button.new_from_icon_name("object-rotate-right-symbolic", Gtk.IconSize.BUTTON)
+        self._convert_button.set_tooltip_text(translate("Convert"))
+        self._convert_button.set_always_show_image(True)
+        self._convert_button.set_sensitive(False)
+        self._convert_button.connect("clicked", self.on_convert)
+        # Formats.
+        self._format_button = Gtk.ComboBoxText()
+        self._format_button.set_tooltip_text(translate("TV Format"))
+        self._format_button.append("hd720", "HD-Ready (720)")
+        self._format_button.append("hd1080", "Full HD (1080)")
+        self._format_button.set_active_id("hd720")
 
         action_box = Gtk.ButtonBox()
         action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
         action_box.add(add_button)
-        action_box.add(convert_button)
+        action_box.add(self._convert_button)
+        action_box.add(self._format_button)
         data_box.pack_start(action_box, False, False, 0)
 
         # Header and toolbar.
         if app.app_settings.use_header_bar:
-            header = HeaderBar()
+            header = HeaderBar(title=translate("Boot Logo"))
             header.pack_start(receive_button)
             header.pack_start(transmit_button)
 
@@ -150,7 +158,9 @@ class BootLogoManager(Gtk.Window):
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
+        self._img_path = response
         self._pix = get_picon_pixbuf(response, -1)
+        self._convert_button.set_sensitive(True)
         self._image_area.queue_draw()
 
     def on_receive(self, button):
@@ -160,27 +170,31 @@ class BootLogoManager(Gtk.Window):
         self._app.show_error_message("Not implemented yet!")
 
     def on_convert(self, button):
-        self._app.show_error_message("Not implemented yet!")
+        self.convert_to_mvi()
 
-    def convert_to_mvi(self, image_path, output="bootlogo.mvi", frame_rate=25, bit_rate=2000, resolution="hd720"):
+    def convert_to_mvi(self, output="bootlogo.mvi", frame_rate=25, bit_rate=2000):
+        path = Path(self._img_path)
+        if not path.is_file():
+            self._app.show_error_message(translate("No image selected!"))
+            return
+
         cmd = [self._exe,
-               "-i", image_path,
+               "-i", self._img_path,
                "-r", str(frame_rate),
                "-b", str(bit_rate),
-               "-s", resolution,
-               _FFMPEG_OUTPUT_FILE]
+               "-s", self._format_button.get_active_id(),
+               path.parent.joinpath(_FFMPEG_OUTPUT_FILE)]
 
         try:
             from PIL import Image
         except ImportError as e:
             self._app.show_error_message(f"{translate('Conversion error.')} {e}")
         else:
-            with Image.open(image_path) as img:
+            with Image.open(self._img_path) as img:
                 width, height = img.size
                 if width != 1280 and height != 720:
                     log(f"{self.__class__.__name__} [convert] Resizing image...")
                     img.resize((1280, 720), Image.Resampling.LANCZOS)
-                    path = Path(image_path)
                     tmp = path.parent.joinpath(f"{path.name}.tmp.{path.suffix}").absolute()
                     cmd[2] = tmp
                     img.save(tmp)
@@ -193,7 +207,7 @@ class BootLogoManager(Gtk.Window):
                     os.rename(_FFMPEG_OUTPUT_FILE, output)
                     log(f"{self.__class__.__name__} [convert] -> '{output}'. Done!")
 
-                if cmd[2] != image_path:
+                if cmd[2] != self._img_path:
                     tmp_path = Path(cmd[2])
                     if tmp_path.exists():
                         tmp_path.unlink()
@@ -225,8 +239,8 @@ class BootLogoManager(Gtk.Window):
                         self._image_area.queue_draw()
 
         except all_errors as e:
-            log(e)
-            GLib.iddle_add(self._app.show_error_message, e)
+            log(f"{self.__class__.__name__} [download error] {e}")
+            GLib.idle_add(self._app.show_error_message, f"Download error: {e}")
 
     def on_image_draw(self, area, cr):
         if self._pix:
