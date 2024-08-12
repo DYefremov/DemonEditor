@@ -89,6 +89,12 @@ class BootLogoManager(Gtk.Window):
         self._convert_button.set_always_show_image(True)
         self._convert_button.set_sensitive(False)
         self._convert_button.connect("clicked", self.on_convert)
+        settings_close_button = Gtk.Button.new_with_mnemonic(translate("Close"))
+        settings_apply_button = Gtk.Button.new_with_mnemonic(translate("Apply"))
+        add_path_button = Gtk.Button.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
+        add_path_button.connect("clicked", self.on_data_path_add)
+        remove_path_button = Gtk.Button.new_from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON)
+        remove_path_button.connect("clicked", self.on_data_path_remove)
         # Formats.
         self._format_button = Gtk.ComboBoxText()
         self._format_button.set_tooltip_text(translate("TV Format"))
@@ -102,12 +108,40 @@ class BootLogoManager(Gtk.Window):
         action_box.add(self._convert_button)
         action_box.add(self._format_button)
         data_box.pack_start(action_box, False, False, 0)
+        # Settings.
+        popover = Gtk.Popover()
+        settings_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, **base_margin)
+        settings_box.pack_start(Gtk.Label(translate("Data path:")), False, False, 0)
+        paths_box = Gtk.Box(spacing=5)
+        self._path_combo_box = Gtk.ComboBoxText()
+        self._path_combo_box.append(_E2_BASE_PATH, _E2_BASE_PATH)
+        self._path_combo_box.set_active_id(_E2_BASE_PATH)
+        paths_box.pack_start(self._path_combo_box, True, True, 0)
+        paths_action_box = Gtk.ButtonBox()
+        paths_action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+        paths_action_box.add(remove_path_button)
+        paths_action_box.add(add_path_button)
+        paths_box.pack_start(paths_action_box, False, False, 0)
+        settings_box.add(paths_box)
+        action_box = Gtk.ButtonBox(margin_top=5)
+        action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
+        action_box.add(settings_apply_button)
+        action_box.add(settings_close_button)
+        settings_box.pack_end(action_box, False, False, 0)
+        settings_box.show_all()
+        popover.add(settings_box)
+        settings_button = Gtk.MenuButton(popover=popover, valign=Gtk.Align.CENTER, tooltip_text=translate("Options"))
+        settings_button.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
+        settings_close_button.connect("clicked", lambda b: popover.popdown())
+        settings_apply_button.connect("clicked", self.on_apply_settings)
+        settings_apply_button.set_sensitive(False)
 
         # Header and toolbar.
         if app.app_settings.use_header_bar:
             header = HeaderBar(title=translate("Boot Logo"))
             header.pack_start(receive_button)
             header.pack_start(transmit_button)
+            header.pack_end(settings_button)
 
             self.set_titlebar(header)
             header.show_all()
@@ -115,12 +149,14 @@ class BootLogoManager(Gtk.Window):
             toolbar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             toolbar.get_style_context().add_class("primary-toolbar")
             margin["margin_start"] = 15
-            margin["margin_top"] = 10
+            margin["margin_top"] = 5
             button_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.HORIZONTAL, **margin)
             button_box.pack_start(receive_button, False, False, 0)
             button_box.pack_start(transmit_button, False, False, 0)
             toolbar.pack_start(button_box, True, True, 0)
+            toolbar.pack_end(settings_button, False, False, 0)
             main_box.pack_start(toolbar, False, False, 0)
+            settings_button.set_margin_end(15)
 
         main_box.pack_start(frame, True, True, 0)
         main_box.show_all()
@@ -222,7 +258,7 @@ class BootLogoManager(Gtk.Window):
             settings = self._app.app_settings
             with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
                 ftp.encoding = "utf-8"
-                ftp.cwd(_E2_BASE_PATH)
+                ftp.cwd(self._path_combo_box.get_active_id())
                 if receive:
                     dest = Path(settings.profile_data_path).joinpath("bootlogo")
                     dest.mkdir(parents=True, exist_ok=True)
@@ -245,6 +281,15 @@ class BootLogoManager(Gtk.Window):
     def on_image_draw(self, area, cr):
         if self._pix:
             redraw_image(area, cr, self._pix)
+
+    def on_apply_settings(self, button):
+        self._app.show_error_message(translate("Not implemented yet!"))
+
+    def on_data_path_add(self, button):
+        self._app.show_error_message(translate("Not implemented yet!"))
+
+    def on_data_path_remove(self, button):
+        self._app.show_error_message(translate("Not implemented yet!"))
 
 
 if __name__ == "__main__":
