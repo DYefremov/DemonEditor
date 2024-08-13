@@ -40,8 +40,13 @@ from app.ui.main_helper import get_picon_pixbuf, redraw_image
 from app.ui.uicommons import HeaderBar
 from .uicommons import Gtk, GLib
 
-_FFMPEG_OUTPUT_FILE = 'bootlogo.m1v'
-_E2_BASE_PATH = "/usr/share"
+_OUTPUT_FILES = ("bootlogo",
+                 "bootlogo_wait",
+                 "backdrop",
+                 "reboot",
+                 "shutdown",
+                 "radio")
+_E2_STB_PATHS = ("/usr/share", "/usr/share/enigma2")
 
 
 class BootLogoManager(Gtk.Window):
@@ -89,12 +94,7 @@ class BootLogoManager(Gtk.Window):
         self._convert_button.set_always_show_image(True)
         self._convert_button.set_sensitive(False)
         self._convert_button.connect("clicked", self.on_convert)
-        settings_close_button = Gtk.Button.new_with_mnemonic(translate("Close"))
-        settings_apply_button = Gtk.Button.new_with_mnemonic(translate("Apply"))
-        add_path_button = Gtk.Button.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
-        add_path_button.connect("clicked", self.on_data_path_add)
-        remove_path_button = Gtk.Button.new_from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON)
-        remove_path_button.connect("clicked", self.on_data_path_remove)
+        settings_close_button = Gtk.ModelButton(label=translate("Close"), centered=True, margin_top=5)
         # Formats.
         self._format_button = Gtk.ComboBoxText()
         self._format_button.set_tooltip_text(translate("TV Format"))
@@ -111,30 +111,27 @@ class BootLogoManager(Gtk.Window):
         # Settings.
         popover = Gtk.Popover()
         settings_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, **base_margin)
-        settings_box.pack_start(Gtk.Label(translate("Data path:")), False, False, 0)
+        file_name_box = Gtk.Box(spacing=5)
+        file_name_box.add(Gtk.Label(f"{translate('File')}:"))
+        self._file_combo_box = Gtk.ComboBoxText()
+        [self._file_combo_box.append(f"{f}.mvi", f) for f in _OUTPUT_FILES]
+        self._file_combo_box.set_active(0)
+        file_name_box.pack_start(self._file_combo_box, True, True, 0)
+        settings_box.add(file_name_box)
+
         paths_box = Gtk.Box(spacing=5)
+        paths_box.add(Gtk.Label(translate("STB path:")))
         self._path_combo_box = Gtk.ComboBoxText()
-        self._path_combo_box.append(_E2_BASE_PATH, _E2_BASE_PATH)
-        self._path_combo_box.set_active_id(_E2_BASE_PATH)
+        [self._path_combo_box.append(p, p) for p in _E2_STB_PATHS]
+        self._path_combo_box.set_active_id(_E2_STB_PATHS[0])
         paths_box.pack_start(self._path_combo_box, True, True, 0)
-        paths_action_box = Gtk.ButtonBox()
-        paths_action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
-        paths_action_box.add(remove_path_button)
-        paths_action_box.add(add_path_button)
-        paths_box.pack_start(paths_action_box, False, False, 0)
         settings_box.add(paths_box)
-        action_box = Gtk.ButtonBox(margin_top=5)
-        action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
-        action_box.add(settings_apply_button)
-        action_box.add(settings_close_button)
-        settings_box.pack_end(action_box, False, False, 0)
+
+        settings_box.pack_end(settings_close_button, False, False, 0)
         settings_box.show_all()
         popover.add(settings_box)
         settings_button = Gtk.MenuButton(popover=popover, valign=Gtk.Align.CENTER, tooltip_text=translate("Options"))
         settings_button.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
-        settings_close_button.connect("clicked", lambda b: popover.popdown())
-        settings_apply_button.connect("clicked", self.on_apply_settings)
-        settings_apply_button.set_sensitive(False)
 
         # Header and toolbar.
         if app.app_settings.use_header_bar:
@@ -200,7 +197,7 @@ class BootLogoManager(Gtk.Window):
         self._image_area.queue_draw()
 
     def on_receive(self, button):
-        self.download_data("bootlogo.mvi")
+        self.download_data(self._file_combo_box.get_active_id())
 
     def on_transmit(self, button):
         self._app.show_error_message("Not implemented yet!")
@@ -208,18 +205,21 @@ class BootLogoManager(Gtk.Window):
     def on_convert(self, button):
         self.convert_to_mvi()
 
-    def convert_to_mvi(self, output="bootlogo.mvi", frame_rate=25, bit_rate=2000):
+    def convert_to_mvi(self, frame_rate=25, bit_rate=2000):
         path = Path(self._img_path)
         if not path.is_file():
             self._app.show_error_message(translate("No image selected!"))
             return
+
+        output = path.parent.joinpath(self._file_combo_box.get_active_id())
+        ffmpeg_output = path.parent.joinpath(f"{self._file_combo_box.get_active_text()}.m1v")
 
         cmd = [self._exe,
                "-i", self._img_path,
                "-r", str(frame_rate),
                "-b", str(bit_rate),
                "-s", self._format_button.get_active_id(),
-               path.parent.joinpath(_FFMPEG_OUTPUT_FILE)]
+               ffmpeg_output]
 
         try:
             from PIL import Image
@@ -231,16 +231,15 @@ class BootLogoManager(Gtk.Window):
                 if width != 1280 and height != 720:
                     log(f"{self.__class__.__name__} [convert] Resizing image...")
                     img.resize((1280, 720), Image.Resampling.LANCZOS)
-                    tmp = path.parent.joinpath(f"{path.name}.tmp.{path.suffix}").absolute()
+                    tmp = path.parent.joinpath(f"{path.name}.tmp{path.suffix}").absolute()
                     cmd[2] = tmp
                     img.save(tmp)
 
                 # Processing image.
                 log(f"{self.__class__.__name__} [convert] Converting...")
                 subprocess.run(cmd)
-
-                if Path(_FFMPEG_OUTPUT_FILE).exists():
-                    os.rename(_FFMPEG_OUTPUT_FILE, output)
+                if Path(ffmpeg_output).exists():
+                    os.rename(ffmpeg_output, output)
                     log(f"{self.__class__.__name__} [convert] -> '{output}'. Done!")
 
                 if cmd[2] != self._img_path:
@@ -265,10 +264,10 @@ class BootLogoManager(Gtk.Window):
                     path = f"{dest}{os.sep}"
                     ftp.download_file(f_name, path)
                     vp = Path(f"{path}{f_name}")
-                    img_path = f"{path}logo.jpg"
+                    img_path = f"{path}{f_name}.jpg"
 
                     if vp.exists():
-                        rn_path = f"{path}{_FFMPEG_OUTPUT_FILE}"
+                        rn_path = f"{path}{self._file_combo_box.get_active_text()}.m1v"
                         vp.rename(rn_path)
                         self.convert_to_image(rn_path, img_path)
                         self._pix = get_picon_pixbuf(img_path, -1)
@@ -281,15 +280,6 @@ class BootLogoManager(Gtk.Window):
     def on_image_draw(self, area, cr):
         if self._pix:
             redraw_image(area, cr, self._pix)
-
-    def on_apply_settings(self, button):
-        self._app.show_error_message(translate("Not implemented yet!"))
-
-    def on_data_path_add(self, button):
-        self._app.show_error_message(translate("Not implemented yet!"))
-
-    def on_data_path_remove(self, button):
-        self._app.show_error_message(translate("Not implemented yet!"))
 
 
 if __name__ == "__main__":
