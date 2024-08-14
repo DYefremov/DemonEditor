@@ -99,7 +99,6 @@ THIS SOFTWARE COMES WITH ABSOLUTELY NO WARRANTY.
 AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY CONNECTION WITH THIS SOFTWARE.
 
 ## Important
-The program is tested only with [openATV](https://www.opena.tv/) image and **Formuler F1** receiver in [Linux Mint](https://linuxmint.com/) (MATE 64-bit) distribution!  
 Support for DVB-T/T2 and DVB-C channels for Neutrino is not fully implemented and has an experimental status.  
 
 Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support! For version **3** is only read mode available. When saving, version **4** format is used instead.   
