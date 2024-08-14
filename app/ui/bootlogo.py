@@ -29,8 +29,11 @@
 import os
 import subprocess
 import sys
+from datetime import datetime
 from ftplib import all_errors
 from pathlib import Path
+
+from gi.repository import GObject
 
 from app.commons import log, run_task
 from app.connections import UtfFTP
@@ -87,6 +90,7 @@ class BootLogoManager(Gtk.Window):
         receive_button.connect("clicked", self.on_receive)
         transmit_button = Gtk.Button.new_from_icon_name("network-transmit-symbolic", Gtk.IconSize.BUTTON)
         transmit_button.set_tooltip_text(translate("Transfer to receiver"))
+        transmit_button.set_sensitive(False)
         transmit_button.set_always_show_image(True)
         transmit_button.connect("clicked", self.on_transmit)
         self._convert_button = Gtk.Button.new_from_icon_name("object-rotate-right-symbolic", Gtk.IconSize.BUTTON)
@@ -94,6 +98,7 @@ class BootLogoManager(Gtk.Window):
         self._convert_button.set_always_show_image(True)
         self._convert_button.set_sensitive(False)
         self._convert_button.connect("clicked", self.on_convert)
+        self._convert_button.bind_property("sensitive", transmit_button, "sensitive", 4)
         settings_close_button = Gtk.ModelButton(label=translate("Close"), centered=True, margin_top=5)
         # Formats.
         self._format_button = Gtk.ComboBoxText()
@@ -200,7 +205,12 @@ class BootLogoManager(Gtk.Window):
         self.download_data(self._file_combo_box.get_active_id())
 
     def on_transmit(self, button):
-        self._app.show_error_message("Not implemented yet!")
+        mvi_file = Path(self._img_path).parent.joinpath(self._file_combo_box.get_active_id())
+        if not mvi_file.is_file():
+            log(self._app.show_error_message(translate("No *.mvi file found for the selected image!")))
+            return
+
+        self.transfer_data(mvi_file)
 
     def on_convert(self, button):
         self.convert_to_mvi()
@@ -247,35 +257,61 @@ class BootLogoManager(Gtk.Window):
                     if tmp_path.exists():
                         tmp_path.unlink()
 
+                self._convert_button.set_sensitive(False)
+
     def convert_to_image(self, video_path, img_path):
         cmd = [self._exe, "-y", "-i", video_path, img_path]
         subprocess.run(cmd)
 
     @run_task
-    def download_data(self, f_name, receive=True, clb=None):
+    def download_data(self, f_name):
         try:
             settings = self._app.app_settings
             with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
                 ftp.encoding = "utf-8"
                 ftp.cwd(self._path_combo_box.get_active_id())
-                if receive:
-                    dest = Path(settings.profile_data_path).joinpath("bootlogo")
-                    dest.mkdir(parents=True, exist_ok=True)
-                    path = f"{dest}{os.sep}"
-                    ftp.download_file(f_name, path)
-                    vp = Path(f"{path}{f_name}")
-                    img_path = f"{path}{f_name}.jpg"
 
-                    if vp.exists():
-                        rn_path = f"{path}{self._file_combo_box.get_active_text()}.m1v"
-                        vp.rename(rn_path)
-                        self.convert_to_image(rn_path, img_path)
-                        self._pix = get_picon_pixbuf(img_path, -1)
-                        self._image_area.queue_draw()
+                dest = Path(settings.profile_data_path).joinpath("bootlogo")
+                dest.mkdir(parents=True, exist_ok=True)
+                path = f"{dest}{os.sep}"
+                ftp.download_file(f_name, path)
+                vp = Path(f"{path}{f_name}")
+                img_path = f"{path}{f_name}.jpg"
+
+                if vp.exists():
+                    rn_path = f"{path}{self._file_combo_box.get_active_text()}.m1v"
+                    vp.rename(rn_path)
+                    self.convert_to_image(rn_path, img_path)
+                    self._pix = get_picon_pixbuf(img_path, -1)
+                    GLib.idle_add(self._image_area.queue_draw)
 
         except all_errors as e:
             log(f"{self.__class__.__name__} [download error] {e}")
-            GLib.idle_add(self._app.show_error_message, f"Download error: {e}")
+            GLib.idle_add(self._app.show_error_message, f"{translate('Failed to download data:')} {e}")
+
+    def transfer_data(self, f_path):
+        try:
+            settings = self._app.app_settings
+            with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+                ftp.encoding = "utf-8"
+                ftp.cwd(self._path_combo_box.get_active_id())
+
+                log(f"{self.__class__.__name__} [transfer data] Creating backup...")
+                backup_path = Path(settings.profile_backup_path).joinpath("bootlogo")
+                backup_path.mkdir(parents=True, exist_ok=True)
+                ftp.download_file(f_path.name, f"{backup_path}{os.sep}")
+                backup_file = backup_path.joinpath(f_path.name)
+                if backup_file.exists():
+                    target = backup_path.joinpath(f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{f_path.name}")
+                    backup_file.rename(target)
+
+                ftp.send_file(f_path.name, f"{f_path.parent}{os.sep}")
+
+        except all_errors as e:
+            log(f"{self.__class__.__name__} [upload error] {e}")
+            GLib.idle_add(self._app.show_error_message, f"{translate('Data transfer error:')} {e}")
+        else:
+            self._app.show_info_message("Done!")
 
     def on_image_draw(self, area, cr):
         if self._pix:
