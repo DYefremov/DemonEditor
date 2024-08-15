@@ -1542,3 +1542,15 @@ msgstr "Падзел па групах"
 
 msgid "Create sub-bouquets"
 msgstr "Стварыць падбукеты"
+
+msgid "Add image"
+msgstr "Дадаць выяву"
+
+msgid "TV Format"
+msgstr "ТБ-фармат"
+
+msgid "Use with Streamrelay"
+msgstr "Скарыстаць Streamrelay"
+
+msgid "Remove use with Streamrelay"
+msgstr "Не выкарыстоўваць Streamrelay"
