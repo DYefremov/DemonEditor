@@ -33,12 +33,10 @@ from datetime import datetime
 from ftplib import all_errors
 from pathlib import Path
 
-from gi.repository import GObject
-
 from app.commons import log, run_task
 from app.connections import UtfFTP
 from app.settings import IS_DARWIN
-from app.ui.dialogs import translate, get_chooser_dialog
+from app.ui.dialogs import translate, get_chooser_dialog, show_dialog, DialogType
 from app.ui.main_helper import get_picon_pixbuf, redraw_image
 from app.ui.uicommons import HeaderBar
 from .uicommons import Gtk, GLib
@@ -205,6 +203,9 @@ class BootLogoManager(Gtk.Window):
         self.download_data(self._file_combo_box.get_active_id())
 
     def on_transmit(self, button):
+        if show_dialog(DialogType.QUESTION, self) != Gtk.ResponseType.OK:
+            return True
+
         mvi_file = Path(self._img_path).parent.joinpath(self._file_combo_box.get_active_id())
         if not mvi_file.is_file():
             log(self._app.show_error_message(translate("No *.mvi file found for the selected image!")))
@@ -289,6 +290,7 @@ class BootLogoManager(Gtk.Window):
             log(f"{self.__class__.__name__} [download error] {e}")
             GLib.idle_add(self._app.show_error_message, f"{translate('Failed to download data:')} {e}")
 
+    @run_task
     def transfer_data(self, f_path):
         try:
             settings = self._app.app_settings
