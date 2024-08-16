@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2024-02-20 21:33+0100\n"
+"PO-Revision-Date: 2024-08-16 05:03+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,12 +13,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 23.08.4\n"
+"X-Generator: Lokalize 24.05.2\n"
 
 msgid "translator-credits"
-msgstr ""
-"Nicola Fanghella\n"
-"Massimo Pissarello"
+msgstr "Massimo Pissarello"
 
 # Main
 msgid "Service"
@@ -1604,3 +1602,17 @@ msgstr "Dividi per gruppi"
 
 msgid "Create sub-bouquets"
 msgstr "Crea sotto-bouquet"
+
+msgid "Add image"
+msgstr "Aggiungi immagine"
+
+msgid "TV Format"
+msgstr "Formato TV"
+
+msgid "Use with Streamrelay"
+msgstr "Usa con Streamrelay"
+
+msgid "Remove use with Streamrelay"
+msgstr "Rimuovi usa con Streamrelay"
+
+
