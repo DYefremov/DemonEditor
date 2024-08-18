@@ -142,7 +142,11 @@ def export_to_m3u(path, bouquet, s_type, url=None):
             lines.append(f"#EXTINF:-1,{s.name}\n")
             lines.append(current_grp) if current_grp else None
             u = res.group(1)
-            lines.append(f"{unquote(u[:u.rfind(':')]) if s_type is SettingsType.ENIGMA_2 else u}\n")
+            if s_type is SettingsType.ENIGMA_2:
+                index = u.rfind(":")
+                lines.append(f"{unquote(u[:index] if index > 0 else u)}\n")
+            else:
+                lines.append(f"{u}\n")
         elif srv_type is BqServiceType.MARKER:
             current_grp = f"#EXTGRP:{s.name}\n"
         elif srv_type is BqServiceType.DEFAULT and url:
