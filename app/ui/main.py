@@ -300,7 +300,17 @@ class Application(Gtk.Application):
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("bouquet-changed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("bouquet-added", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("bouquet-remove", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("bouquet-removed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("fav-added", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        GObject.signal_new("fav-removed", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         GObject.signal_new("fav-clicked", self, GObject.SIGNAL_RUN_LAST,
                            GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
@@ -1391,6 +1401,7 @@ class Application(Gtk.Application):
             self.update_fav_num_column(model)
 
         self._rows_buffer.clear()
+        self.emit("fav-added", self._bq_selected)
 
     def bouquet_paste(self, selection):
         model, paths = selection.get_selected_rows()
@@ -1480,9 +1491,11 @@ class Application(Gtk.Application):
                     if index % self.DEL_FACTOR == 0:
                         yield True
                 self.update_fav_num_column(model)
+                self.emit("fav-removed", self._bq_selected)
 
         self.on_model_changed(self._fav_model)
         self._wait_dialog.hide()
+
         yield True
 
     def delete_services(self, itrs, model, rows, srv_model, fav_column=Column.SRV_FAV_ID):
@@ -1524,6 +1537,8 @@ class Application(Gtk.Application):
             self.show_error_message("This item is not allowed to be removed!")
             return
 
+        self.emit("bouquet-remove", self._bouquets)
+
         for itr in itrs:
             if len(model.get_path(itr)) < 2:
                 continue
@@ -1538,6 +1553,7 @@ class Application(Gtk.Application):
         self._bq_name_label.set_text(self._bq_selected)
         self.on_model_changed(model)
         self._wait_dialog.hide()
+        self.emit("bouquet-removed", self._bouquets)
         yield True
 
     # ***************** Bouquets ********************* #
@@ -1596,7 +1612,9 @@ class Application(Gtk.Application):
                 else:
                     it = model.insert(p_itr, int(model.get_path(itr)[1]) + 1, bq) if p_itr else model.append(itr, bq)
                     scroll_to(model.get_path(it), view, paths)
+
             self._bouquets[key] = []
+            self.emit("bouquet-added", key)
 
     def on_new_sub_bouquet(self, item=None):
         self.on_new_bouquet(self._bouquets_view, True)
@@ -2088,6 +2106,8 @@ class Application(Gtk.Application):
             model.insert(dst_index, (0, ch.coded, ch.service, ch.locked, ch.hide, ch.service_type, ch.pos,
                                      ch.fav_id, self._picons.get(ch.picon_id, None), None, None))
             fav_bouquet.insert(dst_index, ch.fav_id)
+
+        self.emit("fav-added", self._bq_selected)
 
     def on_view_press(self, view, event):
         """ Handles a mouse click (press) to view. """
