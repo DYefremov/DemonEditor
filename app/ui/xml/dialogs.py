@@ -999,14 +999,14 @@ class ServicesUpdateDialog(UpdateDialog):
         no_lb = "No Category"
 
         if self._kos_bq_groups_switch.get_active():
-            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[4] or no_lb)
-            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[4] or no_lb, bq_type=BqType.RADIO.value)
+            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[5] or no_lb)
+            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[5] or no_lb, bq_type=BqType.RADIO.value)
 
         if self._kos_bq_lang_switch.get_active():
             lb = "" if no_lb in {b.name for b in tv_bouquets} else "No Region"
-            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[5] or lb)
+            self.gen_bouquet_group(tv_services, tv_bouquets, lambda s: s[4] or lb)
             lb = "" if no_lb in {b.name for b in radio_bouquets} else "No Region"
-            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[5] or lb, bq_type=BqType.RADIO.value)
+            self.gen_bouquet_group(rd_services, radio_bouquets, lambda s: s[4] or lb, bq_type=BqType.RADIO.value)
 
         return Bouquets("", BqType.TV.value, tv_bouquets), Bouquets("", BqType.RADIO.value, radio_bouquets)
 
