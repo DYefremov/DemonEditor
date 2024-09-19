@@ -62,7 +62,7 @@ For **multiple** selection with the mouse, press and hold the **Ctrl** key!
 ## Minimum requirements
 *Python >= 3.6, GTK+ >= 3.22, python3-gi, python3-gi-cairo, python3-requests.*
 
-***Optional:** python3-pil, python3-chardet.*                      
+***Optional:** python3-pil, python3-chardet, ffmpeg.*                      
 ## Installation and Launch
 * ### Linux                                                                                                          
 To start the program, in most cases it is enough to download the [archive](https://github.com/DYefremov/DemonEditor/archive/master.zip), unpack  
