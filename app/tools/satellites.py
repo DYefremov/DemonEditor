@@ -443,10 +443,8 @@ class ServicesParser(HTMLParser):
 
         self._POS_PAT = re.compile(r".*?(\d+\.\d°[EW]).*")
         # LyngSat.
-        self._TR_PAT = re.compile((r".*?(\d{4,5})\.?\d?\s+([RLHV]).*(DVB-S[2]?)/?(.*PSK)?\s"
-                                   r"?(T2-MI)?\s?(PLS\s+Multistream)?\s?"
-                                   r"SR-FEC:\s(\d+)-(\d+/\d+)\s+?(?:.*ONID-TID:\s+(\d+)-(\d+))?"))
-
+        self._TR_PAT = re.compile(r".*?(\d{4,5})\.?\d?\s+([RLHV]).*(DVB-S2?X?)/?(.*PSK)?.*SR-FEC:\s(\d+)-(\d+/\d+).*")
+        self._ID_PAT = re.compile(r"C/N lock:.*?(?:.*ONID-TID:\s+(\d+)-(\d+))?.*")
         self._MULTI_PAT = re.compile(r"PLS\s+(Root|Gold|Combo)+\s(\d+)?\s+(?:Stream\s(\d+))")
         # KingOfSat.
         self._KING_TR_PAT = re.compile((r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*"
@@ -616,13 +614,12 @@ class ServicesParser(HTMLParser):
         services = []
         pos, freq, sr, fec, pol, nsp, tid, nid = sat_position or 0, 0, 0, 0, 0, 0, 0, 0
         sys = "DVB-S"
-        pos_found = False
-        tr = None
+        pos_found, tr, td, t_id = False, None, None, None
         # Multi-stream.
         multi_tr = None
         multi = False
         # Transponder.
-        for r in filter(lambda x: x and 6 < len(x) < 9, self._rows):
+        for r in self._rows:
             if not pos_found:
                 pos_tr = re.match(self._POS_PAT, r[0].text)
                 if not pos_tr:
@@ -632,28 +629,23 @@ class ServicesParser(HTMLParser):
                     pos = self.get_position(pos_tr.group(1))
                 pos_found = True
 
-            if pos_found:
-                text = " ".join(c.text for c in r[1:])
-                td = re.match(self._TR_PAT, text)
+            if pos_found and not td:
+                td = re.match(self._TR_PAT, " ".join(c.text for c in r))
 
-                if td:
-                    freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
-                    sys, mod, sr, _fec, = td.group(3), td.group(4), td.group(7), td.group(8)
-                    sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, _fec, sys, mod)
+            if td and not t_id:
+                t_id = re.match(self._ID_PAT, " ".join(c.text for c in r))
+                if t_id:
                     # The ONID-TID values may not present!
-                    _nid, _tid = td.group(9), td.group(10)
+                    _nid, _tid = t_id.group(1), t_id.group(2)
                     if _nid and _tid:
                         nid, tid = int(_nid), int(_tid)
                     else:
                         log((f"Values 'ONID-TID' for transponder [{self._t_url}] are not present."
                              " Default values are used."))
 
-                    if td.group(5):
-                        log(f"Detected T2-MI transponder! [{freq} {sr} {pol}]")
-
-                    if td.group(6):
-                        log(f"Detected multi-stream transponder! [{freq} {sr} {pol}]")
-                        multi = True
+                    freq, pol = int(td.group(1)), get_key_by_value(POLARIZATION, td.group(2))
+                    sys, mod, sr, _fec = td.group(3), td.group(4), td.group(5), td.group(6)
+                    sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, _fec, sys, mod)
 
                     tr = self._TR.format(freq, sr, pol, fec, pos, inv, sys, s2_flags)
 
