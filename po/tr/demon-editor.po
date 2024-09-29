@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2023-10-08 13:43+0300\n"
+"PO-Revision-Date: 2024-09-29 22:18+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.5\n"
 
 msgid "translator-credits"
 msgstr "audi06_19 <info@dreamosat-forum.com>"
@@ -1534,3 +1534,54 @@ msgstr "Piconlar için ortak klasörü kullan"
 
 msgid "Activates single folder use for several profiles."
 msgstr "Birden fazla profil için tek klasör kullanımını etkinleştirir."
+
+msgid "Events"
+msgstr "Olaylar"
+
+msgid "Markers"
+msgstr "İşaretleyiciler"
+
+msgid "IPTV only"
+msgstr "Yalnızca IPTV"
+
+msgid "No"
+msgstr "Hayır"
+
+msgid "Not found."
+msgstr "Bulunamadı."
+
+msgid "Current EPG cache contents."
+msgstr "Geçerli EPG önbellek içerikleri."
+
+msgid "Source error!"
+msgstr "Kaynak hatası!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "Favoriler listesi için EPG kaynağı ayarlanmamış!"
+
+msgid "Add to EPG sources list"
+msgstr "EPG kaynakları listesine ekle"
+
+msgid "Current bouquet"
+msgstr "Mevcut buket"
+
+msgid "Single bouquet"
+msgstr "Tek buket"
+
+msgid "Split by groups"
+msgstr "Gruplara göre böl"
+
+msgid "Create sub-bouquets"
+msgstr "Alt buketler oluştur"
+
+msgid "Add image"
+msgstr "Resim ekle"
+
+msgid "TV Format"
+msgstr "TV Formatı"
+
+msgid "Use with Streamrelay"
+msgstr "Streamrelay ile kullan"
+
+msgid "Remove use with Streamrelay"
+msgstr "Streamrelay ile kullanımı kaldır"
