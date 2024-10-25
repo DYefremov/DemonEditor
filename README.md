@@ -77,9 +77,11 @@ A ready-made [package](https://aur.archlinux.org/packages/demoneditor-bin) is al
 **This program can be run on macOS.**  
 To run the program on macOS, you need to install [Homebrew](https://brew.sh/).  
 Then install the required components via terminal:  
-```brew install python3 gtk+3 pygobject3 adwaita-icon-theme python-requests gtksourceview3```  
+```brew install python3 gtk+3 pygobject3 adwaita-icon-theme gtksourceview3``` 
 
-*Optional:* ```brew install pillow python-chardet```  
+```pip3 install requests telnetlib-313-and-up --break-system-packages``` 
+
+*Optional:* ```brew install pillow python-chardet ffmpeg```  
 
 Launch is similar to Linux.
 
