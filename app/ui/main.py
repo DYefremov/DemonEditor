@@ -2323,6 +2323,7 @@ class Application(Gtk.Application):
 
     def update_data(self, data_path, callback=None):
         self._services_load_spinner.start()
+        self.on_info_bar_close()
         self._profile_combo_box.set_sensitive(False)
         self._alt_revealer.set_visible(False)
         self._filter_services_button.set_active(False)
@@ -2365,14 +2366,17 @@ class Application(Gtk.Application):
         except FileNotFoundError as e:
             msg = translate("Please, download files from receiver or setup your path for read data!")
             self.show_error_message(getattr(e, "message", str(e)) + "\n\n" + msg)
+            self._services_load_spinner.stop()
             return
         except SyntaxError as e:
             self.show_error_message(str(e))
+            self._services_load_spinner.stop()
             return
         except Exception as e:
             msg = "Reading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_message("{}\n{}".format(translate("Reading data error!"), e))
+            self._services_load_spinner.stop()
             return
         else:
             self.append_blacklist(black_list)
