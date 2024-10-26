@@ -767,7 +767,7 @@ class ServicesParser(HTMLParser):
     def get_service_data(s_type, pkg, sid, tid, nid, namespace, v_pid, a_pid, cas, use_pids=False):
         sid = int(sid)
         data_id = f"{sid:04x}:{namespace}:{tid:04x}:{nid:04x}:{s_type}:0:0"
-        fav_id = f"{sid}:{tid}:{nid}:{namespace}"
+        fav_id = f"1:0:{int(s_type):X}:{sid}:{tid}:{nid}:{namespace}:0:0:0:"
         picon_id = f"1_0_{int(s_type):X}_{sid}_{tid}_{nid}_{namespace}_0_0_0.png"
         # Flags.
         flags = f"p:{pkg}"

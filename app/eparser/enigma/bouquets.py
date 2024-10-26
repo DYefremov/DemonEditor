@@ -138,11 +138,10 @@ class BouquetsWriter:
                     bouquet.append(self._ALT.format(f_name))
                     self.write_bouquet(f"{p.parent}/{f_name}", srv.service, services)
             else:
-                data = to_bouquet_id(srv)
                 if srv.service:
-                    bouquet.append(f"#SERVICE {data}:{srv.service}\n#DESCRIPTION {srv.service}\n")
+                    bouquet.append(f"#SERVICE {srv.fav_id}:{srv.service}\n#DESCRIPTION {srv.service}\n")
                 else:
-                    bouquet.append(f"#SERVICE {data}\n")
+                    bouquet.append(f"#SERVICE {srv.fav_id}\n")
 
         with open(path, "w", encoding="utf-8", newline="\n") as file:
             file.writelines(bouquet)
@@ -300,22 +299,13 @@ class BouquetsReader:
                     desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
                     services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))
                 else:
-                    fav_id = f"{srv_data[3]}:{srv_data[4]}:{srv_data[5]}:{srv_data[6]}"
+                    fav_id = srv.strip().upper()
                     name = None
                     if data_len == 12:
                         name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
-                    services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id.upper(), num))
+                    services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id, num))
 
         return bq_name.lstrip("#NAME").strip(), services
-
-
-def to_bouquet_id(srv):
-    """ Creates bouquet channel id. """
-    data_type = srv.data_id
-    if data_type and len(data_type) > 4:
-        data_type = int(srv.data_id.split(":")[4])
-
-        return "{}:0:{:X}:{}:0:0:0:".format(1, data_type, srv.fav_id)
 
 
 if __name__ == "__main__":

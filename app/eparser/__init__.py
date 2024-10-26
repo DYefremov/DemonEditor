@@ -29,7 +29,7 @@ from app.commons import run_task
 from app.settings import SettingsType
 from .ecommons import Service, Satellite, Transponder, Bouquet, Bouquets, is_transponder_valid
 from .enigma.blacklist import get_blacklist, write_blacklist
-from .enigma.bouquets import to_bouquet_id, BouquetsWriter, BouquetsReader
+from .enigma.bouquets import BouquetsWriter, BouquetsReader
 from .enigma.lamedb import get_services as get_enigma_services, write_services as write_enigma_services
 from .iptv import parse_m3u
 from .neutrino.bouquets import get_bouquets as get_neutrino_bouquets, write_bouquets as write_neutrino_bouquets

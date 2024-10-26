@@ -171,15 +171,14 @@ class LameDbReader:
             ssid = str(data[0]).lstrip(sp).upper()
             onid = str(data[1]).lstrip(sp).upper()
             # For comparison in bouquets. Needed in upper case!!!
-            fav_id = f"{ssid}:{tid}:{nid}:{onid}"
+            fav_id = f"1:0:{srv_type:X}:{ssid}:{tid}:{nid}:{onid}:0:0:0:"
             picon_id = f"1_0_{srv_type:X}_{ssid}_{tid}_{nid}_{onid}_0_0_0.png"
-            s_id = f"1:0:{srv_type:X}:{ssid}:{tid}:{nid}:{onid}:0:0:0:"
 
             all_flags = srv[2].split(",")
             coded = CODED_ICON if list(filter(lambda x: x.startswith("C:"), all_flags)) else None
             flags = list(filter(lambda x: x.startswith("f:"), all_flags))
             hide = HIDE_ICON if flags and Flag.is_hide(Flag.parse(flags[0])) else None
-            locked = LOCKED_ICON if s_id in blacklist else None
+            locked = LOCKED_ICON if fav_id in blacklist else None
 
             package = list(filter(lambda x: x.startswith("p:"), all_flags))
             package = package[0][2:] if package else ""

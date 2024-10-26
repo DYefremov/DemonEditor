@@ -47,7 +47,7 @@ _UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
 class ServiceDetailsDialog:
     _ENIGMA2_DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
 
-    _ENIGMA2_FAV_ID = "{:X}:{:X}:{:X}:{:X}"
+    _ENIGMA2_FAV_ID = "1:0:{}{:X}:{:X}:{:X}:{:X}:0:0:0:"
 
     _ENIGMA2_TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
@@ -593,7 +593,7 @@ class ServiceDetailsDialog:
         if self._s_type is SettingsType.ENIGMA_2:
             namespace = int(self._namespace_entry.get_text())
             data_id = self._ENIGMA2_DATA_ID.format(ssid, namespace, tr_id, net_id, service_type, 0)
-            fav_id = self._ENIGMA2_FAV_ID.format(ssid, tr_id, net_id, namespace)
+            fav_id = f"{self._reference_label.get_text()}:"
             return fav_id, data_id
         elif self._s_type is SettingsType.NEUTRINO_MP:
             data = get_attributes(self._old_service.data_id)

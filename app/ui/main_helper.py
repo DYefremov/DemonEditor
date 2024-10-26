@@ -49,7 +49,7 @@ from gi.repository import GdkPixbuf, GLib, Gio
 
 from app.eparser import Service
 from app.eparser.ecommons import Flag, BouquetService, Bouquet, BqType
-from app.eparser.enigma.bouquets import BqServiceType, to_bouquet_id
+from app.eparser.enigma.bouquets import BqServiceType
 from app.settings import SettingsType, SEP, IS_WIN, IS_DARWIN, IS_LINUX
 from .dialogs import show_dialog, DialogType, translate
 from .uicommons import ViewTarget, BqGenType, Gtk, Gdk, HIDE_ICON, LOCKED_ICON, KeyboardKey, Column
@@ -294,7 +294,7 @@ def set_lock(blacklist, services, model, paths, target, services_model):
         fav_id = model.get_value(itr, Column.SRV_FAV_ID if target is ViewTarget.SERVICES else Column.FAV_ID)
         srv = services.get(fav_id, None)
         if srv and srv.service_type not in skip_type:
-            bq_id = srv.data_id if srv.service_type == BqServiceType.IPTV.name else to_bouquet_id(srv)
+            bq_id = srv.data_id if srv.service_type == BqServiceType.IPTV.name else srv.fav_id
             if not bq_id:
                 continue
             blacklist.discard(bq_id) if locked else blacklist.add(bq_id)
