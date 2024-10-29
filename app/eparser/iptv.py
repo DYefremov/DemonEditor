@@ -42,6 +42,7 @@ ENIGMA2_FAV_ID_FORMAT = " {}:{}:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0:{}:{}\n#DESCRIPTI
 MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
 PICON_FORMAT = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
+ENCODING_BLACKLIST = {"MacRoman"}
 
 class StreamType(Enum):
     DVB_TS = "1"
@@ -73,6 +74,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
             else:
                 enc = chardet.detect(data)
                 encoding = enc.get("encoding", "utf-8")
+                encoding = "utf-8" if encoding in ENCODING_BLACKLIST else encoding
 
         aggr = [None] * 10
         s_aggr = aggr[: -3]
