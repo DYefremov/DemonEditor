@@ -529,8 +529,12 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
                         ht.send((f"{url}servicelistreload?mode=2", "Reloading Userbouquets."))
                     elif download_type is DownloadType.ALL or download_type is DownloadType.SERVICES:
                         ht.send((f"{url}servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
+                        time.sleep(1)
+                        ht.send((f"{url}servicelistreload?mode=4", "Updating parental control."))
                         if not settings.keep_power_mode:
                             ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
+                    elif download_type is DownloadType.SATELLITES:
+                        ht.send((f"{url}servicelistreload?mode=3", "Reloading transponders."))
                 else:
                     ht.send((f"{url}reloadchannels", "Reloading channels..."))
 
