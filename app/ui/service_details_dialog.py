@@ -615,7 +615,7 @@ class ServiceDetailsDialog:
             freq = self._freq_entry.get_text()
             rate = self._rate_entry.get_text()
             pol = self._pol_combo_box.get_active_id()
-            pos = "{}{}".format(round(self._sat_pos_button.get_value(), 1), self._pos_side_box.get_active_id())
+            pos = f"{round(self._sat_pos_button.get_value(), 1)}{self._pos_side_box.get_active_id()}"
             return freq, rate, pol, fec, system, pos
         elif self._tr_type in (TrType.Terrestrial, TrType.ATSC):
             return freq, o_srv.rate, o_srv.pol, fec, system, o_srv.pos
@@ -624,8 +624,8 @@ class ServiceDetailsDialog:
 
     def get_satellite_transponder_data(self):
         sys = self._sys_combo_box.get_active_id()
-        freq = "{}000".format(self._freq_entry.get_text())
-        rate = "{}000".format(self._rate_entry.get_text())
+        freq = f"{self._freq_entry.get_text()}000"
+        rate = f"{self._rate_entry.get_text()}000"
         pol = self.get_value_from_combobox_id(self._pol_combo_box, POLARIZATION)
         fec = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
         sat_pos = self.get_sat_position()
@@ -645,9 +645,10 @@ class ServiceDetailsDialog:
                 pls_mode = self.get_value_from_combobox_id(self._pls_mode_combo_box, PLS_MODE)
                 pls_code = self._pls_code_entry.get_text()
                 st_id = self._stream_id_entry.get_text()
-                pls = ":{}:{}:{}".format(st_id, pls_code, pls_mode) if pls_mode and pls_code and st_id else ""
+                pls = f":{st_id}:{pls_code}:{pls_mode}" if pls_mode and pls_code and st_id else ""
 
-                return "{}:{}:{}:{}:{}{}".format(dvb_s_tr, flag, mod, roll_off, pilot, pls)
+                return f"{dvb_s_tr}:{flag}:{mod}:{roll_off}:{pilot}{pls}"
+
         elif self._s_type is SettingsType.NEUTRINO_MP:
             tr_data = get_attributes(self._old_service.transponder)
             tr_data["frq"] = freq
@@ -658,7 +659,7 @@ class ServiceDetailsDialog:
             tr_data["id"] = "{:04x}".format(int(self._transponder_id_entry.get_text()))
             tr_data["inv"] = inv
 
-            return SP.join("{}{}{}".format(k, KSP, v) for k, v in tr_data.items())
+            return SP.join(f"{k}{KSP}{v}" for k, v in tr_data.items())
 
     def get_sat_position(self):
         sat_pos = self._sat_pos_button.get_value() * (-1 if self._pos_side_box.get_active_id() == "W" else 1)
@@ -666,11 +667,11 @@ class ServiceDetailsDialog:
         return sat_pos
 
     def get_terrestrial_transponder_data(self):
-        tr_data = re.split("\s|:", self._old_service.transponder)
+        tr_data = re.split(r"\s|:", self._old_service.transponder)
         # frequency, bandwidth, code rate HP, code rate LP, modulation, transmission mode, guard interval, hierarchy,
         # inversion, system, plp_id
         # Bandwidth -> Pol, Rate HP -> FEC, TransmissionMode -> Roll off, GuardInterval -> Pilot, Hierarchy -> Pls Mode
-        tr_data[1] = "{}000".format(self._freq_entry.get_text())
+        tr_data[1] = f"{self._freq_entry.get_text()}000"
         tr_data[2] = self.get_value_from_combobox_id(self._pol_combo_box, BANDWIDTH)
         tr_data[3] = self.get_value_from_combobox_id(self._fec_combo_box, T_FEC)
         tr_data[4] = self.get_value_from_combobox_id(self._rate_lp_combo_box, T_FEC)
@@ -681,28 +682,28 @@ class ServiceDetailsDialog:
         tr_data[9] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         tr_data[10] = self.get_value_from_combobox_id(self._sys_combo_box, T_SYSTEM)
 
-        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
+        return f"{tr_data[0]} {':'.join(tr_data[1:])}"
 
     def get_cable_transponder_data(self):
-        tr_data = re.split("\s|:", self._old_service.transponder)
+        tr_data = re.split(r"\s|:", self._old_service.transponder)
         # frequency, symbol_rate, modulation, inversion, fec_inner, system;
-        tr_data[1] = "{}000".format(self._freq_entry.get_text())
-        tr_data[2] = "{}000".format(self._rate_entry.get_text())
+        tr_data[1] = f"{self._freq_entry.get_text()}000"
+        tr_data[2] = f"{self._rate_entry.get_text()}000"
         tr_data[3] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         tr_data[4] = self.get_value_from_combobox_id(self._mod_combo_box, C_MODULATION)
         tr_data[5] = self.get_value_from_combobox_id(self._fec_combo_box, FEC_DEFAULT)
         tr_data[6] = get_value_by_name(SystemCable, self._sys_combo_box.get_active_id())
 
-        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
+        return f"{tr_data[0]} {':'.join(tr_data[1:])}"
 
     def get_atsc_transponder_data(self):
-        tr_data = re.split("\s|:", self._old_service.transponder)
+        tr_data = re.split(r"\s|:", self._old_service.transponder)
         # frequency, inversion, modulation, system
-        tr_data[1] = "{}000".format(self._freq_entry.get_text())
+        tr_data[1] = f"{self._freq_entry.get_text()}000"
         tr_data[2] = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
         tr_data[3] = self.get_value_from_combobox_id(self._mod_combo_box, A_MODULATION)
 
-        return "{} {}".format(tr_data[0], ":".join(tr_data[1:]))
+        return f"{tr_data[0]} {':'.join(tr_data[1:])}"
 
     def update_transponder_services(self, transponder, sat_pos):
         for itr in self._transponder_services_iters:
@@ -714,13 +715,13 @@ class ServiceDetailsDialog:
             fav_id = srv[Column.SRV_FAV_ID]
             old_srv = self._services.pop(fav_id, None)
             if not old_srv:
-                log("Update transponder services error: No service found for ID {}".format(srv[Column.SRV_FAV_ID]))
+                log(f"Update transponder services error: No service found for ID {srv[Column.SRV_FAV_ID]}")
                 continue
 
             if self._s_type is SettingsType.NEUTRINO_MP:
                 flags = get_attributes(srv[Column.SRV_CAS_FLAGS])
                 flags["position"] = sat_pos
-                srv[Column.SRV_CAS_FLAGS] = SP.join("{}{}{}".format(k, KSP, v) for k, v in flags.items())
+                srv[Column.SRV_CAS_FLAGS] = SP.join(f"{k}{KSP}{v}" for k, v in flags.items())
 
             self._services[fav_id] = Service(*srv[:Column.SRV_TOOLTIP])
             self._current_model.set_row(itr, srv)
@@ -796,7 +797,7 @@ class ServiceDetailsDialog:
             on_id = int(self._namespace_entry.get_text())
             self._reference_label.set_text(self._ENIGMA2_FAV_ID.format(srv_type, ssid, tid, nid, on_id))
         else:
-            self._reference_label.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
+            self._reference_label.set_text(f"{tid:x}{nid:04x}{ssid:04x}")
 
     def update_ui_for_terrestrial(self):
         tr_grid = self.get_transponder_grid_for_non_satellite()
