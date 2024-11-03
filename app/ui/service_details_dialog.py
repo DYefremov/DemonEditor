@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ _UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
 class ServiceDetailsDialog:
     _ENIGMA2_DATA_ID = "{:04x}:{:08x}:{:04x}:{:04x}:{}:{}"
 
-    _ENIGMA2_FAV_ID = "1:0:{}{:X}:{:X}:{:X}:{:X}:0:0:0:"
+    _ENIGMA2_FAV_ID = "1:0:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0"
 
     _ENIGMA2_TRANSPONDER_DATA = "{} {}:{}:{}:{}:{}:{}:{}"
 
@@ -794,8 +794,7 @@ class ServiceDetailsDialog:
         nid = int(self._network_id_entry.get_text())
         if self._s_type is SettingsType.ENIGMA_2:
             on_id = int(self._namespace_entry.get_text())
-            ref = "1:0:{:X}:{:X}:{:X}:{:X}:{:X}:0:0:0".format(srv_type, ssid, tid, nid, on_id)
-            self._reference_label.set_text(ref)
+            self._reference_label.set_text(self._ENIGMA2_FAV_ID.format(srv_type, ssid, tid, nid, on_id))
         else:
             self._reference_label.set_text("{:x}{:04x}{:04x}".format(tid, nid, ssid))
 
