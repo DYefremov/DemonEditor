@@ -302,6 +302,7 @@ class BouquetsReader:
                     fav_id = srv.strip().upper()
                     name = None
                     if data_len == 12:
+                        fav_id = f":".join(srv_data[:11])
                         name, sep, desc = str(srv_data[-1]).partition("\n#DESCRIPTION")
                     services.append(BouquetService(name, BqServiceType.DEFAULT, fav_id, num))
 
