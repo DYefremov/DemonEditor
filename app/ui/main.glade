@@ -1746,7 +1746,7 @@ Author: Dmitriy Yefremov
                               <object class="GtkLabel" id="app_ver_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label">3.11.1 Beta</property>
+                                <property name="label">3.11.2 Beta</property>
                                 <attributes>
                                   <attribute name="weight" value="bold"/>
                                 </attributes>
