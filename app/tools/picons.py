@@ -354,9 +354,9 @@ class PiconsParser(HTMLParser):
 class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
-    _POSITION_PATTERN = re.compile("at\s\d+\..*(?:E|W)']")
-    _ONID_TID_PATTERN = re.compile("^\d+-\d+.*")
-    _TRANSPONDER_FREQUENCY_PATTERN = re.compile("^\d+ [HVLR]+")
+    _POSITION_PATTERN = re.compile(r"at\s\d+\..*(?:E|W)']")
+    _ONID_TID_PATTERN = re.compile(r"^\d+-\d+.*")
+    _TRANSPONDER_FREQUENCY_PATTERN = re.compile(r"^\d+ [HVLR]+")
     _DOMAINS = {"/tvchannels/", "/radiochannels/", "/packages/", "/logo/"}
     _BASE_URL = "https://www.lyngsat.com"
 
