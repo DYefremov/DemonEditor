@@ -303,6 +303,7 @@ class ServiceDetailsDialog:
         data = srv.data_id.split(":")
         tr_data = srv.transponder.split(":")
         tr_type = TrType(srv.transponder_type)
+        data_len = len(tr_data)
 
         self._namespace_entry.set_text(str(int(data[1], 16)))
         self._transponder_id_entry.set_text(str(int(data[2], 16)))
@@ -311,11 +312,12 @@ class ServiceDetailsDialog:
         if tr_type is TrType.Satellite:
             self.select_active_text(self._invertion_combo_box, Inversion(tr_data[5]).name)
             if srv.system == "DVB-S2":
-                self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
-                self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
-                self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
-                self._tr_flag_entry.set_text(tr_data[7])
-                if len(tr_data) > 12:
+                if data_len > 9:
+                    self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
+                    self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
+                    self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
+                    self._tr_flag_entry.set_text(tr_data[7])
+                if data_len > 12:
                     self._stream_id_entry.set_text(tr_data[11])
                     self._pls_code_entry.set_text(tr_data[12])
                     self.select_active_text(self._pls_mode_combo_box, PLS_MODE.get(tr_data[13]))

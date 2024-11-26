@@ -172,6 +172,8 @@ class LameDbReader:
             onid = str(data[1]).lstrip(sp).upper()
             # For comparison in bouquets. Needed in upper case!!!
             fav_id = f"1:0:{srv_type:X}:{ssid}:{tid}:{nid}:{onid}:0:0:0:"
+            if len(data) > 9:
+                fav_id = f"{fav_id}:0:0:0:0"
             picon_id = f"1_0_{srv_type:X}_{ssid}_{tid}_{nid}_{onid}_0_0_0.png"
 
             all_flags = srv[2].split(",")
