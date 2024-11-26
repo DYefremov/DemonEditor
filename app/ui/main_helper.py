@@ -819,7 +819,10 @@ def get_pos_num(pos):
 
     if len(pos) > 1:
         m = -1 if pos[-1] == "W" else 1
-        return float(pos[:-1]) * m
+        try:
+            return float(pos[:-1]) * m
+        except ValueError:
+            return -183
 
     return -181.0 if pos == "T" else -182.0
 

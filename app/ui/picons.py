@@ -44,7 +44,7 @@ from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_t
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, translate, get_builder, get_chooser_dialog
 from .main_helper import (scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog,
-                          get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale)
+                          get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale, get_pos_num)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
 
 
@@ -680,7 +680,7 @@ class PiconManager(Gtk.Box):
             model.clear()
 
         try:
-            for sat in sorted(sats):
+            for sat in sorted(sats, key=lambda s: get_pos_num(s[1]), reverse=True):
                 pos = sat[1]
                 name = f"{sat[0]} ({pos})"
                 if is_filter and pos not in self._sat_positions:
@@ -825,9 +825,10 @@ class PiconManager(Gtk.Box):
         services = self._app.current_services
 
         ids = set()
-        for s in (services.get(fav_id) for fav_id in fav_bouquet):
-            ids.add(s.picon_id)
-            ids.add(get_picon_file_name(s.service))
+        for s in (services.get(fav_id, None) for fav_id in fav_bouquet):
+            if s:
+                ids.add(s.picon_id)
+                ids.add(get_picon_file_name(s.service))
         return ids
 
     def process_provider(self, prv, picons_path):
