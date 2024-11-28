@@ -110,16 +110,20 @@ class EpgCache(abc.ABC):
         self._canceled = True
 
     @abc.abstractmethod
-    def reset(self) -> None: pass
+    def reset(self) -> None:
+        pass
 
     @abc.abstractmethod
-    def update_epg_data(self) -> bool: pass
+    def update_epg_data(self) -> bool:
+        pass
 
     @abc.abstractmethod
-    def get_current_event(self, service_name) -> EpgEvent: pass
+    def get_current_event(self, service_name) -> EpgEvent:
+        pass
 
     @abc.abstractmethod
-    def get_current_events(self, service_name) -> list: pass
+    def get_current_events(self, service_name) -> list:
+        pass
 
     @staticmethod
     def get_gz_file_name(url, path):
@@ -1209,7 +1213,7 @@ class EpgDialog:
 
         fav_id = row[Column.FAV_ID]
         fav_id_data = fav_id.split(":")
-        fav_id_data[3:7] = data[-3].split(":")
+        fav_id_data[3:7] = data[-3].split(":")[3:7]
 
         if data[-2]:
             row[Column.FAV_POS] = data[-2]
