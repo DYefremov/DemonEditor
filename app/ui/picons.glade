@@ -347,7 +347,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkCheckButton" id="info_check_button">
-                    <property name="visible">True</property>
+                    <property name="visible" bind-source="filter_button" bind-property="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">False</property>
                     <property name="tooltip-text" translatable="yes">Details</property>
@@ -413,12 +413,13 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkBox" id="header_download_box">
-                    <property name="visible">True</property>
+                    <property name="visible" bind-source="cancel_button" bind-property="visible" bind-flags="invert-boolean">True</property>
+                    <property name="visible" bind-source="convert_button" bind-property="visible" bind-flags="invert-boolean">True</property>
                     <property name="can-focus">False</property>
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkMenuButton" id="add_menu_button">
-                        <property name="visible">True</property>
+                        <property name="visible" bind-source="manager_button" bind-property="active">True</property>
                         <property name="can-focus">True</property>
                         <property name="focus-on-click">False</property>
                         <property name="receives-default">True</property>
@@ -440,6 +441,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkButton" id="receive_button">
+                        <property name="visible" bind-source="download_source_button" bind-property="visible">False</property>
                         <property name="sensitive">False</property>
                         <property name="can-focus">False</property>
                         <property name="receives-default">False</property>
@@ -462,7 +464,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkButton" id="remove_button">
-                        <property name="visible">True</property>
+                        <property name="visible" bind-source="filter_button" bind-property="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="receives-default">True</property>
                         <property name="tooltip-text" translatable="yes">Remove all picons from the receiver</property>
@@ -490,7 +492,7 @@ Author: Dmitriy Yefremov
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="src_button">
-                    <property name="visible">True</property>
+                    <property name="visible" bind-source="filter_button" bind-property="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="receives-default">True</property>
                     <property name="tooltip-text" translatable="yes">Additional source</property>
@@ -529,6 +531,7 @@ Author: Dmitriy Yefremov
                     <property name="spacing">5</property>
                     <child>
                       <object class="GtkBox" id="filter_bar">
+                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                         <property name="can-focus">False</property>
                         <property name="margin-top">5</property>
                         <property name="spacing">5</property>
@@ -591,6 +594,7 @@ Author: Dmitriy Yefremov
                         <property name="wide-handle">True</property>
                         <child>
                           <object class="GtkFrame" id="src_picon_box_frame">
+                            <property name="visible" bind-source="src_button" bind-property="active">False</property>
                             <property name="can-focus">False</property>
                             <property name="label-xalign">0.49000000953674316</property>
                             <property name="shadow-type">none</property>
@@ -606,6 +610,7 @@ Author: Dmitriy Yefremov
                                     <property name="can-focus">False</property>
                                     <child>
                                       <object class="GtkCheckButton" id="src_filter_button">
+                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="label" translatable="yes">Filter</property>
                                         <property name="can-focus">False</property>
                                         <property name="focus-on-click">False</property>
@@ -740,6 +745,7 @@ Author: Dmitriy Yefremov
                                     <property name="can-focus">False</property>
                                     <child>
                                       <object class="GtkCheckButton" id="dst_filter_button">
+                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="label" translatable="yes">Filter</property>
                                         <property name="can-focus">False</property>
                                         <property name="focus-on-click">False</property>
@@ -849,6 +855,7 @@ Author: Dmitriy Yefremov
                             </child>
                             <child type="label">
                               <object class="GtkLabel" id="explorer_dst_label">
+                                <property name="visible" bind-source="src_button" bind-property="active">False</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Destination:</property>
                               </object>
@@ -868,6 +875,7 @@ Author: Dmitriy Yefremov
                     </child>
                     <child>
                       <object class="GtkFrame" id="explorer_info_box_frame">
+                        <property name="visible" bind-source="info_check_button" bind-property="active">False</property>
                         <property name="can-focus">False</property>
                         <property name="label-xalign">0</property>
                         <property name="shadow-type">in</property>
@@ -952,7 +960,7 @@ Author: Dmitriy Yefremov
                                 <property name="margin-bottom">5</property>
                                 <child>
                                   <object class="GtkComboBoxText" id="download_source_button">
-                                    <property name="sensitive">False</property>
+                                    <property name="sensitive" bind-source="satellite_label" bind-property="visible">False</property>
                                     <property name="can-focus">False</property>
                                     <property name="tooltip-text" translatable="yes">Source:</property>
                                     <property name="active">0</property>
@@ -1026,7 +1034,7 @@ Author: Dmitriy Yefremov
                                         </child>
                                         <child>
                                           <object class="GtkLabel" id="loading_data_label">
-                                            <property name="visible">True</property>
+                                            <property name="visible" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="label" translatable="yes">Loading data...</property>
                                             <property name="ellipsize">end</property>
@@ -1039,10 +1047,10 @@ Author: Dmitriy Yefremov
                                         </child>
                                         <child>
                                           <object class="GtkSpinner" id="loading_data_spinner">
-                                            <property name="visible">True</property>
+                                            <property name="visible" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
+                                            <property name="active" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="margin-right">5</property>
-                                            <property name="active">True</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1057,6 +1065,7 @@ Author: Dmitriy Yefremov
                                             <property name="can-focus">False</property>
                                             <property name="margin-right">5</property>
                                             <property name="column-spacing">5</property>
+                                            <property name="tooltip-text" translatable="yes">Filter by current satellite positions</property>
                                             <child>
                                               <object class="GtkLabel" id="satellite_filter_label">
                                                 <property name="visible">True</property>
@@ -1072,7 +1081,6 @@ Author: Dmitriy Yefremov
                                               <object class="GtkSwitch" id="satellite_filter_switch">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">True</property>
-                                                <property name="active">True</property>
                                                 <signal name="state-set" handler="on_satellite_filter_toggled" swapped="no"/>
                                               </object>
                                               <packing>
@@ -1103,6 +1111,7 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkTreeView" id="satellites_view">
                                             <property name="visible">True</property>
+                                            <property name="sensitive" bind-source="satellite_label" bind-property="visible">False</property>
                                             <property name="can-focus">True</property>
                                             <property name="model">satellites_list_store</property>
                                             <property name="headers-visible">False</property>
@@ -1807,7 +1816,7 @@ Author: Dmitriy Yefremov
         <property name="margin-bottom">2</property>
         <child>
           <object class="GtkLabel" id="manager_label">
-            <property name="visible">True</property>
+            <property name="visible" bind-source="manager_button" bind-property="active">True</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Picons manager</property>
             <attributes>
@@ -1822,6 +1831,7 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkLabel" id="downloader_label">
+            <property name="visible" bind-source="downloader_button" bind-property="active">False</property>
             <property name="can-focus">False</property>
             <property name="label" translatable="yes">Picons download tool</property>
             <attributes>
@@ -1836,8 +1846,9 @@ Author: Dmitriy Yefremov
         </child>
         <child>
           <object class="GtkLabel" id="converter_label">
+            <property name="visible" bind-source="converter_button" bind-property="active">False</property>
             <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Converter between name formats</property>
+            <property name="label" translatable="yes">Converter between formats</property>
             <attributes>
               <attribute name="weight" value="bold"/>
             </attributes>
