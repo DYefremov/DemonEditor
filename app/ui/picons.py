@@ -40,7 +40,7 @@ from app.commons import run_idle, run_task, run_with_delay, log
 from app.connections import upload_data, DownloadType, download_data, remove_picons
 from app.settings import SettingsType, Settings, SEP, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
-                              PiconsError)
+                              PiconsError, PiconFormat)
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, translate, get_builder, get_chooser_dialog
 from .main_helper import (scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog,
@@ -153,6 +153,9 @@ class PiconManager(Gtk.Box):
         self._bouquet_filter_switch = builder.get_object("bouquet_filter_switch")
         self._providers_header_box = builder.get_object("providers_header_box")
         self._header_download_box = builder.get_object("header_download_box")
+        self._converter_sc_button = builder.get_object("converter_sc_button")
+        self._converter_nt_button = builder.get_object("converter_nt_button")
+        self._converter_bq_button = builder.get_object("converter_bq_button")
         # Info.
         self._dst_count_label = builder.get_object("dst_count_label")
         self._info_check_button = builder.get_object("info_check_button")
@@ -999,10 +1002,22 @@ class PiconManager(Gtk.Box):
             return
 
         self._app.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
-        convert_to(src_path=picons_path,
-                   dest_path=save_path,
-                   s_type=SettingsType.ENIGMA_2,
-                   done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
+        ids = None
+        p_format = PiconFormat.NEUTRINO if self._converter_nt_button.get_active() else PiconFormat.OSCAM
+
+        if self._converter_bq_button.get_active():
+            bq_selected = self._app.check_bouquet_selection()
+            if not bq_selected:
+                return
+
+            services = self._app.current_services
+            ids = {services.get(s).picon_id for s in self._app.current_bouquets.get(bq_selected) if s in services}
+
+        if self._converter_nt_button.get_active():
+            convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids,
+                       done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
+        else:
+            self.show_info_message("Not implemented yet!", Gtk.MessageType.ERROR)
 
     @run_idle
     def update_receive_button_state(self):

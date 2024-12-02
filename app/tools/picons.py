@@ -32,6 +32,7 @@ import re
 import shutil
 import subprocess
 from collections import namedtuple
+from enum import IntEnum
 from html.parser import HTMLParser
 
 import requests
@@ -49,6 +50,12 @@ Picon = namedtuple("Picon", ["ref", "ssid"])
 
 class PiconsError(Exception):
     pass
+
+
+class PiconFormat(IntEnum):
+    ENIGMA2 = 0
+    NEUTRINO = 1
+    OSCAM = 3
 
 
 class PiconsCzDownloader:
@@ -509,21 +516,40 @@ def download_picon(src_url, dest_path):
 
 
 @run_task
-def convert_to(src_path, dest_path, s_type, done_callback):
-    """ Converts names format of picons.
+def convert_to(src_path, dest_path, p_format, ids=None, done_callback=None):
+    """ Converts format [names] of picons.
 
         Copies resulting files from src to dest and writes state to callback.
     """
-    pattern = "/*_0_0_0.png" if s_type is SettingsType.ENIGMA_2 else "/*.png"
+    pattern = "/*_0_0_0.png" if p_format is PiconFormat.NEUTRINO else "/*.png"
+    to_convert = []
     for file in glob.glob(src_path + pattern):
         base_name = os.path.basename(file)
+        if ids is not None and base_name not in ids:
+            continue
+
+        to_convert.append((base_name, dest_path, file))
+
+    if p_format is PiconFormat.NEUTRINO:
+        convert_to_neutrino(to_convert)
+    elif p_format is PiconFormat.OSCAM:
+        convert_to_oscam(to_convert)
+
+    if done_callback:
+        done_callback()
+
+
+def convert_to_neutrino(files):
+    for base_name, dest_path, file in files:
         pic_data = base_name.rstrip(".png").split("_")
         dest_file = _NEUTRINO_PICON_KEY.format(int(pic_data[4], 16), int(pic_data[5], 16), int(pic_data[3], 16))
-        dest = "{}/{}".format(dest_path, dest_file)
-        log('Converting "{}" to "{}"'.format(base_name, dest_file))
+        dest = f"{dest_path}{os.sep}{dest_file}"
+        log(f'Converting "{base_name}" to "{dest_file}"')
         shutil.copyfile(file, dest)
 
-    done_callback()
+
+def convert_to_oscam(files):
+    pass
 
 
 if __name__ == "__main__":

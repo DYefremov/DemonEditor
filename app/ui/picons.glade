@@ -610,8 +610,8 @@ Author: Dmitriy Yefremov
                                     <property name="can-focus">False</property>
                                     <child>
                                       <object class="GtkCheckButton" id="src_filter_button">
-                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="label" translatable="yes">Filter</property>
+                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="can-focus">False</property>
                                         <property name="focus-on-click">False</property>
                                         <property name="receives-default">False</property>
@@ -745,8 +745,8 @@ Author: Dmitriy Yefremov
                                     <property name="can-focus">False</property>
                                     <child>
                                       <object class="GtkCheckButton" id="dst_filter_button">
-                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="label" translatable="yes">Filter</property>
+                                        <property name="visible" bind-source="filter_button" bind-property="active">False</property>
                                         <property name="can-focus">False</property>
                                         <property name="focus-on-click">False</property>
                                         <property name="receives-default">False</property>
@@ -1048,9 +1048,9 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkSpinner" id="loading_data_spinner">
                                             <property name="visible" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
-                                            <property name="active" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="margin-right">5</property>
+                                            <property name="active" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -1063,9 +1063,9 @@ Author: Dmitriy Yefremov
                                           <object class="GtkGrid" id="satellite_filter_grid">
                                             <property name="visible">True</property>
                                             <property name="can-focus">False</property>
+                                            <property name="tooltip-text" translatable="yes">Filter by current satellite positions</property>
                                             <property name="margin-right">5</property>
                                             <property name="column-spacing">5</property>
-                                            <property name="tooltip-text" translatable="yes">Filter by current satellite positions</property>
                                             <child>
                                               <object class="GtkLabel" id="satellite_filter_label">
                                                 <property name="visible">True</property>
@@ -1580,110 +1580,24 @@ Author: Dmitriy Yefremov
                       <object class="GtkBox" id="converter_box">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="margin-left">5</property>
-                        <property name="margin-right">5</property>
-                        <property name="margin-top">5</property>
-                        <property name="margin-bottom">5</property>
+                        <property name="margin-start">10</property>
+                        <property name="margin-end">10</property>
+                        <property name="margin-top">10</property>
+                        <property name="margin-bottom">10</property>
                         <property name="orientation">vertical</property>
-                        <property name="spacing">2</property>
+                        <property name="spacing">5</property>
                         <child>
-                          <!-- n-columns=3 n-rows=4 -->
-                          <object class="GtkGrid" id="converter_grid">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="margin-left">10</property>
-                            <property name="margin-right">10</property>
-                            <property name="margin-top">10</property>
-                            <property name="row-spacing">5</property>
-                            <property name="column-spacing">2</property>
-                            <property name="column-homogeneous">True</property>
-                            <child>
-                              <object class="GtkFileChooserButton" id="enigma2_path_button">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="action">select-folder</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="picons_path_label">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Path to Enigma2 picons:</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="save_to_label">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">Path to save:</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkFileChooserButton" id="save_to_button">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="action">select-folder</property>
-                              </object>
-                              <packing>
-                                <property name="left-attach">0</property>
-                                <property name="top-attach">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel" id="convert_to_label">
-                            <property name="visible">True</property>
+                          <object class="GtkLabel" id="convert_to_nt_label">
+                            <property name="visible" bind-source="converter_nt_button" bind-property="active">False</property>
                             <property name="can-focus">False</property>
                             <property name="margin-bottom">10</property>
-                            <property name="label" translatable="yes">Enigma2  -&gt;  Neutrino-MP</property>
+                            <property name="label">Enigma2  -&gt;  Neutrino-MP</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="pack-type">end</property>
-                            <property name="position">1</property>
+                            <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
@@ -1697,7 +1611,152 @@ Author: Dmitriy Yefremov
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="pack-type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="convert_to_sc_label">
+                            <property name="visible" bind-source="converter_sc_button" bind-property="active">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-bottom">10</property>
+                            <property name="label">Enigma2  -&gt;  OSCam</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack-type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButtonBox" id="converter_format_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="margin-top">10</property>
+                            <property name="homogeneous">True</property>
+                            <property name="layout-style">expand</property>
+                            <child>
+                              <object class="GtkRadioButton" id="converter_sc_button">
+                                <property name="label" translatable="yes">OSCam</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">False</property>
+                                <property name="group">converter_nt_button</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkRadioButton" id="converter_nt_button">
+                                <property name="label" translatable="yes">Neutrino-MP</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="draw-indicator">False</property>
+                                <property name="group">converter_sc_button</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
                             <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="converter_select_bq_box">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="margin-top">5</property>
+                            <property name="margin-bottom">5</property>
+                            <property name="spacing">5</property>
+                            <child>
+                              <object class="GtkLabel" id="coverter_bq_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">end</property>
+                                <property name="label">Convert for selected bouquets</property>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="converter_bq_button">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="picons_path_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Path to Enigma2 picons:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkFileChooserButton" id="enigma2_path_button">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="action">select-folder</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="save_to_label">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Path to save:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkFileChooserButton" id="save_to_button">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="action">select-folder</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">7</property>
                           </packing>
                         </child>
                       </object>
