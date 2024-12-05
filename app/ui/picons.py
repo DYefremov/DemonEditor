@@ -1005,6 +1005,13 @@ class PiconManager(Gtk.Box):
         ids = None
         p_format = PiconFormat.NEUTRINO if self._converter_nt_button.get_active() else PiconFormat.OSCAM
 
+        if p_format is PiconFormat.OSCAM:
+            try:
+                from PIL import Image
+            except ImportError as e:
+                self.show_info_message(f"{translate('Conversion error.')} {e}", Gtk.MessageType.ERROR)
+                return
+
         if self._converter_bq_button.get_active():
             bq_selected = self._app.check_bouquet_selection()
             if not bq_selected:
@@ -1013,11 +1020,8 @@ class PiconManager(Gtk.Box):
             services = self._app.current_services
             ids = {services.get(s).picon_id for s in self._app.current_bouquets.get(bq_selected) if s in services}
 
-        if self._converter_nt_button.get_active():
-            convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids,
+        convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids,
                        done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
-        else:
-            self.show_info_message("Not implemented yet!", Gtk.MessageType.ERROR)
 
     @run_idle
     def update_receive_button_state(self):

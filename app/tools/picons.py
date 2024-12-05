@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2024 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,9 @@ from html.parser import HTMLParser
 
 import requests
 
-from app.commons import run_task, log
+from app.commons import log, run_task
 from app.settings import SettingsType, IS_LINUX, IS_WIN, IS_DARWIN, GTK_PATH
-from .satellites import _HEADERS
+from app.tools.satellites import _HEADERS
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
@@ -311,7 +311,7 @@ class PiconsParser(HTMLParser):
         if req.status_code == 200:
             logo_data = req.text
         else:
-            log("Provider picons downloading error: {} {}".format(provider.url, req.reason))
+            log(f"Provider picons downloading error: {provider.url} {req.reason}")
             return
 
         on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
@@ -342,7 +342,7 @@ class PiconsParser(HTMLParser):
                     p_name = picons_path + (name if name else os.path.basename(p.ref))
                     picons_data.append(("{}{}".format(PiconsParser._BASE_URL, p.ref), p_name))
                 except (TypeError, ValueError) as e:
-                    msg = "Picons format parse error: {}".format(p) + "\n" + str(e)
+                    msg = f"Picons format parse error: {p}\n{e}"
                     log(msg)
 
         return picons_data
@@ -355,7 +355,7 @@ class PiconsParser(HTMLParser):
             tr_id = int(ssid[:-2] if len(ssid) < 4 else ssid[:2])
             return _NEUTRINO_PICON_KEY.format(tr_id, int(on_id), int(ssid))
         else:
-            return "{}.png".format(ssid)
+            return f"{ssid}.png"
 
 
 class ProviderParser(HTMLParser):
@@ -449,7 +449,7 @@ class ProviderParser(HTMLParser):
                             if req.status_code == 200:
                                 logo_data = req.content
                             else:
-                                log("Downloading provider logo error: {}".format(req.reason))
+                                log(f"Downloading provider logo error: {req.reason}")
                         self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=row[6], on_id=on_id,
                                                   ssid=None, single=False, selected=True))
             elif 6 < len_row < 12:
@@ -482,7 +482,7 @@ def parse_providers(url):
     if request.status_code == 200:
         parser.feed(request.text)
     else:
-        log("Parse providers error [{}]: {}".format(url, request.reason))
+        log(f"Parse providers error [{url}]: {request.reason}")
 
     def srt(p):
         if p.logo is None:
@@ -511,9 +511,8 @@ def download_picon(src_url, dest_path):
                 for chunk in req:
                     f.write(chunk)
         except OSError as e:
-            err_msg = "Saving picon [{}] error: {}".format(dest_path, e)
+            err_msg = f"Saving picon [{dest_path}] error: {e}"
             log(err_msg)
-
 
 @run_task
 def convert_to(src_path, dest_path, p_format, ids=None, done_callback=None):
@@ -528,19 +527,19 @@ def convert_to(src_path, dest_path, p_format, ids=None, done_callback=None):
         if ids is not None and base_name not in ids:
             continue
 
-        to_convert.append((base_name, dest_path, file))
+        to_convert.append((base_name, file))
 
     if p_format is PiconFormat.NEUTRINO:
-        convert_to_neutrino(to_convert)
+        convert_to_neutrino(to_convert, dest_path)
     elif p_format is PiconFormat.OSCAM:
-        convert_to_oscam(to_convert)
+        convert_to_oscam(to_convert, dest_path)
 
     if done_callback:
         done_callback()
 
 
-def convert_to_neutrino(files):
-    for base_name, dest_path, file in files:
+def convert_to_neutrino(files, dest_path):
+    for base_name, file in files:
         pic_data = base_name.rstrip(".png").split("_")
         dest_file = _NEUTRINO_PICON_KEY.format(int(pic_data[4], 16), int(pic_data[5], 16), int(pic_data[3], 16))
         dest = f"{dest_path}{os.sep}{dest_file}"
@@ -548,8 +547,36 @@ def convert_to_neutrino(files):
         shutil.copyfile(file, dest)
 
 
-def convert_to_oscam(files):
-    pass
+def convert_to_oscam(files, dest_path):
+    if not files:
+        return
+
+    os.makedirs(dest_path, exist_ok=True)
+
+    import base64
+    from io import BytesIO
+    from PIL import Image
+
+    for base_name, file in files:
+        sid = base_name
+        caid = "0000"
+        data = base_name.split("_")
+
+        if len(data):
+            sid = data[3].rjust(4, "0")
+
+        dest_file = f"{dest_path}{os.sep}IC_{caid}_{sid}.tpl"
+        log(f'Converting "{base_name}" to "{dest_file}"')
+
+        image = Image.open(file)
+        image.thumbnail((100, 60))
+
+        buff = BytesIO()
+        image.save(buff, format="PNG")
+        data_bytes = b"data:image/png;base64," + base64.b64encode(buff.getvalue())
+
+        with open(dest_file, "wb") as f:
+            f.write(data_bytes)
 
 
 if __name__ == "__main__":
