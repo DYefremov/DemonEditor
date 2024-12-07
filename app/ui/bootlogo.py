@@ -223,7 +223,7 @@ class BootLogoManager(Gtk.Window):
             return
 
         output = path.parent.joinpath(self._file_combo_box.get_active_id())
-        ffmpeg_output = path.parent.joinpath(f"{self._file_combo_box.get_active_text()}.m1v")
+        ffmpeg_output = path.parent.joinpath(f"{self._file_combo_box.get_active_text()}.m2v")
 
         cmd = [self._exe,
                "-i", self._img_path,
@@ -280,7 +280,7 @@ class BootLogoManager(Gtk.Window):
                 img_path = f"{path}{f_name}.jpg"
 
                 if vp.exists():
-                    rn_path = f"{path}{self._file_combo_box.get_active_text()}.m1v"
+                    rn_path = f"{path}{self._file_combo_box.get_active_text()}.m2v"
                     vp.rename(rn_path)
                     self.convert_to_image(rn_path, img_path)
                     self._pix = get_picon_pixbuf(img_path, -1)
