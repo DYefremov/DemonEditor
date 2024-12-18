@@ -206,6 +206,8 @@ class PiconManager(Gtk.Box):
             name = "downloader"
         elif is_converter:
             name = "converter"
+            if not self._enigma2_path_button.get_filename():
+                self._enigma2_path_button.set_filename(self._settings.profile_picons_path)
 
         self._stack.set_visible_child_name(name)
 
@@ -235,6 +237,7 @@ class PiconManager(Gtk.Box):
     def on_profile_changed(self, app, data):
         self._current_path_label.set_text(self._settings.profile_picons_path)
         self.update_picons_dest(app, self._app.page)
+        self._enigma2_path_button.set_filename(self._settings.profile_picons_path)
 
     def on_picon_assign(self, app, target):
         if target is ViewTarget.SERVICES:
@@ -1021,7 +1024,7 @@ class PiconManager(Gtk.Box):
             ids = {services.get(s).picon_id for s in self._app.current_bouquets.get(bq_selected) if s in services}
 
         convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids,
-                       done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
+                   done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
 
     @run_idle
     def update_receive_button_state(self):
