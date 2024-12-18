@@ -514,8 +514,9 @@ def download_picon(src_url, dest_path):
             err_msg = f"Saving picon [{dest_path}] error: {e}"
             log(err_msg)
 
+
 @run_task
-def convert_to(src_path, dest_path, p_format, ids=None, done_callback=None):
+def convert_to(src_path, dest_path, p_format, ids=None, services=None, done_callback=None):
     """ Converts format [names] of picons.
 
         Copies resulting files from src to dest and writes state to callback.
@@ -532,7 +533,7 @@ def convert_to(src_path, dest_path, p_format, ids=None, done_callback=None):
     if p_format is PiconFormat.NEUTRINO:
         convert_to_neutrino(to_convert, dest_path)
     elif p_format is PiconFormat.OSCAM:
-        convert_to_oscam(to_convert, dest_path)
+        convert_to_oscam(to_convert, dest_path, services)
 
     if done_callback:
         done_callback()
@@ -547,7 +548,7 @@ def convert_to_neutrino(files, dest_path):
         shutil.copyfile(file, dest)
 
 
-def convert_to_oscam(files, dest_path):
+def convert_to_oscam(files, dest_path, services):
     if not files:
         return
 
@@ -558,15 +559,20 @@ def convert_to_oscam(files, dest_path):
     from PIL import Image
 
     for base_name, file in files:
-        sid = base_name
-        caid = "0000"
-        data = base_name.split("_")
-
-        if len(data):
-            sid = data[3].rjust(4, "0")
-
-        dest_file = f"{dest_path}{os.sep}IC_{caid}_{sid}.tpl"
-        log(f'Converting "{base_name}" to "{dest_file}"')
+        to_convert = []
+        srv = services.get(base_name, None)
+        if srv:
+            sid, flags = srv.ssid, srv.flags_cas
+            if flags:
+                cas = list(map(lambda c: c.lstrip("C:"), filter(lambda x: x.startswith("C:"), flags.split(","))))
+                if cas:
+                    [to_convert.append(f"{dest_path}{os.sep}IC_{c.upper()}_{sid.upper()}.tpl") for c in cas]
+                else:
+                    to_convert.append(f"{dest_path}{os.sep}{base_name}.tpl")
+            else:
+                to_convert.append(f"{dest_path}{os.sep}{base_name}.tpl")
+        else:
+            to_convert.append(f"{dest_path}{os.sep}{base_name}.tpl")
 
         image = Image.open(file)
         image.thumbnail((100, 60))
@@ -575,8 +581,11 @@ def convert_to_oscam(files, dest_path):
         image.save(buff, format="PNG")
         data_bytes = b"data:image/png;base64," + base64.b64encode(buff.getvalue())
 
-        with open(dest_file, "wb") as f:
-            f.write(data_bytes)
+        for dest_file in to_convert:
+            log(f'Converting "{base_name}" to "{dest_file}"')
+
+            with open(dest_file, "wb") as f:
+                f.write(data_bytes)
 
 
 if __name__ == "__main__":

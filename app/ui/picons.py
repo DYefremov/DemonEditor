@@ -1023,7 +1023,7 @@ class PiconManager(Gtk.Box):
             services = self._app.current_services
             ids = {services.get(s).picon_id for s in self._app.current_bouquets.get(bq_selected) if s in services}
 
-        convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids,
+        convert_to(src_path=picons_path, dest_path=save_path, p_format=p_format, ids=ids, services=self._services,
                    done_callback=lambda: self.show_info_message(translate("Done!"), Gtk.MessageType.INFO))
 
     @run_idle
