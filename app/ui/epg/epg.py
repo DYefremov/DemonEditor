@@ -61,6 +61,76 @@ class RefsSource(Enum):
     XML = 1
 
 
+class StringComparer:
+    """ Additional string similarity comparer. """
+
+    class ALG(Enum):
+        JARO = "Jaro-Winkler"
+
+    @staticmethod
+    def jaro_distance(s1, s2):
+        """ Returns [Jaro-Winkler] distance of two strings."""
+        if s1 == s2:
+            return 1.0
+
+        len1, len2 = len(s1), len(s2)
+        if len1 == 0 or len2 == 0:
+            return 0.0
+
+        match = 0
+        max_dist = (max(len(s1), len(s2)) // 2) - 1
+        s1_hash = [0] * len(s1)
+        s2_hash = [0] * len(s2)
+
+        for i in range(len1):
+            for j in range(max(0, i - max_dist), min(len2, i + max_dist + 1)):
+                if s1[i] == s2[j] and s2_hash[j] == 0:
+                    s1_hash[i] = 1
+                    s2_hash[j] = 1
+                    match += 1
+                    break
+
+        if match == 0:
+            return 0.0
+
+        t = 0
+        point = 0
+
+        for i in range(len1):
+            if s1_hash[i]:
+                while s2_hash[point] == 0:
+                    point += 1
+
+                if s1[i] != s2[point]:
+                    point += 1
+                    t += 1
+                else:
+                    point += 1
+            t /= 2
+
+        return (match / len1 + match / len2 + (match - t) / match) / 3.0
+
+    @staticmethod
+    def is_similar(s1, s2, alg, max_ch=4, ratio=0.92):
+        """ Returns similarity of two strings. """
+        if alg is StringComparer.ALG.JARO:
+            dist = StringComparer.jaro_distance(s1, s2)
+            if dist > 0.7:
+                prefix = 0
+                for i in range(min(len(s1), len(s2))):
+                    if s1[i] == s2[i]:
+                        prefix += 1
+                    else:
+                        break
+
+                prefix = min(max_ch, prefix)  # Maximum of [max_ch] characters are allowed in prefix!
+                dist += 0.1 * prefix * (1 - dist)
+
+            return dist > ratio
+        else:
+            raise ValueError(f"This algorithm [{alg}] is not supported!")
+
+
 class EpgCache(abc.ABC):
     def __init__(self, app):
         super().__init__()
@@ -864,6 +934,8 @@ class EpgDialog:
         self._left_action_box = builder.get_object("left_action_box")
         self._xml_download_progress_bar = builder.get_object("xml_download_progress_bar")
         self._src_load_spinner = builder.get_object("src_load_spinner")
+        self._auto_config_button = builder.get_object("auto_config_button")
+        self._enable_deep_comparing_switch = builder.get_object("enable_deep_comparing_switch")
         # Filter
         self._filter_bar = builder.get_object("filter_bar")
         self._filter_entry = builder.get_object("filter_entry")
@@ -1153,12 +1225,17 @@ class EpgDialog:
                                      num=r[Column.FAV_NUM])
                 services.append(srv)
 
-        ChannelsParser.write_refs_to_xml("{}{}.xml".format(response, self._bouquet_name), services)
+        ChannelsParser.write_refs_to_xml(f"{response}{self._bouquet_name}.xml", services)
         self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     @run_idle
     def on_auto_configuration(self, item):
+        gen = self.auto_configuration()
+        GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+
+    def auto_configuration(self):
         """ Simple mapping of services by name. """
+        self._auto_config_button.set_sensitive(False)
         use_cyrillic = locale.getdefaultlocale()[0] in ("ru_RU", "be_BY", "uk_UA", "sr_RS")
         tr = None
         if use_cyrillic:
@@ -1186,20 +1263,28 @@ class EpgDialog:
             if ref:
                 self.assign_data(r, ref, True)
                 success_count += 1
+                self._bouquet_epg_count_label.set_text(str(success_count))
+                yield True
             else:
                 not_founded[name] = r
+
         # Additional attempt to search in the remaining elements
+        use_deep = self._enable_deep_comparing_switch.get_active()
         for n in not_founded:
             for k in source:
-                if k.startswith(n):
+                if StringComparer.is_similar(k, n, StringComparer.ALG.JARO) if use_deep else k.startswith(n):
                     self.assign_data(not_founded[n], source[k], True)
                     success_count += 1
+                    self._bouquet_epg_count_label.set_text(str(success_count))
                     break
+                yield True
 
+        self._auto_config_button.set_sensitive(True)
         self.update_epg_count()
         self.show_info_message("{} {} {}".format(translate("Done!"),
                                                  translate("Count of successfully configured services:"),
                                                  success_count), Gtk.MessageType.INFO)
+        yield True
 
     def assign_refs(self, model, paths, data):
         [self.assign_data(model[p], data) for p in paths]
@@ -1369,6 +1454,7 @@ class EpgDialog:
             self._url_to_xml_entry.set_text(epg_options.get("url_to_xml", ""))
             self._enable_dat_filter = epg_options.get("enable_filtering", False)
             self._enable_filtering_switch.set_active(self._enable_dat_filter)
+            self._enable_deep_comparing_switch.set_active(epg_options.get("enable_deep_comparing", False))
             epg_dat_path = epg_options.get("epg_dat_path", epg_dat_path)
             self._epg_dat_path_entry.set_text(epg_dat_path)
             self._epg_dat_stb_path_entry.set_text(epg_options.get("epg_dat_stb_path", default_epg_data_stb_path))
@@ -1385,6 +1471,7 @@ class EpgDialog:
                                       "local_path_to_xml": self._xml_chooser_button.get_filename(),
                                       "url_to_xml": self._url_to_xml_entry.get_text(),
                                       "enable_filtering": self._enable_filtering_switch.get_active(),
+                                      "enable_deep_comparing": self._enable_deep_comparing_switch.get_active(),
                                       "epg_dat_path": self._epg_dat_path_entry.get_text(),
                                       "epg_dat_stb_path": self._epg_dat_stb_path_entry.get_text(),
                                       "epg_data_update_on_start": self._update_on_start_switch.get_active()}
