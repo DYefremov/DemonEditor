@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,7 @@ MARKER_FORMAT = " 1:64:{}:0:0:0:0:0:0:0::{}\n#DESCRIPTION {}\n"
 PICON_FORMAT = "{}_{}_{:X}_{:X}_{:X}_{:X}_{:X}_0_0_0.png"
 
 ENCODING_BLACKLIST = {"MacRoman"}
+
 
 class StreamType(Enum):
     DVB_TS = "1"
@@ -101,6 +102,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                 data = dict(pattern.findall(line))
                 name = data.get("tvg-name", name)
                 picon = data.get("tvg-logo", None)
+                epg_id = data.get("tvg-id", None)
 
                 if s_type is SettingsType.ENIGMA_2:
                     group = data.get("group-title", None)
@@ -111,6 +113,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                 params[0] = sid_counter
                 sid_counter += 1
                 fav_id = get_fav_id(url, name, s_type, params)
+
                 if s_type is SettingsType.ENIGMA_2:
                     p_id = get_picon_id(params)
                     if group not in groups:
@@ -122,7 +125,7 @@ def parse_m3u(path, s_type, detect_encoding=True, params=None):
                         services.append(Service(None, None, None, group, *aggr[0:3], m_name, *aggr, m_id, None))
 
                 if all((name, url, fav_id)):
-                    services.append(Service(None, None, IPTV_ICON, name, *aggr[0:2], group,
+                    services.append(Service(epg_id, None, IPTV_ICON, name, *aggr[0:2], group,
                                             st, picon, p_id, *s_aggr, url, fav_id, None))
                 else:
                     log(f"*.m3u* parse error ['{path}']: name[{name}], url[{url}], fav id[{fav_id}]")
