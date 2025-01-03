@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
 """ Module for working with EPG. """
 import abc
 import gzip
+import json
 import locale
 import os
 import re
@@ -43,7 +44,7 @@ from urllib.parse import quote
 
 from gi.repository import GLib
 
-from app.commons import run_idle, run_task, run_with_delay
+from app.commons import run_idle, run_task, run_with_delay, log
 from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP, EpgSource, IS_WIN
@@ -132,6 +133,9 @@ class StringComparer:
 
 
 class EpgCache(abc.ABC):
+    _CACHE_FILE = "epg-name-cache"
+    NAME_CACHE = {}  # service name -> id (tvg-id for *.m3u)
+
     def __init__(self, app):
         super().__init__()
         self.events = {}
@@ -152,6 +156,9 @@ class EpgCache(abc.ABC):
         self._app.connect("profile-changed", self.on_profile_changed)
         self._app.connect("epg-settings-changed", self.on_settings_changed)
         self._app.connect("task-canceled", self.on_xml_load_cancel)
+
+        if self._app.app_settings.enable_epg_name_cache:
+            self.init_name_cache(self._app.app_settings.default_data_path)
 
     @property
     def current_reader(self):
@@ -202,6 +209,30 @@ class EpgCache(abc.ABC):
 
         f_sha1 = sha1(url.encode("utf-8", errors="ignore")).hexdigest()
         return f"{path}epg{os.sep}{f_sha1}_epg.gz"
+
+    @staticmethod
+    @run_task
+    def update_name_cache(path, values):
+        EpgCache.NAME_CACHE.update(values)
+        log(f"[{EpgCache.__name__}] Updating name cache...")
+        f_name = f"{path}{EpgCache._CACHE_FILE}"
+        with open(f_name, "w", encoding="utf-8") as cf:
+            log(f"[{EpgCache.__name__}] Dumping name cache... -> [{f_name}]")
+            json.dump(EpgCache.NAME_CACHE, cf)
+
+    @staticmethod
+    @run_task
+    def init_name_cache(path):
+        f_name = f"{path}{EpgCache._CACHE_FILE}"
+        if not os.path.isfile(f_name):
+            return
+
+        log(f"[{EpgCache.__name__}] Name cache init...")
+        try:
+            with open(f_name, "r", encoding="utf-8") as cf:
+                EpgCache.NAME_CACHE.update(json.load(cf))
+        except Exception as e:
+            log(f"[{EpgCache.__name__}] Name cache init error: {e}")
 
 
 class FavEpgCache(EpgCache):

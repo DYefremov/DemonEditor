@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,7 @@ from app.eparser.iptv import (NEUTRINO_FAV_ID_FORMAT, StreamType, ENIGMA2_FAV_ID
 from app.settings import SettingsType
 from app.tools.yt import YouTubeException, YouTube
 from app.ui.dialogs import Action, show_dialog, DialogType, translate, get_builder, BaseDialog
+from app.ui.epg.epg import EpgCache
 from app.ui.main_helper import get_iptv_url, on_popup_menu, get_picon_pixbuf, show_info_bar_message, gen_bouquet_name
 from app.ui.uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, IPTV_ICON, Column, KeyboardKey, get_yt_icon, HeaderBar)
 
@@ -769,6 +770,8 @@ class M3uImportDialog(IptvListDialog):
 
         picons = {}
         services = self._services
+        if self._app.app_settings.enable_epg_name_cache:
+            EpgCache.update_name_cache(self._app.app_settings.default_data_path, {s[3]: s[0] for s in services if s[0]})
 
         if not self.is_all_data_default():
             services = []
