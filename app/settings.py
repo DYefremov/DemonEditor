@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -603,6 +603,15 @@ class Settings:
     @epg_xml_sources.setter
     def epg_xml_sources(self, value):
         self._cp_settings["epg_xml_sources"] = value
+
+    @property
+    def enable_epg_name_cache(self):
+        """ Enables additional name cache for EPG. """
+        return self._settings.get("enable_epg_name_cache", False)
+
+    @enable_epg_name_cache.setter
+    def enable_epg_name_cache(self, value):
+        self._settings["enable_epg_name_cache"] = value
 
     # *********** FTP ************ #
 

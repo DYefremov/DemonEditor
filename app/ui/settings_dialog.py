@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -185,6 +185,7 @@ class SettingsDialog:
         self._enable_yt_dl_switch = builder.get_object("enable_yt_dl_switch")
         self._enable_update_yt_dl_switch = builder.get_object("enable_update_yt_dl_switch")
         self._enable_send_to_switch = builder.get_object("enable_send_to_switch")
+        self._enable_epg_name_cache_switch = builder.get_object("enable_epg_name_cache_switch")
         self._enable_exp_switch = builder.get_object("enable_experimental_switch")
         # Profiles.
         self._profile_view = builder.get_object("profile_tree_view")
@@ -338,6 +339,7 @@ class SettingsDialog:
             self._enable_yt_dl_switch.set_active(self._settings.enable_yt_dl)
             self._enable_update_yt_dl_switch.set_active(self._settings.enable_yt_dl_update)
             self._enable_send_to_switch.set_active(self._settings.enable_send_to)
+            self._enable_epg_name_cache_switch.set_active(self._settings.enable_epg_name_cache)
             self._set_color_switch.set_active(self._settings.use_colors)
             new_rgb = Gdk.RGBA()
             new_rgb.parse(self._settings.new_color)
@@ -420,6 +422,7 @@ class SettingsDialog:
             self._ext_settings.enable_yt_dl = self._enable_yt_dl_switch.get_active()
             self._ext_settings.enable_yt_dl_update = self._enable_update_yt_dl_switch.get_active()
             self._ext_settings.enable_send_to = self._enable_send_to_switch.get_active()
+            self._ext_settings.enable_epg_name_cache = self._enable_epg_name_cache_switch.get_active()
 
         self._ext_settings.default_profile = list(filter(lambda r: r[1], self._profile_view.get_model()))[0][0]
         self._ext_settings.save()
@@ -497,6 +500,7 @@ class SettingsDialog:
             self._support_ver5_switch.set_active(state)
             self._unlimited_buffer_switch.set_active(state)
             self._enable_send_to_switch.set_active(state)
+            self._enable_epg_name_cache_switch.set_active(state)
             self._enable_yt_dl_switch.set_active(state)
 
     def on_force_bq_name(self, switch, state):

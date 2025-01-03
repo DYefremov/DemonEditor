@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.38.2 
 
-Copyright (C)  2018-2023 Dmitriy Yefremov
+Copyright (C)  2018-2025 Dmitriy Yefremov
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
@@ -17,7 +17,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type all_permissive -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor. -->
-  <!-- interface-copyright  2018-2023 Dmitriy Yefremov -->
+  <!-- interface-copyright  2018-2025 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkAdjustment" id="font_size_adjustment">
     <property name="lower">8</property>
@@ -3946,6 +3946,46 @@ Author: Dmitriy Yefremov
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="enable_epg_name_cache_box">
+                            <property name="visible">True</property>
+                            <property name="sensitive" bind-source="enable_experimental_switch" bind-property="active">False</property>
+                            <property name="can-focus">False</property>
+                            <property name="tooltip-text" translatable="yes">Enables additional cache to display EPG for some IPTV channels imported from *.m3u.</property>
+                            <child>
+                              <object class="GtkLabel" id="enable_epg_name_cache_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="label" translatable="yes">Enable additional name cache for EPG</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSwitch" id="enable_epg_name_cache_switch">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="halign">end</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="pack-type">end</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
                           </packing>
                         </child>
                       </object>
