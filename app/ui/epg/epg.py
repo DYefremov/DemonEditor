@@ -317,13 +317,18 @@ class FavEpgCache(EpgCache):
     def update_xml_data(self):
         services = self._app.current_services
         names = {services[s].service for s in self._app.current_bouquets.get(self._current_bq, []) if s in services}
+        if self._app.app_settings.enable_epg_name_cache:
+            id_names = set(filter(lambda n: n in EpgCache.NAME_CACHE, names))
+            names -= id_names
+            names.update({EpgCache.NAME_CACHE.get(n) for n in id_names})
+
         for name, events in self._reader.get_current_events(names).items():
             ev = min(events, key=lambda x: x.start, default=None)
             if ev:
                 self.events[name] = ev
 
     def get_current_event(self, service_name):
-        return self.events.get(service_name, EpgEvent())
+        return self.events.get(EpgCache.NAME_CACHE.get(service_name, service_name), EpgEvent())
 
     def get_current_events(self, service_name):
         return [EpgEvent()]
@@ -417,6 +422,12 @@ class TabEpgCache(EpgCache):
     def update_epg_data(self) -> bool:
         services = self._app.current_services
         names = {services[s].service for s in chain.from_iterable(self._app.current_bouquets.values()) if s in services}
+
+        if self._app.app_settings.enable_epg_name_cache:
+            id_names = set(filter(lambda n: n in EpgCache.NAME_CACHE, names))
+            names -= id_names
+            names.update({EpgCache.NAME_CACHE.get(n) for n in id_names})
+
         for name, events in self._reader.get_current_events(names).items():
             self.events[name] = events
 
@@ -428,7 +439,7 @@ class TabEpgCache(EpgCache):
         pass
 
     def get_current_events(self, service_name) -> list:
-        return self.events.get(service_name, [])
+        return self.events.get(EpgCache.NAME_CACHE.get(service_name, service_name), [])
 
 
 class EpgSettingsPopover(Gtk.Popover):

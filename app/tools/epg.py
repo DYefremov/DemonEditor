@@ -324,7 +324,7 @@ class XmlTvReader(Reader):
         utc = dt.timestamp()
         offset = datetime.now() - dt
 
-        for srv in filter(lambda s: any(name in names for name in s.names), self._cache.values()):
+        for srv in filter(lambda s: s.id in names or any(name in names for name in s.names), self._cache.values()):
             [self.process_event(ev, events, offset, srv) for ev in filter(lambda s: s.duration > utc, srv.events)]
 
         return events
