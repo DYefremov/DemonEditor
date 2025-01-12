@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -276,8 +276,8 @@ class BouquetsReader:
 
                 s_type = ServiceType(srv_data[1])
                 if s_type is ServiceType.MARKER:
-                    m_data, sep, desc = srv.partition("#DESCRIPTION")
-                    services.append(BouquetService(desc.strip() if desc else "", BqServiceType.MARKER, srv, num))
+                    m_data, sep, desc = srv_data[-1].partition("#DESCRIPTION")
+                    services.append(BouquetService(desc.strip() if desc else m_data, BqServiceType.MARKER, srv, num))
                 elif s_type is ServiceType.SPACE:
                     m_data, sep, desc = srv.partition("#DESCRIPTION")
                     services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
