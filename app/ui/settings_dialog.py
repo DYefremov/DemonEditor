@@ -367,6 +367,7 @@ class SettingsDialog:
         self._settings.telnet_port = self._telnet_port_field.get_text()
         self._settings.telnet_timeout = int(self._telnet_timeout_spin_button.get_value())
         self._settings.services_path = self._services_field.get_text()
+        self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
         self._settings.user_bouquet_path = self._user_bouquet_field.get_text()
         self._settings.epg_dat_path = self._epg_dat_box.get_active_id()
         self._settings.picons_path = self._picons_paths_box.get_active_id()
