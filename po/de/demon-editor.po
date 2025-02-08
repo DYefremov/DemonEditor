@@ -1,8 +1,8 @@
-# Copyright (C) 2018-2024 Dmitriy Yefremov
+# Copyright (C) 2018-2025 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020-2024.
+# Dmitriy Yefremov, 2020-2025.
 # Thomas Schmidt, 2021.
 msgid ""
 msgstr ""
@@ -334,8 +334,8 @@ msgstr "Pfad zu Enigma2-Picons:"
 msgid "Specify the correct position value for the provider!"
 msgstr "Geben Sie den richtigen Positionswert für den Provider an!"
 
-msgid "Converter between name formats"
-msgstr "Konverter zwischen Namensformaten"
+msgid "Converter between formats"
+msgstr "Konverter zwischen Formaten"
 
 msgid "Receive picons for providers"
 msgstr "Picons für Provider erhalten"
@@ -1568,3 +1568,15 @@ msgstr "Benutzung mit Streamrelay"
 
 msgid "Remove use with Streamrelay"
 msgstr "Streamrelay nutzung löschen"
+
+msgid "Enable additional name cache for EPG"
+msgstr "Zusätzlichen Namenscache für EPG aktivieren"
+
+msgid "Enables additional cache to display EPG for some IPTV channels imported from *.m3u."
+msgstr "Aktiviert zusätzlichen Cache zur Anzeige des EPG für einige IPTV-Kanäle, die aus *.m3u importiert wurden."
+
+msgid "Enable deep name comparison"
+msgstr "Tiefer Namensvergleich aktivieren"
+
+msgid "Enables deeper name matching. Possible inaccuracies!"
+msgstr "Aktiviert tiefere Namensübereinstimmung. Mögliche Ungenauigkeiten!"

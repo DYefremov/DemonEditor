@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2024 Dmitriy Yefremov
+# Copyright (C) 2018-2025 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr ""
+msgstr "Dmitriy Yefremov"
 
 # Main
 msgid "Service"
@@ -332,8 +332,8 @@ msgstr "Шлях да піконаў фармату Enigma2:"
 msgid "Specify the correct position value for the provider!"
 msgstr "Пакажыце правільнае значэнне пазіцыі для правайдара!"
 
-msgid "Converter between name formats"
-msgstr "Канвертар фармату імёнаў"
+msgid "Converter between formats"
+msgstr "Канвертар фарматаў"
 
 msgid "Receive picons for providers"
 msgstr "Атрыманне піконаў для правайдараў"
@@ -1554,3 +1554,15 @@ msgstr "Скарыстаць Streamrelay"
 
 msgid "Remove use with Streamrelay"
 msgstr "Не выкарыстоўваць Streamrelay"
+
+msgid "Enable additional name cache for EPG"
+msgstr "Уключыць дадатковы кэш імёнаў для EPG"
+
+msgid "Enables additional cache to display EPG for some IPTV channels imported from *.m3u."
+msgstr "Улучае дадатковы кэш для адлюстравання EPG некаторых каналаў IPTV імпартаваных з *.m3u."
+
+msgid "Enable deep name comparison"
+msgstr "Уключыць глыбокае параўнанне імёнаў"
+
+msgid "Enables deeper name matching. Possible inaccuracies!"
+msgstr "Дазваляе глыбейшае параўнанне імёнаў. Магчымы недакладнасці!"
