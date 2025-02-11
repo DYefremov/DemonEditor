@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2024-09-29 22:18+0300\n"
+"PO-Revision-Date: 2025-02-10 22:56+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
@@ -335,8 +335,8 @@ msgstr "Enigma2 piconların yolu:"
 msgid "Specify the correct position value for the provider!"
 msgstr "Sağlayıcı için doğru pozisyon değerini belirtin!"
 
-msgid "Converter between name formats"
-msgstr "İsim formatları arasında dönüştürücü"
+msgid "Converter between formats"
+msgstr "Biçimler arasında dönüştürücü"
 
 msgid "Receive picons for providers"
 msgstr "Sağlayıcılar için picon alma"
@@ -1585,3 +1585,15 @@ msgstr "Streamrelay ile kullan"
 
 msgid "Remove use with Streamrelay"
 msgstr "Streamrelay ile kullanımı kaldır"
+
+msgid "Enable additional name cache for EPG"
+msgstr "EPG için ek ad önbelleğini etkinleştirin"
+
+msgid "Enables additional cache to display EPG for some IPTV channels imported from *.m3u."
+msgstr "*.m3u'dan içe aktarılan bazı IPTV kanalları için EPG'yi görüntülemek üzere ek önbelleği etkinleştirir."
+
+msgid "Enable deep name comparison"
+msgstr "Derin ad karşılaştırmasını etkinleştir"
+
+msgid "Enables deeper name matching. Possible inaccuracies!"
+msgstr "Daha derin isim eşleştirmesini etkinleştirir. Olası yanlışlıklar!"
