@@ -1,11 +1,11 @@
-# Copyright (C) 2018-2024 Dmitriy Yefremov
+# Copyright (C) 2018-2025 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
-# SPDX-FileCopyrightText: 2022, 2023, 2024 Massimo Pissarello <mapi68@gmail.com>
+# SPDX-FileCopyrightText: 2022, 2023, 2024, 2025 Massimo Pissarello <mapi68@gmail.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2024-08-16 08:21+0200\n"
+"PO-Revision-Date: 2025-02-10 18:37+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 24.05.2\n"
+"X-Generator: Lokalize 24.12.1\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello\nNicola Fanghella"
@@ -726,7 +726,7 @@ msgid "XML file"
 msgstr "File XML"
 
 msgid "Use web source"
-msgstr "Usa fonte web"
+msgstr "Usa sorgente web"
 
 msgid "Url to *.xml.gz file:"
 msgstr "Da URL a file *.xml.gz:"
@@ -822,8 +822,8 @@ msgstr "Abilita barra di riproduzione diretta"
 
 msgid "Enables direct sending and playback of media links on the receiver"
 msgstr ""
-"Abilita l'invio e la riproduzione diretta di collegamenti multimediali sul"
-" ricevitore"
+"Abilita invio e la riproduzione diretta di collegamenti multimediali sul ricev"
+"itore"
 
 msgid "Watch the channel in the program"
 msgstr "Guarda canale nel programma"
@@ -1322,7 +1322,7 @@ msgid "Length"
 msgstr "Durata"
 
 msgid "Additional source"
-msgstr "Fonte aggiuntiva"
+msgstr "Sorgente aggiuntiva"
 
 msgid "Automatically set the name selected in the favorites list."
 msgstr "Imposta automaticamente il nome selezionato nell'elenco dei preferiti."
@@ -1410,8 +1410,8 @@ msgstr "Riproduci dall'elenco principale"
 
 msgid "Enables URL parsing using yt-dlp to get direct links to media."
 msgstr ""
-"Abilita l'analisi degli URL utilizzando yt-dlp per ottenere collegamenti"
-" diretti ai contenuti multimediali."
+"Abilita analisi degli URL utilizzando yt-dlp per ottenere collegamenti diretti"
+" ai contenuti multimediali."
 
 msgid "Permissions..."
 msgstr "Permessi..."
@@ -1464,8 +1464,8 @@ msgid ""
 " selected.\n"
 "                          Recommended only if you have external storage."
 msgstr ""
-"Abilita il caricamento come archivio compresso se viene selezionato un numero"
-" elevato di picon (> 1000). Consigliato solo se si dispone di memoria esterna."
+"Abilita caricamento come archivio compresso se viene selezionato un numero ele"
+"vato di picon (> 1000). Consigliato solo se si dispone di memoria esterna."
 
 msgid "Clear \"New\" flag"
 msgstr "Rimuovi il flag \"Nuovo\""
@@ -1507,11 +1507,10 @@ msgid "Removed"
 msgstr "Rimosso"
 
 msgid "Enables overwriting existing main list services."
-msgstr ""
-"Abilita la sovrascrittura dei servizi esistenti dell'elenco principale."
+msgstr "Abilita sovrascrittura dei servizi esistenti dell'elenco principale."
 
 msgid "Enables skipping services import from lamedb."
-msgstr "Abilita il salto dell'importazione dei servizi da lamedb."
+msgstr "Abilita salto dell'importazione dei servizi da lamedb."
 
 msgid "Bouquets data only"
 msgstr "Bouquet solo dati"
@@ -1583,13 +1582,13 @@ msgid "Current EPG cache contents."
 msgstr "Contenuto attuale cache EPG."
 
 msgid "Source error!"
-msgstr "Errore fonte!"
+msgstr "Errore sorgente!"
 
 msgid "The EPG source for the favorites list is not set!"
-msgstr "La fonte EPG per l'elenco dei preferiti non è impostata!"
+msgstr "La sorgente EPG per l'elenco dei preferiti non è impostata!"
 
 msgid "Add to EPG sources list"
-msgstr "Aggiungi all'elenco delle fonti EPG"
+msgstr "Aggiungi all'elenco delle sorgenti EPG"
 
 msgid "Current bouquet"
 msgstr "Bouquet attuale"
@@ -1615,4 +1614,19 @@ msgstr "Usa con Streamrelay"
 msgid "Remove use with Streamrelay"
 msgstr "Rimuovi usa con Streamrelay"
 
+msgid "Enable additional name cache for EPG"
+msgstr "Abilita cache nomi aggiuntiva per EPG"
 
+msgid ""
+"Enables additional cache to display EPG for some IPTV channels imported from *"
+".m3u."
+msgstr ""
+"Abilita una cache aggiuntiva per visualizzare l'EPG per alcuni canali IPTV imp"
+"ortati da *.m3u."
+
+msgid "Enable deep name comparison"
+msgstr "Abilita confronto approfondito dei nomi"
+
+msgid "Enables deeper name matching. Possible inaccuracies!"
+msgstr ""
+"Abilita una corrispondenza più approfondita dei nomi. Possibili imprecisioni!"
