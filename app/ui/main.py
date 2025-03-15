@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -2761,7 +2761,8 @@ class Application(Gtk.Application):
         if not cas:
             return
         cvs = list(filter(lambda val: val.startswith("C:") and len(val) > 3, cas.split(",")))
-        self._cas_label.set_text(", ".join(map(str, sorted(set(CAS.get(v[:4].upper(), def_val) for v in cvs)))))
+        cas = sorted(set(CAS.get(v.upper(), CAS.get(v[:4].upper(), def_val)) for v in cvs))
+        self._cas_label.set_text(", ".join(map(str, cas)))
 
     def on_bouquets_selection(self, model, path, column):
         self.reset_view_sort_indication(self._fav_view)
