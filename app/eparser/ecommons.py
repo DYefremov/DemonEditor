@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -225,7 +225,8 @@ A_MODULATION = {"0": "Auto", "1": "QAM16", "2": "QAM32", "3": "QAM64", "4": "QAM
 
 # CAS
 CAS = {"C:26": "BISS", "C:0B": "Conax", "C:06": "Irdeto", "C:18": "Nagravision", "C:05": "Viaccess", "C:01": "SECA",
-       "C:0E": "PowerVu", "C:4A": "DRE-Crypt", "C:7B": "DRE-Crypt", "C:56": "Verimatrix", "C:09": "VideoGuard"}
+       "C:0E": "PowerVu", "C:4A": "DRE-Crypt", "C:7B": "DRE-Crypt", "C:56": "Verimatrix", "C:09": "VideoGuard",
+       "C:4AFC": "Panaccess"}
 
 # 'on' attribute  0070(hex) = 112(int) =  ONID(ONID-TID on www.lyngsat.com)
 PROVIDER = {112: "HTB+", 253: "Tricolor TV"}
