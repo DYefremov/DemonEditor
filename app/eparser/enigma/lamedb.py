@@ -294,7 +294,7 @@ class LameDbReader:
             tmp.append(line)
             if i == size:
                 # check if provider (p:) is present in line
-                if not line.startswith("p:") and not ",p:" in line:
+                if "p:" not in line:
                     # To prevent cases of incorrect service data formation
                     # (e.g. the name contains a line break)
                     tmp.pop()
