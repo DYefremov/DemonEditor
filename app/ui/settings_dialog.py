@@ -444,6 +444,11 @@ class SettingsDialog:
     def on_connection_test(self, item):
         if self._test_spinner.get_state() is Gtk.StateType.ACTIVE:
             return
+
+        if not self.is_data_correct((self._port_field, self._http_port_field, self._telnet_port_field)):
+            show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
+            return
+
         self.show_spinner(True)
         if self._ftp_radio_button.get_active():
             self.test_ftp()
@@ -454,7 +459,7 @@ class SettingsDialog:
 
     def test_http(self):
         user, password = self._login_field.get_text(), self._password_field.get_text()
-        host, port = self._host_field.get_text(), self._http_port_field.get_text()
+        host, port = self._host_field.get_text(), int(self._http_port_field.get_text())
         use_ssl = self._http_use_ssl_check_button.get_active()
         try:
             self.show_info_message(test_http(host, port, user, password, use_ssl=use_ssl, s_type=self._s_type),
@@ -468,7 +473,7 @@ class SettingsDialog:
 
     def test_telnet(self):
         timeout = int(self._telnet_timeout_spin_button.get_value())
-        host, port = self._host_field.get_text(), self._telnet_port_field.get_text()
+        host, port = self._host_field.get_text(), int(self._telnet_port_field.get_text())
         user, password = self._login_field.get_text(), self._password_field.get_text()
         try:
             self.show_info_message(test_telnet(host, port, user, password, timeout), Gtk.MessageType.INFO)
@@ -478,7 +483,7 @@ class SettingsDialog:
             self.show_spinner(False)
 
     def test_ftp(self):
-        host, port = self._host_field.get_text(), self._port_field.get_text()
+        host, port = self._host_field.get_text(), int(self._port_field.get_text())
         user, password = self._login_field.get_text(), self._password_field.get_text()
         try:
             self.show_info_message(f"OK.  {test_ftp(host, port, user, password)}", Gtk.MessageType.INFO)
