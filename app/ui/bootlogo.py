@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -268,7 +268,7 @@ class BootLogoManager(Gtk.Window):
     def download_data(self, f_name):
         try:
             settings = self._app.app_settings
-            with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+            with UtfFTP(host=settings.host, port=settings.port, user=settings.user, passwd=settings.password) as ftp:
                 ftp.encoding = "utf-8"
                 ftp.cwd(self._path_combo_box.get_active_id())
 
@@ -294,7 +294,7 @@ class BootLogoManager(Gtk.Window):
     def transfer_data(self, f_path):
         try:
             settings = self._app.app_settings
-            with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+            with UtfFTP(host=settings.host, port=settings.port, user=settings.user, passwd=settings.password) as ftp:
                 ftp.encoding = "utf-8"
                 ftp.cwd(self._path_combo_box.get_active_id())
 

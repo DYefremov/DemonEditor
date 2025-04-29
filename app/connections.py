@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import time
 import urllib
 import xml.etree.ElementTree as ETree
 from enum import Enum
-from ftplib import FTP, CRLF, Error, all_errors
+from ftplib import FTP, FTP_PORT, CRLF, Error, all_errors
 from http.client import RemoteDisconnected
 from pathlib import Path
 from telnetlib import Telnet
@@ -80,6 +80,10 @@ class HttpApiException(Exception):
 
 class UtfFTP(FTP):
     """ FTP class wrapper. """
+
+    def __init__(self, *, host="", port=FTP_PORT, user="", passwd="", **kwargs):
+        self.port = port
+        super().__init__(host, user, passwd, **kwargs)
 
     def retrlines(self, cmd, callback=None):
         """ Small modification of the original method.
@@ -372,7 +376,7 @@ class UtfFTP(FTP):
 
 
 def download_data(*, settings, download_type=DownloadType.ALL, callback=log, files_filter=None):
-    with UtfFTP(host=settings.host, user=settings.user, passwd=settings.password) as ftp:
+    with UtfFTP(host=settings.host, port=settings.port, user=settings.user, passwd=settings.password) as ftp:
         ftp.encoding = "utf-8"
         callback("FTP OK.")
         save_path = settings.profile_data_path
@@ -413,6 +417,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
     base = "web" if s_type is SettingsType.ENIGMA_2 else "control"
     url = f"{base_url}/{base}/"
     tn, ht = None, None  # Telnet, HTTP.
+    ftp_port, telnet_port = settings.port, settings.telnet_port
 
     try:
         use_http = use_http and test_http(host, port, user, password, use_ssl=use_ssl, skip_message=True, s_type=s_type)
@@ -441,14 +446,14 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
         else:
             if download_type is not DownloadType.PICONS:
                 # Telnet
-                tn = telnet(host=host, user=user, password=password, timeout=settings.telnet_timeout)
+                tn = telnet(host=host, port=telnet_port, user=user, password=password, timeout=settings.telnet_timeout)
                 next(tn)
                 # Terminate Enigma2 or Neutrino.
                 callback("Telnet initialization ...")
                 tn.send("init 4")
                 callback("Stopping GUI...")
 
-        with UtfFTP(host=host, user=user, passwd=password) as ftp:
+        with UtfFTP(host=host, port=ftp_port, user=user, passwd=password) as ftp:
             ftp.encoding = "utf-8"
             callback("FTP OK.")
             sat_xml_path = settings.satellites_xml_path
@@ -506,7 +511,8 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
                 if compress:
                     if not tn:
                         callback("Telnet initialization...")
-                        tn = telnet(host=host, user=user, password=password, timeout=settings.telnet_timeout)
+                        tn = telnet(host=host, port=telnet_port, user=user, password=password,
+                                    timeout=settings.telnet_timeout)
                         next(tn)
 
                     callback("Extracting...")
@@ -895,7 +901,7 @@ class HttpAPI:
 
 def test_ftp(host, port, user, password, timeout=5):
     try:
-        with FTP(host=host, user=user, passwd=password, timeout=timeout) as ftp:
+        with UtfFTP(host=host, port=port, user=user, passwd=password, timeout=timeout) as ftp:
             return ftp.getwelcome()
     except all_errors as e:
         raise TestException(e)

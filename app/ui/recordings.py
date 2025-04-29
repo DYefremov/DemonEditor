@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -143,7 +143,8 @@ class RecordingsTool(Gtk.Box):
             if self._ftp:
                 self._ftp.close()
 
-            self._ftp = UtfFTP(host=self._settings.host, user=self._settings.user, passwd=self._settings.password)
+            host, port = self._settings.host, self._settings.port
+            self._ftp = UtfFTP(host=host, port=port, user=self._settings.user, passwd=self._settings.password)
             self._ftp.encoding = "utf-8"
         except all_errors:
             pass  # NOP
