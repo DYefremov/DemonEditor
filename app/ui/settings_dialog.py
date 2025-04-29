@@ -269,7 +269,13 @@ class SettingsDialog:
     def on_response(self, dialog, resp):
         if resp == Gtk.ResponseType.ACCEPT:
             self._updated = self.on_save_settings()
-        dialog.destroy()
+            if not self._updated:
+                return True
+
+        if resp == Gtk.ResponseType.DELETE_EVENT or resp == Gtk.ResponseType.ACCEPT:
+            dialog.destroy()
+
+        return False
 
     def on_field_button_press(self, entry):
         update_entry_data(entry, self._dialog, self._settings)
@@ -291,12 +297,12 @@ class SettingsDialog:
         self._hosts_box.remove_all()
         self._remove_host_button.set_sensitive(len([self._hosts_box.append(h, h) for h in self._settings.hosts]) > 1)
         self._hosts_box.set_active_id(self._settings.host)
-        self._port_field.set_text(self._settings.port)
+        self._port_field.set_text(str(self._settings.port))
         self._login_field.set_text(self._settings.user)
         self._password_field.set_text(self._settings.password)
-        self._http_port_field.set_text(self._settings.http_port)
+        self._http_port_field.set_text(str(self._settings.http_port))
         self._http_use_ssl_check_button.set_active(self._settings.http_use_ssl)
-        self._telnet_port_field.set_text(self._settings.telnet_port)
+        self._telnet_port_field.set_text(str(self._settings.telnet_port))
         self._telnet_timeout_spin_button.set_value(self._settings.telnet_timeout)
         self._services_field.set_text(self._settings.services_path)
         self._user_bouquet_field.set_text(self._settings.user_bouquet_path)
@@ -353,18 +359,18 @@ class SettingsDialog:
     def on_apply_profile_settings(self, item=None):
         if not self.is_data_correct(self._digit_elems):
             show_dialog(DialogType.ERROR, self._dialog, "Error. Verify the data!")
-            return
+            return False
 
         self._s_type = SettingsType(int(self._settings_type_box.get_active_id()))
         self._settings.setting_type = self._s_type
         self._settings.host = self._host_field.get_text()
         self._settings.hosts = [h[1] for h in self._hosts_box.get_model()]
-        self._settings.port = self._port_field.get_text()
+        self._settings.port = int(self._port_field.get_text())
         self._settings.user = self._login_field.get_text()
         self._settings.password = self._password_field.get_text()
-        self._settings.http_port = self._http_port_field.get_text()
+        self._settings.http_port = int(self._http_port_field.get_text())
         self._settings.http_use_ssl = self._http_use_ssl_check_button.get_active()
-        self._settings.telnet_port = self._telnet_port_field.get_text()
+        self._settings.telnet_port = int(self._telnet_port_field.get_text())
         self._settings.telnet_timeout = int(self._telnet_timeout_spin_button.get_value())
         self._settings.services_path = self._services_field.get_text()
         self._settings.satellites_xml_path = self._satellites_xml_field.get_text()
@@ -372,11 +378,15 @@ class SettingsDialog:
         self._settings.epg_dat_path = self._epg_dat_box.get_active_id()
         self._settings.picons_path = self._picons_paths_box.get_active_id()
 
+        return True
+
     def on_save_settings(self, item=None):
         if show_dialog(DialogType.QUESTION, self._dialog) != Gtk.ResponseType.OK:
             return False
 
-        self.on_apply_profile_settings()
+        if not self.on_apply_profile_settings():
+            return False
+
         self._ext_settings.profiles = self._settings.profiles
         self._ext_settings.backup_before_save = self._before_save_switch.get_active()
         self._ext_settings.backup_before_downloading = self._before_downloading_switch.get_active()

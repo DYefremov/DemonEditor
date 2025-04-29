@@ -839,6 +839,7 @@ Author: Dmitriy Yefremov
                                     <property name="max-width-chars">6</property>
                                     <property name="text">21</property>
                                     <property name="primary-icon-name">network-workgroup-symbolic</property>
+                                    <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left-attach">1</property>
@@ -861,6 +862,7 @@ Author: Dmitriy Yefremov
                                         <property name="max-width-chars">6</property>
                                         <property name="text" translatable="yes">80</property>
                                         <property name="primary-icon-name">network-workgroup-symbolic</property>
+                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -906,6 +908,7 @@ Author: Dmitriy Yefremov
                                         <property name="max-width-chars">6</property>
                                         <property name="text" translatable="yes">23</property>
                                         <property name="primary-icon-name">network-workgroup-symbolic</property>
+                                        <signal name="changed" handler="on_digit_entry_changed" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
