@@ -56,9 +56,9 @@ class Defaults:
     USER = "root"
     PASSWORD = ""
     HOST = "127.0.0.1"
-    FTP_PORT = "21"
-    HTTP_PORT = "80"
-    TELNET_PORT = "23"
+    FTP_PORT = 21
+    HTTP_PORT = 80
+    TELNET_PORT = 23
     HTTP_USE_SSL = False
     # Enigma2.
     BOX_SERVICES_PATH = "/etc/enigma2/"
@@ -305,11 +305,11 @@ class Settings:
         self._cp_settings["hosts"] = value
 
     @property
-    def port(self):
-        return self._cp_settings.get("port", self.get_default("port"))
+    def port(self) -> int:
+        return int(self._cp_settings.get("port", self.get_default("port")))
 
     @port.setter
-    def port(self, value):
+    def port(self, value: int):
         self._cp_settings["port"] = value
 
     @property
@@ -329,19 +329,19 @@ class Settings:
         self._cp_settings["password"] = value
 
     @property
-    def http_port(self):
-        return self._cp_settings.get("http_port", self.get_default("http_port"))
+    def http_port(self) -> int:
+        return int(self._cp_settings.get("http_port", self.get_default("http_port")))
 
     @http_port.setter
-    def http_port(self, value):
+    def http_port(self, value: int):
         self._cp_settings["http_port"] = value
 
     @property
-    def http_timeout(self):
+    def http_timeout(self) -> int:
         return self._cp_settings.get("http_timeout", self.get_default("http_timeout"))
 
     @http_timeout.setter
-    def http_timeout(self, value):
+    def http_timeout(self, value: int):
         self._cp_settings["http_timeout"] = value
 
     @property
@@ -353,11 +353,11 @@ class Settings:
         self._cp_settings["http_use_ssl"] = value
 
     @property
-    def telnet_port(self):
-        return self._cp_settings.get("telnet_port", self.get_default("telnet_port"))
+    def telnet_port(self) -> int:
+        return int(self._cp_settings.get("telnet_port", self.get_default("telnet_port")))
 
     @telnet_port.setter
-    def telnet_port(self, value):
+    def telnet_port(self, value: int):
         self._cp_settings["telnet_port"] = value
 
     @property
