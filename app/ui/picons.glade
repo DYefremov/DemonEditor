@@ -1682,10 +1682,10 @@ Author: Dmitriy Yefremov
                             <property name="spacing">5</property>
                             <child>
                               <object class="GtkLabel" id="coverter_bq_label">
+                                <property name="label" translatable="yes">Convert for selected bouquets</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="halign">end</property>
-                                <property name="label">Convert for selected bouquets</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>

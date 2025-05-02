@@ -258,8 +258,14 @@ msgid "Extra:"
 msgstr "Дадаткова:"
 
 # Filter bar
-msgid "Only free"
-msgstr "Толькі адкрытыя"
+msgid "Access"
+msgstr "Доступ"
+
+msgid "Free (FTA)"
+msgstr "Адкрытыя (FTA)"
+
+msgid "Coded"
+msgstr "Закадаваныя"
 
 msgid "All positions"
 msgstr "Усе пазіцыі"
@@ -1566,3 +1572,6 @@ msgstr "Уключыць глыбокае параўнанне імёнаў"
 
 msgid "Enables deeper name matching. Possible inaccuracies!"
 msgstr "Дазваляе глыбейшае параўнанне імёнаў. Магчымы недакладнасці!"
+
+msgid "Convert for selected bouquets"
+msgstr "Канвертаваць для абраных букетаў"

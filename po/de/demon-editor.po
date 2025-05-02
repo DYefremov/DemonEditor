@@ -260,8 +260,14 @@ msgid "Extra:"
 msgstr "Extra:"
 
 # Filter bar
-msgid "Only free"
-msgstr "Nur freie"
+msgid "Access"
+msgstr "Zugriff"
+
+msgid "Free (FTA)"
+msgstr "Freie (FTA)"
+
+msgid "Coded"
+msgstr "Codiert"
 
 msgid "All positions"
 msgstr "Alle Positionen"
@@ -1580,3 +1586,6 @@ msgstr "Tiefer Namensvergleich aktivieren"
 
 msgid "Enables deeper name matching. Possible inaccuracies!"
 msgstr "Aktiviert tiefere Namensübereinstimmung. Mögliche Ungenauigkeiten!"
+
+msgid "Convert for selected bouquets"
+msgstr "Konvertieren für ausgewählte Bouquets"
