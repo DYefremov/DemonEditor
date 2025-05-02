@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2024 Dmitriy Yefremov
+Copyright (c) 2018-2025 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ Author: Dmitriy Yefremov
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellite list editor. -->
-  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2025 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkListStore" id="alt_list_store">
     <columns>
@@ -294,6 +294,67 @@ Author: Dmitriy Yefremov
               </object>
             </child>
           </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkPopover" id="filter_cas_popover">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkButtonBox">
+        <property name="width-request">100</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="border-width">5</property>
+        <property name="orientation">vertical</property>
+        <property name="layout-style">expand</property>
+        <child>
+          <object class="GtkRadioButton" id="filter_all_button">
+            <property name="label" translatable="yes">All</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="active">True</property>
+            <property name="draw-indicator">False</property>
+            <signal name="toggled" handler="on_filter_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="filter_free_button">
+            <property name="label" translatable="yes">Free</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="draw-indicator">False</property>
+            <property name="group">filter_coded_button</property>
+            <signal name="toggled" handler="on_filter_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="filter_coded_button">
+            <property name="label" translatable="yes">Coded</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">False</property>
+            <property name="draw-indicator">False</property>
+            <property name="group">filter_all_button</property>
+            <signal name="toggled" handler="on_filter_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
         </child>
       </object>
     </child>
@@ -2022,22 +2083,23 @@ Author: Dmitriy Yefremov
                                               <object class="GtkBox" id="services_fs_box">
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
-                                                <property name="margin-left">5</property>
-                                                <property name="margin-right">5</property>
+                                                <property name="margin-start">5</property>
+                                                <property name="margin-end">5</property>
                                                 <property name="margin-bottom">5</property>
-                                                <property name="spacing">10</property>
+                                                <property name="orientation">vertical</property>
+                                                <property name="spacing">5</property>
                                                 <child>
                                                   <object class="GtkBox" id="filter_box">
                                                     <property name="can-focus">False</property>
                                                     <property name="valign">center</property>
                                                     <child>
-                                                      <object class="GtkToggleButton" id="filter_only_free_button">
+                                                      <object class="GtkMenuButton" id="filter_cas_menu_button">
                                                         <property name="width-request">50</property>
                                                         <property name="visible">True</property>
                                                         <property name="can-focus">False</property>
                                                         <property name="receives-default">True</property>
-                                                        <property name="tooltip-text" translatable="yes">Only free</property>
-                                                        <signal name="toggled" handler="on_filter_changed" swapped="no"/>
+                                                        <property name="tooltip-text" translatable="yes">Access</property>
+                                                        <property name="popover">filter_cas_popover</property>
                                                         <child>
                                                           <object class="GtkImage">
                                                             <property name="visible">True</property>

@@ -456,7 +456,9 @@ class Application(Gtk.Application):
         self._filter_types_model = builder.get_object("filter_types_list_store")
         self._filter_sat_pos_model = builder.get_object("filter_sat_pos_list_store")
         self._filter_bouquet_model = builder.get_object("filter_bouquet_list_store")
-        self._filter_only_free_button = builder.get_object("filter_only_free_button")
+        self._filter_all_button = builder.get_object("filter_all_button")
+        self._filter_free_button = builder.get_object("filter_free_button")
+        self._filter_coded_button = builder.get_object("filter_coded_button")
         self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
         self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
         self._filter_iptv_services_button = builder.get_object("filter_iptv_services_button")
@@ -3829,7 +3831,7 @@ class Application(Gtk.Application):
     def filter_set_default(self):
         """ Setting defaults for filter elements. """
         self._filter_entry.set_text("")
-        self._filter_only_free_button.set_active(False)
+        self._filter_all_button.set_active(True)
         self._filter_not_in_bq_button.set_active(False)
         self._filter_types_model.foreach(lambda m, p, i: m.set_value(i, 1, True))
         self._service_types.update({r[0] for r in self._filter_types_model})
@@ -3920,7 +3922,12 @@ class Application(Gtk.Application):
         txt = self._filter_entry.get_text().upper()
         for r in self._services_model:
             fav_id = r[Column.SRV_FAV_ID]
-            free = not r[Column.SRV_CODED] if self._filter_only_free_button.get_active() else True
+            free = True
+            if self._filter_free_button.get_active():
+                free = not r[Column.SRV_CODED]
+            elif self._filter_coded_button.get_active():
+                free = r[Column.SRV_CODED]
+
             self._filter_cache[fav_id] = all((free, fav_id not in self._in_bouquets,
                                               r[Column.SRV_TYPE] in self._service_types,
                                               r[Column.SRV_POS] in self._sat_positions,
