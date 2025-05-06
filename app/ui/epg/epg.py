@@ -704,7 +704,11 @@ class EpgTool(Gtk.Box):
                 return
 
             if self._multi_epg_button.get_active():
-                path = next((r.path for r in self._model if r[-1].get("e2eventservicename", None) == srv.service), None)
+                name =  srv.service
+                if self._app.app_settings.enable_epg_name_cache:
+                    name = EpgCache.NAME_CACHE.get(name, name)
+
+                path = next((r.path for r in self._model if r[-1].get("e2eventservicename", None) == name), None)
                 scroll_to(path, self._view) if path else None
             else:
                 self._app.wait_dialog.show()
