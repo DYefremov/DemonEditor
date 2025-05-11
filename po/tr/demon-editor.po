@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2025-02-10 22:56+0300\n"
+"PO-Revision-Date: 2025-05-11 19:32+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Poedit 3.6\n"
 
 msgid "translator-credits"
 msgstr "audi06_19 <info@dreamosat-forum.com>"
@@ -261,8 +261,14 @@ msgid "Extra:"
 msgstr "Ekstra:"
 
 # Filter bar
-msgid "Only free"
-msgstr "Sadece ücretsiz"
+msgid "Access"
+msgstr "Erişim"
+
+msgid "Free (FTA)"
+msgstr "Açık (FTA)"
+
+msgid "Coded"
+msgstr "Kodlanmış"
 
 msgid "All positions"
 msgstr "Tüm pozisyonlar"
@@ -1597,3 +1603,6 @@ msgstr "Derin ad karşılaştırmasını etkinleştir"
 
 msgid "Enables deeper name matching. Possible inaccuracies!"
 msgstr "Daha derin isim eşleştirmesini etkinleştirir. Olası yanlışlıklar!"
+
+msgid "Convert for selected bouquets"
+msgstr "Seçili buketler için dönüştür"
