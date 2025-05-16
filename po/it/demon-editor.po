@@ -880,7 +880,7 @@ msgid "To the end"
 msgstr "Alla fine"
 
 msgid "View"
-msgstr "Visualizza000zione"
+msgstr "Visualizzazione"
 
 msgid "Lock"
 msgstr "Blocca"
