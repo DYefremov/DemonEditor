@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2021 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,41 +27,14 @@
 
 
 import re
-import selectors
 import socket
 from collections import deque
-from telnetlib import Telnet
 
 from gi.repository import GLib
 
 from app.commons import run_task, run_idle, log
+from app.connections import ExtTelnet
 from app.ui.uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, MOD_MASK
-
-
-class ExtTelnet(Telnet):
-
-    def __init__(self, output_callback, **kwargs):
-        super().__init__(**kwargs)
-        self._output_callback = output_callback
-
-    def interact(self):
-        """ Interaction function, emulates a very dumb telnet client. """
-        with selectors.DefaultSelector() as selector:
-            selector.register(self, selectors.EVENT_READ)
-
-            while True:
-                for key, events in selector.select():
-                    if key.fileobj is self:
-                        try:
-                            text = self.read_very_eager()
-                        except EOFError as e:
-                            msg = "\n*** Connection closed by remote host ***\n"
-                            self._output_callback(msg)
-                            log(msg)
-                            raise e
-                        else:
-                            if text:
-                                self._output_callback(text)
 
 
 class TelnetClient(Gtk.Box):
@@ -158,7 +131,7 @@ class TelnetClient(Gtk.Box):
 
         key_code = event.hardware_keycode
         if not KeyboardKey.value_exist(key_code):
-            return
+            return None
 
         key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
@@ -181,6 +154,7 @@ class TelnetClient(Gtk.Box):
                 self._commands.append(cmd)
                 self._buf.insert_at_cursor(cmd, -1)
             return True
+        return False
 
     def delete_last_command(self):
         end = self._buf.get_end_iter()
