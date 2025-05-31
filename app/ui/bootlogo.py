@@ -33,6 +33,8 @@ from datetime import datetime
 from ftplib import all_errors
 from pathlib import Path
 
+from gi.repository.GObject import BindingFlags
+
 from app.commons import log, run_task
 from app.connections import UtfFTP
 from app.settings import IS_DARWIN
@@ -78,10 +80,10 @@ class BootLogoManager(Gtk.Window):
         data_box.pack_end(self._image_area, True, True, 5)
         self.add(main_box)
         # Buttons
-        add_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
-        add_button.set_tooltip_text(translate("Add image"))
-        add_button.set_always_show_image(True)
-        add_button.connect("clicked", self.on_add_image)
+        add_path_button = Gtk.Button.new_from_icon_name("insert-image-symbolic", Gtk.IconSize.BUTTON)
+        add_path_button.set_tooltip_text(translate("Add image"))
+        add_path_button.set_always_show_image(True)
+        add_path_button.connect("clicked", self.on_add_image)
         receive_button = Gtk.Button.new_from_icon_name("network-receive-symbolic", Gtk.IconSize.BUTTON)
         receive_button.set_tooltip_text(translate("Download from the receiver"))
         receive_button.set_always_show_image(True)
@@ -107,11 +109,13 @@ class BootLogoManager(Gtk.Window):
 
         action_box = Gtk.ButtonBox()
         action_box.set_layout(Gtk.ButtonBoxStyle.EXPAND)
-        action_box.add(add_button)
+        action_box.add(add_path_button)
         action_box.add(self._convert_button)
         action_box.add(self._format_button)
         data_box.pack_start(action_box, False, False, 0)
+
         # Settings.
+        self._stb_path_property = "boot_logo_manager_stb_paths"
         popover = Gtk.Popover()
         settings_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5, **base_margin)
         file_name_box = Gtk.Box(spacing=5)
@@ -124,15 +128,48 @@ class BootLogoManager(Gtk.Window):
 
         paths_box = Gtk.Box(spacing=5)
         paths_box.add(Gtk.Label(translate("STB path:")))
-        self._path_combo_box = Gtk.ComboBoxText()
-        [self._path_combo_box.append(p, p) for p in _E2_STB_PATHS]
-        self._path_combo_box.set_active_id(_E2_STB_PATHS[0])
+        self._path_combo_box = Gtk.ComboBoxText(has_entry=True)
+        self._path_entry = self._path_combo_box.get_child()
+        self._path_entry.set_can_focus(False)
+        self._path_entry.connect("focus-out-event", self.on_path_entry_focus_out)
+        # Init paths.
+        self._stb_paths = self._app.app_settings.get(self._stb_path_property, _E2_STB_PATHS)
+        [self._path_combo_box.append(p, p) for p in self._stb_paths]
+        self._path_combo_box.set_active_id(self._stb_paths[0])
         paths_box.pack_start(self._path_combo_box, True, True, 0)
-        settings_box.add(paths_box)
+        # Paths action box.
+        paths_action_box = Gtk.ButtonBox(homogeneous=True, layout_style=Gtk.ButtonBoxStyle.EXPAND)
+        self._remove_path_button = Gtk.Button.new_from_icon_name("list-remove-symbolic", Gtk.IconSize.BUTTON)
+        self._remove_path_button.set_tooltip_text(translate("Remove"))
+        self._remove_path_button.connect("clicked", self.on_remove_path)
+        add_e2_path_button = Gtk.Button.new_from_icon_name("list-add-symbolic", Gtk.IconSize.BUTTON)
+        add_e2_path_button.set_tooltip_text(translate("Add"))
+        add_e2_path_button.connect("clicked", self.on_add_path)
+        cancel_path_button = Gtk.Button.new_from_icon_name("edit-undo-symbolic", Gtk.IconSize.BUTTON)
+        cancel_path_button.set_tooltip_text(translate("Cancel"))
+        apply_path_button = Gtk.Button.new_from_icon_name("insert-link-symbolic", Gtk.IconSize.BUTTON)
+        apply_path_button.set_tooltip_text(translate("Apply"))
+        apply_path_button.set_can_focus(False)
+        apply_path_button.connect("clicked", self.on_apply_path)
 
+        paths_action_box.add(self._remove_path_button)
+        paths_action_box.add(add_e2_path_button)
+        paths_action_box.add(cancel_path_button)
+        paths_action_box.add(apply_path_button)
+        paths_box.pack_end(paths_action_box, True, True, 0)
+        settings_box.add(paths_box)
         settings_box.pack_end(settings_close_button, False, False, 0)
         settings_box.show_all()
+
+        cancel_path_button.set_visible(False)
+        apply_path_button.set_visible(False)
+        self._path_entry.bind_property("has-focus", apply_path_button, "visible")
+        apply_path_button.bind_property("visible", cancel_path_button, "visible")
+        apply_path_button.bind_property("visible", add_e2_path_button, "visible", BindingFlags.INVERT_BOOLEAN)
+        apply_path_button.bind_property("visible", self._remove_path_button, "visible", BindingFlags.INVERT_BOOLEAN)
+
         popover.add(settings_box)
+        popover.connect("closed", self.on_settings_closed)
         settings_button = Gtk.MenuButton(popover=popover, valign=Gtk.Align.CENTER, tooltip_text=translate("Options"))
         settings_button.add(Gtk.Image.new_from_icon_name("applications-system-symbolic", Gtk.IconSize.BUTTON))
 
@@ -180,6 +217,43 @@ class BootLogoManager(Gtk.Window):
         else:
             lines = out.decode(errors="ignore").splitlines()
             log(lines[0] if lines else lines)
+
+    def on_add_path(self, button):
+        self._path_entry.set_can_focus(True)
+        self._path_entry.grab_focus()
+
+    def on_remove_path(self, button):
+        self._path_combo_box.remove(self._path_combo_box.get_active())
+        self._path_combo_box.set_active(0)
+        self._remove_path_button.set_sensitive(len(self._path_combo_box.get_model()) > 1)
+
+    def on_apply_path(self, button):
+        path = self._path_entry.get_text()
+        paths = {r[0] for r in self._path_combo_box.get_model()}
+
+        if path in paths:
+            self._app.show_error_message("This path already exists!")
+            return True
+
+        self._path_combo_box.append(path, path)
+        self._path_combo_box.set_active_id(path)
+        self._remove_path_button.grab_focus()
+        self._remove_path_button.set_sensitive(len(paths))
+
+        return False
+
+    def on_path_entry_focus_out(self, entry, event):
+        entry.set_can_focus(False)
+        active = self._path_combo_box.get_active_id()
+        txt = entry.get_text()
+        if active != txt:
+            entry.set_text(active or "")
+
+    def on_settings_closed(self, popover):
+        paths = tuple(r[0] for r in self._path_combo_box.get_model())
+        if paths != self._stb_paths:
+            self._stb_paths = paths
+            self._app.app_settings.add(self._stb_path_property, self._stb_paths)
 
     def on_add_image(self, button):
         file_filter = None
