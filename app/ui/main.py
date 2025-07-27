@@ -2459,36 +2459,27 @@ class Application(Gtk.Application):
         bouquet = self._bouquets_model.append(parent, [name, locked, hidden, bq_type])
         bq_id = f"{name}:{bq_type}"
         services = []
-        extra_services = {}  # for services with different names in bouquet and main list
+        extra_services = {}  # For services with different names in the bouquet and main list.
         agr = [None] * 7
         for srv in bq.services:
             fav_id = srv.data
-            # IPTV and MARKER services
             s_type = srv.type
-            if s_type in (BqServiceType.MARKER, BqServiceType.IPTV, BqServiceType.SPACE):
-                icon = None
-                picon_id = None
-                data_id = srv.num
-                locked = None
-
-                if s_type is BqServiceType.IPTV:
-                    fav_id_data = fav_id.lstrip().split(":")
-                    if len(fav_id_data) > 10:
-                        data_id = ":".join(fav_id_data[:11])
-                        picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
-                        icon = LINK_ICON if data_id in self._stream_relay else IPTV_ICON
-                        locked = LOCKED_ICON if data_id in self._blacklist else None
-
-                srv = Service(None, None, icon, srv.name, locked, None, None, s_type.name,
-                              self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
-                self._services[fav_id] = srv
+            # Markers and spaces.
+            if s_type in (BqServiceType.MARKER, BqServiceType.SPACE):
+                self._services[fav_id] = Service(None, None, None, srv.name, None, None, None,
+                                                 s_type.name, None, None, *agr, srv.num, fav_id, None)
+            # IPTV services.
+            elif s_type is BqServiceType.IPTV:
+                self._services[fav_id] = self.get_bq_iptv_service(srv, agr)
+            # Alternatives.
             elif s_type is BqServiceType.ALT:
                 self._alt_file.add(f"{srv.data}:{bq_type}")
-                srv = Service(None, None, None, srv.name, locked, None, None, s_type.name,
-                              None, None, *agr, srv.data, fav_id, srv.num)
-                self._services[fav_id] = srv
+                self._services[fav_id] = Service(None, None, None, srv.name, locked, None, None, s_type.name,
+                                                 None, None, *agr, srv.data, fav_id, srv.num)
+                for s in filter(lambda x: x.type is BqServiceType.IPTV, srv[-1]):
+                    iptv_srv = self.get_bq_iptv_service(s, agr)
+                    self._services[iptv_srv.fav_id] = iptv_srv
             elif s_type is BqServiceType.BOUQUET:
-                # Sub bouquets!
                 self.append_bouquet(srv.data, bouquet)
             elif srv.name:
                 extra_services[fav_id] = srv.name
@@ -2498,6 +2489,24 @@ class Application(Gtk.Application):
         self._bq_file[bq_id] = bq.file
         if extra_services:
             self._extra_bouquets[bq_id] = extra_services
+
+    def get_bq_iptv_service(self, srv, agr):
+        fav_id = srv.data
+        data_id = srv.num
+        picon_id = None
+        icon = None
+        locked = None
+
+        fav_id_data = fav_id.lstrip().split(":")
+
+        if len(fav_id_data) > 10:
+            data_id = ":".join(fav_id_data[:11])
+            picon_id = "{}_{}_{}_{}_{}_{}_{}_{}_{}_{}.png".format(*fav_id_data[:10])
+            icon = LINK_ICON if data_id in self._stream_relay else IPTV_ICON
+            locked = LOCKED_ICON if data_id in self._blacklist else None
+
+        return Service(None, None, icon, srv.name, locked, None, None, srv.type.name,
+                       self._picons.get(picon_id, None), picon_id, *agr, data_id, fav_id, None)
 
     @run_idle
     def open_last_bouquet(self, app, profile):
