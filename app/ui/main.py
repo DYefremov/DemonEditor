@@ -4447,6 +4447,8 @@ class Application(Gtk.Application):
             itr_str, sep, source = txt.partition(self.DRAG_SEP)
             if source == self.SERVICE_MODEL:
                 model, id_col, t_col = self._services_view.get_model(), Column.SRV_FAV_ID, Column.SRV_TYPE
+            elif source == self.IPTV_MODEL:
+                model, id_col, t_col = self._iptv_services_view.get_model(), Column.IPTV_FAV_ID, Column.IPTV_TYPE
             elif source == self.FAV_MODEL:
                 model, id_col, t_col = self._fav_view.get_model(), Column.FAV_ID, Column.FAV_TYPE
             elif source == self.ALT_MODEL:
