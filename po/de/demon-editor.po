@@ -1589,3 +1589,9 @@ msgstr "Aktiviert tiefere Namensübereinstimmung. Mögliche Ungenauigkeiten!"
 
 msgid "Convert for selected bouquets"
 msgstr "Konvertieren für ausgewählte Bouquets"
+
+msgid "There were errors [%s] during bouquets loading!"
+msgstr "Beim Laden der Bouquets sind Fehler [%s] aufgetreten!"
+
+msgid "Check the log for more info."
+msgstr "Weitere Informationen finden Sie im Log."
