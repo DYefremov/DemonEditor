@@ -27,6 +27,7 @@
 
 
 """ Module for working with Enigma2 bouquets. """
+import os.path
 import re
 from collections import Counter
 from enum import Enum
@@ -39,6 +40,24 @@ _TV_FILE = "bouquets.tv"
 _RADIO_FILE = "bouquets.radio"
 _DEFAULT_BOUQUET_NAME = "favourites"
 _MARKER_PREFIX = "[MARKER!] "
+
+
+class ServiceType(Enum):
+    SERVICE = "0"
+    BOUQUET = "7"  # Sub bouquet.
+    MARKER = "64"
+    SPACE = "832"
+    ALT = "134"  # Alternatives.
+    UDP = "256"
+    HIDDEN = "519"  # Skip, hide.
+
+    @classmethod
+    def _missing_(cls, value):
+        log("Error. No matching service type [{} {}] was found.".format(cls.__name__, value))
+        return cls.SERVICE
+
+    def __str__(self):
+        return self.value
 
 
 class BouquetsWriter:
@@ -159,24 +178,6 @@ class BouquetsWriter:
             file.writelines(bouquet)
 
 
-class ServiceType(Enum):
-    SERVICE = "0"
-    BOUQUET = "7"  # Sub bouquet.
-    MARKER = "64"
-    SPACE = "832"
-    ALT = "134"  # Alternatives.
-    UDP = "256"
-    HIDDEN = "519"  # Skip, hide.
-
-    @classmethod
-    def _missing_(cls, value):
-        log("Error. No matching service type [{} {}] was found.".format(cls.__name__, value))
-        return cls.SERVICE
-
-    def __str__(self):
-        return self.value
-
-
 class BouquetsReader:
     """ Class for reading and parsing bouquets. """
     _BQ_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?([\w-]+)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
@@ -184,10 +185,15 @@ class BouquetsReader:
     _BQ_POST_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?(.*)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
-    __slots__ = ["_path"]
+    __slots__ = ["_path", "_has_errors"]
 
-    def __init__(self, path):
+    def __init__(self, path=""):
         self._path = path
+        self._has_errors = False
+
+    @property
+    def has_errors(self):
+        return self._has_errors
 
     def get(self):
         """ Returns a tuple of TV and Radio bouquets. """
@@ -253,12 +259,17 @@ class BouquetsReader:
 
         return bouquets
 
-    @staticmethod
-    def get_bouquet(path, f_name, bq_name):
+    def get_bouquet(self, path, f_name, bq_name):
         """ Parsing services ids from bouquet file. """
-        with open(f"{path}{f_name}", encoding="utf-8", errors="replace") as file:
+        bq_file = f"{path}{f_name}"
+        services = []
+
+        if not os.path.isfile(bq_file):
+            log(f"Bouquet reading error: No such bouquet [{bq_name}] file -> '{f_name}'.")
+            return f"{bq_name}", services
+
+        with open(bq_file, encoding="utf-8", errors="replace") as file:
             chs_list = file.read()
-            services = []
             srvs = list(filter(None, chs_list.split("\n#SERVICE")))  # filtering ['']
             # May come across empty[wrong] files!
             if not srvs:
@@ -282,19 +293,19 @@ class BouquetsReader:
                     m_data, sep, desc = srv.partition("#DESCRIPTION")
                     services.append(BouquetService(desc.strip() if desc else "", BqServiceType.SPACE, srv, num))
                 elif s_type is ServiceType.ALT:
-                    alt = re.match(BouquetsReader._BQ_PAT, srv)
+                    alt = re.match(self._BQ_PAT, srv)
                     if alt:
                         af_name, alt_name = alt.group(1), alt.group(3)
-                        alt_bq_name, alt_srvs = BouquetsReader.get_bouquet(path, af_name, alt_name)
+                        alt_bq_name, alt_srvs = self.get_bouquet(path, af_name, alt_name)
                         services.append(BouquetService(alt_bq_name, BqServiceType.ALT, alt_name, tuple(alt_srvs)))
                 elif s_type is ServiceType.BOUQUET:
-                    sub = re.match(BouquetsReader._BQ_PAT, srv)
+                    sub = re.match(self._BQ_PAT, srv)
                     if sub:
                         sf_name, sub_name, sub_type = sub.group(1), sub.group(3), sub.group(4)
-                        sub_bq_name, sub_srvs = BouquetsReader.get_bouquet(path, sf_name, sub_name)
+                        sub_bq_name, sub_srvs = self.get_bouquet(path, sf_name, sub_name)
                         bq = Bouquet(sub_bq_name, sub_type, tuple(sub_srvs), None, None, sf_name)
                         services.append(BouquetService(sub_bq_name, BqServiceType.BOUQUET, bq, num))
-                elif srv_data[0].strip() in BouquetsReader._STREAM_TYPES or srv_data[10].startswith(("http", "rtsp")):
+                elif srv_data[0].strip() in self._STREAM_TYPES or srv_data[10].startswith(("http", "rtsp")):
                     stream_data, sep, desc = srv.partition("#DESCRIPTION")
                     desc = desc.lstrip(":").strip() if desc else srv_data[-1].strip()
                     services.append(BouquetService(desc, BqServiceType.IPTV, srv, num))

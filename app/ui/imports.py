@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,7 @@ def import_bouquet(app, model, path, appender, file_path=None):
 
 def get_enigma2_bouquet(path):
     p = Path(path)
-    bq = BouquetsReader.get_bouquet(f"{p.parent}{SEP}", f"{p.stem}{p.suffix}", p.stem)
+    bq = BouquetsReader().get_bouquet(f"{p.parent}{SEP}", f"{p.stem}{p.suffix}", p.stem)
     bouquet = Bouquet(name=bq[0], type=BqType(p.suffix.lstrip(".")).value, services=bq[1], locked=None, hidden=None)
     return bouquet
 
