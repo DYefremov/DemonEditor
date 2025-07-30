@@ -38,10 +38,9 @@ from .satxml import get_satellites, write_satellites
 
 
 def get_services(data_path, s_type, format_version):
-    if s_type is SettingsType.ENIGMA_2:
-        return get_enigma_services(data_path, format_version)
-    elif s_type is SettingsType.NEUTRINO_MP:
+    if s_type is SettingsType.NEUTRINO_MP:
         return get_neutrino_services(data_path)
+    return get_enigma_services(data_path, format_version)
 
 
 @run_task
@@ -53,10 +52,11 @@ def write_services(path, channels, s_type, format_version):
 
 
 def get_bouquets(path, s_type):
-    if s_type is SettingsType.ENIGMA_2:
-        return BouquetsReader(path).get()
-    elif s_type is SettingsType.NEUTRINO_MP:
-        return get_neutrino_bouquets(path)
+    if s_type is SettingsType.NEUTRINO_MP:
+        return get_neutrino_bouquets(path), 0
+
+    reader = BouquetsReader(path)
+    return reader.get(), reader.errors
 
 
 def write_bouquet(path, bq, s_type):

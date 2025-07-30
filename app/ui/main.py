@@ -2361,7 +2361,10 @@ class Application(Gtk.Application):
             prf = self._s_type
             black_list = get_blacklist(data_path)
             self._stream_relay.refresh(data_path)
-            bouquets = get_bouquets(data_path, prf)
+            bouquets, errors = get_bouquets(data_path, prf)
+            if errors:
+                msg = translate('There were errors [%s] during bouquets loading!') % errors
+                self.show_info_message(f"{msg} {translate('Check the log for more info.')}", Gtk.MessageType.WARNING)
             yield True
             services = get_services(data_path, prf, self.get_format_version() if prf is SettingsType.ENIGMA_2 else 0)
             yield True

@@ -194,7 +194,11 @@ class ImportDialog:
         try:
             if not self._bouquets:
                 log("Import [init data]: getting bouquets...")
-                self._bouquets = get_bouquets(path, self._profile)
+                self._bouquets, errors = get_bouquets(path, self._profile)
+                if errors:
+                    msg = translate('There were errors [%s] during bouquets loading!') % errors
+                    self.show_info_message(f"{msg} {translate('Check the log for more info.')}",
+                                           Gtk.MessageType.WARNING)
             for bqs in self._bouquets:
                 for bq in bqs.bouquets:
                     self._bq_model.append((bq.name, bq.type, True))
