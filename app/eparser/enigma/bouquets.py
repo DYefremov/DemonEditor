@@ -185,15 +185,15 @@ class BouquetsReader:
     _BQ_POST_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?(.*)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
     _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
 
-    __slots__ = ["_path", "_has_errors"]
+    __slots__ = ["_path", "_errors"]
 
     def __init__(self, path=""):
         self._path = path
-        self._has_errors = False
+        self._errors = 0
 
     @property
-    def has_errors(self):
-        return self._has_errors
+    def errors(self):
+        return self._errors
 
     def get(self):
         """ Returns a tuple of TV and Radio bouquets. """
@@ -205,6 +205,7 @@ class BouquetsReader:
             _, _, bqs_name = line.partition("#NAME")
             if not bqs_name:
                 log(f"No bouquets name found in '{bq_name}'")
+                self._errors += 1
                 bqs_name = "Bouquets (TV)" if bq_type == BqType.TV.value else "Bouquets (Radio)"
             bouquets = Bouquets(bqs_name.strip(), bq_type, [])
 
@@ -254,8 +255,10 @@ class BouquetsReader:
                             bouquets[2].append(Bouquet(b_name, BqType.MARKER.value, [], None, None, line.strip()))
                         else:
                             log(f"Unsupported or invalid data format: [{line}].")
+                            self._errors += 1
                 else:
                     log(f"Unsupported or invalid line format: [{line}].")
+                    self._errors += 1
 
         return bouquets
 
@@ -266,7 +269,8 @@ class BouquetsReader:
 
         if not os.path.isfile(bq_file):
             log(f"Bouquet reading error: No such bouquet [{bq_name}] file -> '{f_name}'.")
-            return f"{bq_name}", services
+            self._errors += 1
+            return f"! -> {bq_name}", services
 
         with open(bq_file, encoding="utf-8", errors="replace") as file:
             chs_list = file.read()
@@ -274,6 +278,7 @@ class BouquetsReader:
             # May come across empty[wrong] files!
             if not srvs:
                 log(f"Bouquet file '{f_name}' is empty or wrong!")
+                self._errors += 1
                 return f"{bq_name} [empty]", services
 
             bq_name = srvs.pop(0)
@@ -283,6 +288,7 @@ class BouquetsReader:
                 data_len = len(srv_data)
                 if data_len < 10:
                     log(f"The bouquet [{bq_name}] service [{num}] has the wrong data format: [{srv}]")
+                    self._errors += 1
                     continue
 
                 s_type = ServiceType(srv_data[1])
