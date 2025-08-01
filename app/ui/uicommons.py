@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -194,6 +194,7 @@ class ViewTarget(Enum):
     FAV = 1
     SERVICES = 2
     IPTV = 3
+    ALT = 4
 
 
 class BqGenType(Enum):

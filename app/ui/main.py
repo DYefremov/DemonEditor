@@ -119,6 +119,7 @@ class Application(Gtk.Application):
     _FAV_ENIGMA_ELEMENTS = ("fav_insert_marker_popup_item", "fav_epg_configuration_popup_item")
 
     _FAV_IPTV_ELEMENTS = ("fav_iptv_popup_item", "iptv_menu_button")
+    _ALT_ELEMENTS = ("alt_paste_popup_item",)
 
     DATA_SAVE_PAGES = {Page.SERVICES, Page.SATELLITE}
     DATA_OPEN_PAGES = {Page.SERVICES, Page.SATELLITE, Page.PICONS, Page.EPG}
@@ -152,6 +153,7 @@ class Application(Gtk.Application):
                     "on_reference_assign": self.on_reference_assign,
                     "on_fav_paste": self.on_fav_paste,
                     "on_bouquets_paste": self.on_bouquets_paste,
+                    "on_alt_paste": self.on_alt_paste,
                     "on_rename_for_bouquet": self.on_rename_for_bouquet,
                     "on_set_default_name_for_bouquet": self.on_set_default_name_for_bouquet,
                     "on_services_add_new": self.on_services_add_new,
@@ -501,7 +503,7 @@ class Application(Gtk.Application):
         self._record_image = builder.get_object("record_button_image")
         # Dynamically active elements depending on the selected view.
         d_elements = (self._SERVICE_ELEMENTS, self._BOUQUET_ELEMENTS, self._COMMONS_ELEMENTS, self._FAV_ELEMENTS,
-                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS)
+                      self._FAV_ENIGMA_ELEMENTS, self._FAV_IPTV_ELEMENTS, self._ALT_ELEMENTS)
         self._tool_elements = {k: builder.get_object(k) for k in set(chain.from_iterable(d_elements))}
         # Lock, Hide.
         self._bouquet_lock_hide_box = builder.get_object("bouquet_lock_hide_box")
@@ -1381,6 +1383,8 @@ class Application(Gtk.Application):
             self.fav_paste(selection)
         elif target is ViewTarget.BOUQUET:
             self.bouquet_paste(selection)
+        elif target is ViewTarget.ALT:
+            self.alt_paste()
         self.on_view_focus(view)
 
     def fav_paste(self, selection):
@@ -2158,6 +2162,8 @@ class Application(Gtk.Application):
             elif name == "bouquets_popup_menu":
                 self.delete_selection(self._services_view, self._fav_view)
                 self.on_view_focus(self._bouquets_view)
+            elif name == "alt_popup_menu":
+                self.on_view_focus(self._alt_view)
 
             menu.popup(None, None, None, None, event.button, event.time)
             return True
@@ -3051,6 +3057,10 @@ class Application(Gtk.Application):
                 self._tool_elements[elem].set_sensitive(not_empty)
                 if elem == "bouquets_paste_popup_item":
                     self._tool_elements[elem].set_sensitive(not_empty and self._bouquets_buffer)
+        elif model_name == self.ALT_MODEL:
+            for elem in self._ALT_ELEMENTS:
+                if elem == "alt_paste_popup_item":
+                    self._tool_elements[elem].set_sensitive(not is_service and self._rows_buffer)
         else:
             for elem in self._FAV_ELEMENTS:
                 if elem in ("paste_tool_button", "fav_paste_popup_item"):
@@ -4410,6 +4420,9 @@ class Application(Gtk.Application):
             model.set(model.get_iter(paths), data)
             self._fav_view.row_activated(paths[0], self._fav_view.get_column(Column.FAV_NUM))
 
+    def on_alt_paste(self, item):
+        self.on_paste(self._alt_view, ViewTarget.ALT)
+
     def delete_alts(self, itrs, model, rows):
         """ Deleting alternatives. """
         list(map(model.remove, itrs))
@@ -4512,11 +4525,15 @@ class Application(Gtk.Application):
         ctrl = event.state & MOD_MASK
 
         if ctrl and key == KeyboardKey.V:
-            srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
-            if not srv:
-                return
+            self.alt_paste()
 
-            self.append_alt_services(srv, tuple(self._services.get(r[Column.FAV_ID]) for r in self._rows_buffer))
+    def alt_paste(self):
+        srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
+        if not srv:
+            return
+
+        self.append_alt_services(srv, tuple(self._services.get(r[Column.FAV_ID]) for r in self._rows_buffer))
+        self._rows_buffer.clear()
 
     def append_alt_services(self, srv, srvs):
         dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV

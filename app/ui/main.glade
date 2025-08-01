@@ -58,6 +58,16 @@ Author: Dmitriy Yefremov
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <child>
+      <object class="GtkMenuItem" id="alt_paste_popup_item">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can-focus">False</property>
+        <property name="label" translatable="yes">Paste</property>
+        <signal name="activate" handler="on_alt_paste" swapped="no"/>
+        <accelerator key="v" signal="activate" modifiers="Primary"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="alt_remove_popup_item">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -3792,6 +3802,7 @@ Author: Dmitriy Yefremov
                                                         <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
                                                         <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                                         <signal name="drag-data-received" handler="on_alt_view_drag_data_received" swapped="no"/>
+                                                        <signal name="focus-in-event" handler="on_view_focus" swapped="no"/>
                                                         <signal name="key-press-event" handler="on_alt_view_key_press" swapped="no"/>
                                                         <signal name="row-activated" handler="on_alt_selection" object="alt_list_store" swapped="no"/>
                                                         <child internal-child="selection">
