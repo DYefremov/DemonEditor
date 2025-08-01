@@ -172,6 +172,7 @@ class Application(Gtk.Application):
                     "on_view_drag_data_received": self.on_view_drag_data_received,
                     "on_bq_view_drag_data_received": self.on_bq_view_drag_data_received,
                     "on_alt_view_drag_data_received": self.on_alt_view_drag_data_received,
+                    "on_alt_view_key_press": self.on_alt_view_key_press,
                     "on_view_press": self.on_view_press,
                     "on_view_release": self.on_view_release,
                     "on_view_popup_menu": self.on_view_popup_menu,
@@ -4465,20 +4466,8 @@ class Application(Gtk.Application):
         itrs = tuple(model.get_iter_from_string(itr) for itr in itr_str.split(","))
         types = {BqServiceType.MARKER.name, BqServiceType.SPACE.name, BqServiceType.ALT.name}
         ids = tuple(model.get_value(itr, id_col) for itr in itrs if model.get_value(itr, t_col) not in types)
-        srvs = tuple(self._services.get(f_id, None) for f_id in ids)
-        dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
-        a_srvs = tuple(BouquetService(None, dt if s.service_type != it.name else it, s.fav_id, 0) for s in srvs)
-        alt_services = srv.transponder + a_srvs
-        self._services[srv.fav_id] = srv._replace(transponder=alt_services)
 
-        a_row = self._alt_model[self._alt_model.get_iter_first()][:]
-        alt_id, a_itr = a_row[Column.ALT_ID], a_row[Column.ALT_ITER]
-
-        for i, srv in enumerate(srvs, start=len(self._alt_model) + 1):
-            pic = self._picons.get(srv.picon_id, None)
-            self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, alt_id, a_itr))
-
-        return True
+        return self.append_alt_services(srv, tuple(self._services.get(f_id, None) for f_id in ids))
 
     def on_alt_move(self, s_iters, info, srv):
         """ Move alternatives in the list. """
@@ -4513,6 +4502,35 @@ class Application(Gtk.Application):
             srv = self._services.get(row[Column.ALT_FAV_ID], None)
             if srv and srv.transponder or row[Column.ALT_TYPE] == BqServiceType.IPTV.name:
                 self.emit("fav-changed", srv)
+
+    def on_alt_view_key_press(self, view, event):
+        key_code = event.hardware_keycode
+        if not KeyboardKey.value_exist(key_code):
+            return
+
+        key = KeyboardKey(key_code)
+        ctrl = event.state & MOD_MASK
+
+        if ctrl and key == KeyboardKey.V:
+            srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
+            if not srv:
+                return
+
+            self.append_alt_services(srv, tuple(self._services.get(r[Column.FAV_ID]) for r in self._rows_buffer))
+
+    def append_alt_services(self, srv, srvs):
+        dt, it = BqServiceType.DEFAULT, BqServiceType.IPTV
+        a_srvs = tuple(BouquetService(None, dt if s.service_type != it.name else it, s.fav_id, 0) for s in srvs)
+        alt_services = srv.transponder + a_srvs
+        self._services[srv.fav_id] = srv._replace(transponder=alt_services)
+        a_row = self._alt_model[self._alt_model.get_iter_first()][:]
+        alt_id, a_itr = a_row[Column.ALT_ID], a_row[Column.ALT_ITER]
+
+        for i, srv in enumerate(srvs, start=len(self._alt_model) + 1):
+            pic = self._picons.get(srv.picon_id, None)
+            self._alt_model.append((i, pic, srv.service, srv.service_type, srv.pos, srv.fav_id, alt_id, a_itr))
+
+        return True
 
     # ***************** Stream relay ********************** #
 

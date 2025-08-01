@@ -3792,6 +3792,7 @@ Author: Dmitriy Yefremov
                                                         <signal name="drag-begin" handler="on_view_drag_begin" after="yes" swapped="no"/>
                                                         <signal name="drag-data-get" handler="on_view_drag_data_get" swapped="no"/>
                                                         <signal name="drag-data-received" handler="on_alt_view_drag_data_received" swapped="no"/>
+                                                        <signal name="key-press-event" handler="on_alt_view_key_press" swapped="no"/>
                                                         <signal name="row-activated" handler="on_alt_selection" object="alt_list_store" swapped="no"/>
                                                         <child internal-child="selection">
                                                           <object class="GtkTreeSelection"/>
