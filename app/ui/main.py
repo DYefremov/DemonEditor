@@ -4526,6 +4526,8 @@ class Application(Gtk.Application):
 
         if ctrl and key == KeyboardKey.V:
             self.alt_paste()
+        elif key == KeyboardKey.DELETE:
+            self.on_delete(view)
 
     def alt_paste(self):
         srv = self._services.get(self._alt_model.get_value(self._alt_model.get_iter_first(), Column.ALT_ID), None)
