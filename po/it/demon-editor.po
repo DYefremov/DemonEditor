@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2025-05-16 03:08+0200\n"
+"PO-Revision-Date: 2025-08-04 17:49+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 25.04.1\n"
+"X-Generator: Lokalize 25.08.0\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello\nNicola Fanghella"
@@ -1316,7 +1316,7 @@ msgid "Add picons"
 msgstr "Aggiungi picon"
 
 msgid "Logs"
-msgstr "Registri"
+msgstr "Log"
 
 msgid "Title"
 msgstr "Titolo"
@@ -1639,3 +1639,9 @@ msgstr ""
 
 msgid "Convert for selected bouquets"
 msgstr "Converti per i bouquet selezionati"
+
+msgid "There were errors [%s] during bouquets loading!"
+msgstr "Si sono verificati errori [%s] durante il caricamento dei bouquet!"
+
+msgid "Check the log for more info."
+msgstr "Per maggiori informazioni consulta il log."
