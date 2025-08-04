@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2025-05-11 19:32+0300\n"
+"PO-Revision-Date: 2025-08-03 21:34+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
@@ -1606,3 +1606,9 @@ msgstr "Daha derin isim eşleştirmesini etkinleştirir. Olası yanlışlıklar!
 
 msgid "Convert for selected bouquets"
 msgstr "Seçili buketler için dönüştür"
+
+msgid "There were errors [%s] during bouquets loading!"
+msgstr "Buketler yüklenirken [%s] hata oluştu!"
+
+msgid "Check the log for more info."
+msgstr "Daha fazla bilgi için günlüğü kontrol edin."
