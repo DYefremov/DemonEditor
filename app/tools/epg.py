@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ import os
 import re
 import shutil
 import struct
-import sys
 import xml.etree.ElementTree as ET
 from collections import namedtuple, defaultdict
 from datetime import datetime, timezone
@@ -275,15 +274,16 @@ class XmlTvReader(Reader):
                 with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
                     downloaded = 0
                     data_size = int(data_size)
-                    log("Downloading XMLTV file...")
+                    completed = set()
+
                     for data in resp.iter_content(chunk_size=1024):
                         downloaded += len(data)
                         tf.write(data)
-                        done = int(50 * downloaded / data_size)
-                        sys.stdout.write(f"\rDownloading XMLTV file [{'=' * done}{' ' * (50 - done)}]")
-                        sys.stdout.flush()
+                        done = int(100 * downloaded / data_size)
+                        if done % 25 == 0 and done not in completed:
+                            completed.add(done)
+                            log(f"Downloading XMLTV file...{done}%" if done < 100 else "XMLTV file download complete.")
                     tf.seek(0)
-                    sys.stdout.write("\n")
 
                     os.makedirs(os.path.dirname(self._path), exist_ok=True)
 
