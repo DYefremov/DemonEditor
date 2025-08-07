@@ -5,8 +5,8 @@ The best way to run this program from source is using of [MSYS2](https://www.msy
 ![mingw64](https://user-images.githubusercontent.com/7511379/161400639-898ceb10-7de8-4557-bde1-25fe32bdfb03.png)
 3. Run first `pacman -Suy` After that, you may need to restart the terminal and re-run the update command. 
 4. Install minimal required packages:  
-   `pacman -S mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-gobject mingw-w64-x86_64-python3-pip mingw-w64-x86_64-python3-requests`  
-Optional: `pacman -S mingw-w64-x86_64-python3-pillow`  
+   `pacman -S mingw-w64-x86_64-gtk3 mingw-w64-x86_64-python3 mingw-w64-x86_64-python3-gobject mingw-w64-x86_64-python-requests`  
+Optional: `pacman -S mingw-w64-x86_64-python-pillow mingw-w64-x86_64-python-chardet`  
 To support streams playback, install the following packages (the list may not be complete):   
 * For  [GStreamer](https://gstreamer.freedesktop.org/)  `pacman -S mingw-w64-x86_64-gst-libav mingw-w64-x86_64-gst-plugins-bad mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good mingw-w64-x86_64-gstreamer`  
 * For [MPV](https://mpv.io/) `pacman -S mingw-w64-x86_64-mpv`,  
@@ -23,7 +23,7 @@ And run: `./start.py`
 ## Building a package
 To build a standalone package, we can use [PyInstaller](https://pyinstaller.readthedocs.io/en/stable/). 
 1. Launch mingw64 shell.
-2. Install PyInstaller via pip:  `pip3 install pyinstaller`
+2. Install PyInstaller:  `pacman -S mingw-w64-x86_64-pyinstaller`
 3. Go to the folder where the program was unpacked. E.g: `c:\msys64\home\username\DemonEditor\`
 4. Сopy and replace the files from the /build/win/ folder to the root .
 5. Go to the folder with the program in the running terminal:  `cd DemonEditor/`
