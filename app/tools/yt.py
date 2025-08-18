@@ -172,22 +172,21 @@ class InnerTube:
     _BASE_URI = "https://www.youtube.com/youtubei/v1"
 
     _DEFAULT_CLIENTS = {
-        "WEB_EMBED": {"context": {"client": {"clientName": "WEB_EMBEDDED_PLAYER",
-                                             "clientVersion": "2.20210721.00.00",
-                                             "clientScreen": "EMBED"}},
-                      "header": {"User-Agent": "Mozilla/5.0"},
-                      "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"},
-
-        "ANDROID_EMBED": {"context": {"client": {"clientName": "ANDROID_EMBEDDED_PLAYER",
-                                                 "clientVersion": "17.31.35",
-                                                 "clientScreen": "EMBED",
-                                                 "androidSdkVersion": 30}},
-                          "header": {"User-Agent": "com.google.android.youtube/"},
-                          "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"}
-
+        # The client is taken from -> https://github.com/JuanBindez/pytubefix
+        "ANDROID": {"context": {"client": {"clientName": "ANDROID",
+                                           "clientVersion": "19.44.38",
+                                           "platform": "MOBILE",
+                                           "osName": "Android",
+                                           "osVersion": "14",
+                                           "androidSdkVersion": "34"}},
+                    "header": {"User-Agent": "com.google.android.youtube/",
+                               "X-Youtube-Client-Name": "3"},
+                    "api_key": "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+                    "require_js_player": False,
+                    "require_po_token": True}
     }
 
-    def __init__(self, client="ANDROID_EMBED"):
+    def __init__(self, client="ANDROID"):
         """ Initialize an InnerTube object.
 
             @param client: Client to use for the object. Default to web because it returns the most playback types.
