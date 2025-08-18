@@ -1551,6 +1551,7 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="services_add_new_popup_item">
+        <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="label" translatable="yes">New</property>
         <signal name="activate" handler="on_services_add_new" swapped="no"/>

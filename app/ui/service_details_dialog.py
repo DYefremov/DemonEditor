@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -62,10 +62,9 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, app, new_color, action=Action.EDIT):
+    def __init__(self, app, action=Action.EDIT):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
-                    "on_create_new": self.on_create_new,
                     "on_tr_edit_toggled": self.on_tr_edit_toggled,
                     "update_reference": self.update_reference,
                     "on_cas_entry_changed": self.on_cas_entry_changed,
@@ -89,7 +88,7 @@ class ServiceDetailsDialog:
         self._old_service = None
         self._services = app.current_services
         self._bouquets = app.current_bouquets
-        self._new_color = new_color
+        self._new_color = app._NEW_COLOR
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
@@ -177,19 +176,29 @@ class ServiceDetailsDialog:
 
     @run_idle
     def init_default_data_elements(self):
+        srv = Service(None, "s", None, "New", None, None, "New", "TV", None,
+                      "1_0_1_0_0_0_000000_0_0_0.png", "0", "10700", "27500", "H", "3/4", "DVB-S", "0.0E",
+                      "0:00000000:0:0000:0:0:0:0:0:0", "1:0:1:0:0:0:000000:0:0:0::0:0:0:0",
+                      "s 10720000:27500000:0:1:0:0:0:0:0")
+
+        self._old_service = srv
         self._apply_button.set_visible(False)
         self._create_button.set_visible(True)
         self._tr_edit_switch.set_sensitive(False)
         self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
-        for elem in self._non_empty_elements.values():
-            elem.set_text(" ")
-            elem.set_text("")
+        [elem.set_text("0") for elem in self._non_empty_elements.values()]
+
         self._new_check_button.set_active(True)
+        self._name_entry.set_text(srv.service)
+        self._package_entry.set_text(srv.package)
+        self._freq_entry.set_text(srv.freq)
         self._service_type_combo_box.set_active(0)
         self._pol_combo_box.set_active(0)
         self._fec_combo_box.set_active(0)
         self._sys_combo_box.set_active(0)
         self._invertion_combo_box.set_active(2)
+
+        self._current_model = get_base_model(self._services_view.get_model())
 
     def update_data_elements(self):
         model, paths = self._services_view.get_selection().get_selected_rows()
@@ -403,9 +412,6 @@ class ServiceDetailsDialog:
     def on_save(self, item):
         self.save_data()
 
-    def on_create_new(self, item):
-        self.save_data()
-
     def save_data(self):
         if self._s_type is SettingsType.NEUTRINO_MP and self._tr_type is not TrType.Satellite:
             show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
@@ -423,12 +429,21 @@ class ServiceDetailsDialog:
 
     def on_new(self):
         """ Create new service. """
-        service = self.get_service(*self.get_srv_data(), self.get_satellite_transponder_data())
-        show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
+        srv_data = self.update_service_data()
+        if srv_data:
+            service, data = srv_data
+            self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
         return True
 
     def on_edit(self):
         """ Edit current service.  """
+        service, extra_data = self.update_service_data()
+        self._current_model.set(self._current_itr, extra_data)
+        self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
+        self.update_fav_view(self._old_service, service)
+        return True
+
+    def update_service_data(self):
         fav_id, data_id = self.get_srv_data()
         # Transponder
         transponder = self._old_service.transponder
@@ -443,7 +458,7 @@ class ServiceDetailsDialog:
                 elif self._tr_type is TrType.ATSC:
                     transponder = self.get_atsc_transponder_data()
             except Exception as e:
-                log("Edit service error: {}".format(e))
+                log(f"Edit service error: {e}")
                 show_dialog(DialogType.ERROR, transient=self._dialog, text="Error getting transponder parameters!")
             else:
                 if self._transponder_services_iters:
@@ -470,11 +485,9 @@ class ServiceDetailsDialog:
             if f_flags and Flag.is_new(Flag.parse(f_flags[0])):
                 extra_data[Column.SRV_BACKGROUND] = self._new_color
 
-        self._current_model.set(self._current_itr, extra_data)
-        self._current_model.set(self._current_itr, {i: v for i, v in enumerate(service)})
-        self.update_fav_view(self._old_service, service)
         self._old_service = service
-        return True
+
+        return service, extra_data
 
     def update_bouquets(self, fav_id, old_fav_id):
         self._services.pop(old_fav_id, None)

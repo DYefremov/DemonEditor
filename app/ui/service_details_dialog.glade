@@ -298,12 +298,13 @@ Author: Dmitriy Yefremov
     </child>
     <child type="action">
       <object class="GtkButton" id="create_button">
-        <property name="label" translatable="yes">Create</property>
+        <property name="label" translatable="yes">Add</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Create and save as new service</property>
         <property name="valign">center</property>
-        <signal name="clicked" handler="on_create_new" swapped="no"/>
+        <signal name="clicked" handler="on_save" swapped="no"/>
+        <accelerator key="Return" signal="activate"/>
       </object>
     </child>
     <child internal-child="vbox">

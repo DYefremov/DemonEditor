@@ -102,7 +102,9 @@ class Application(Gtk.Application):
     # Dynamically active elements depending on the selected view
     _SERVICE_ELEMENTS = ("services_to_fav_end_move_popup_item", "services_to_fav_move_popup_item",
                          "services_create_bouquet_popup_item", "services_copy_popup_item", "services_edit_popup_item",
-                         "services_add_new_popup_item", "services_picon_popup_item", "services_remove_popup_item")
+                         "services_mark_not_in_bq_popup_item", "services_clear_not_in_bq_popup_item",
+                         "services_clear_new_flag_item", "services_picon_popup_item", "services_remove_popup_item",
+                         "services_reference_popup_item")
 
     _FAV_ELEMENTS = ("fav_cut_popup_item", "fav_paste_popup_item", "fav_locate_popup_item", "fav_iptv_popup_item",
                      "fav_insert_marker_popup_item", "fav_insert_space_popup_item", "fav_edit_sub_menu_popup_item",
@@ -3069,18 +3071,15 @@ class Application(Gtk.Application):
                     self._tool_elements[elem].set_sensitive(self._bq_selected and not is_service)
                 else:
                     self._tool_elements[elem].set_sensitive(not_empty and not is_service)
-            for elem in self._SERVICE_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(not_empty and is_service)
-            for elem in self._BOUQUET_ELEMENTS:
-                self._tool_elements[elem].set_sensitive(False)
-
+            [self._tool_elements[elem].set_sensitive(not_empty and is_service) for elem in self._SERVICE_ELEMENTS]
+            [self._tool_elements[elem].set_sensitive(False) for elem in self._BOUQUET_ELEMENTS]
         for elem in self._FAV_IPTV_ELEMENTS:
             is_iptv = self._bq_selected and not is_service
             if self._s_type is SettingsType.NEUTRINO_MP:
                 is_iptv = is_iptv and BqType(self._bq_selected.split(":")[1]) is BqType.WEBTV
             self._tool_elements[elem].set_sensitive(is_iptv)
-        for elem in self._COMMONS_ELEMENTS:
-            self._tool_elements[elem].set_sensitive(not_empty)
+
+        [self._tool_elements[elem].set_sensitive(not_empty) for elem in self._COMMONS_ELEMENTS]
 
         if self._s_type is not SettingsType.ENIGMA_2:
             for elem in self._FAV_ENIGMA_ELEMENTS:
@@ -4041,9 +4040,13 @@ class Application(Gtk.Application):
             if model_name == self.IPTV_MODEL:
                 self.on_iptv_service_edit(model[paths][Column.IPTV_FAV_ID], view)
             else:
-                ServiceDetailsDialog(self, self._NEW_COLOR).show()
+                ServiceDetailsDialog(self).show()
 
     def on_services_add_new(self, item):
+        if self._s_type is SettingsType.NEUTRINO_MP:
+            self.show_error_message("Neutrino at the moment not supported!")
+            return
+
         ServiceDetailsDialog(self, action=Action.ADD).show()
 
     def on_bouquets_edit(self, view):
