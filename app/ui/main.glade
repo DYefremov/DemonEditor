@@ -1551,10 +1551,42 @@ Author: Dmitriy Yefremov
     </child>
     <child>
       <object class="GtkMenuItem" id="services_add_new_popup_item">
+        <property name="label" translatable="yes">New</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="label" translatable="yes">New</property>
-        <signal name="activate" handler="on_services_add_new" swapped="no"/>
+        <child type="submenu">
+          <object class="GtkMenu" id="et_popup_menu">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Satellite channel</property>
+                <property name="name">s</property>
+                <signal name="activate" handler="on_services_add_new" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Terrestrial channel</property>
+                <property name="name">t</property>
+                <signal name="activate" handler="on_services_add_new" swapped="no"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Cable channel</property>
+                <property name="name">c</property>
+                <signal name="activate" handler="on_services_add_new" swapped="no"/>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
     <child>

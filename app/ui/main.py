@@ -43,7 +43,7 @@ from app.commons import run_idle, log, run_task, run_with_delay, init_logger, De
 from app.connections import (HttpAPI, download_data, DownloadType, upload_data, STC_XML_FILE)
 from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
-from app.eparser.ecommons import CAS, Flag, BouquetService
+from app.eparser.ecommons import CAS, Flag, BouquetService, TrType
 from app.eparser.enigma.bouquets import BqServiceType
 from app.eparser.enigma.streamrelay import StreamRelay
 from app.eparser.iptv import export_to_m3u, StreamType
@@ -4047,7 +4047,7 @@ class Application(Gtk.Application):
             self.show_error_message("Neutrino at the moment not supported!")
             return
 
-        ServiceDetailsDialog(self, action=Action.ADD).show()
+        ServiceDetailsDialog(self, action=Action.ADD, tr_type=TrType(item.get_name())).show()
 
     def on_bouquets_edit(self, view):
         """ Renaming bouquets. """

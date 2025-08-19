@@ -62,7 +62,7 @@ class ServiceDetailsDialog:
 
     _DIGIT_ENTRY_NAME = "digit-entry"
 
-    def __init__(self, app, action=Action.EDIT):
+    def __init__(self, app, action=Action.EDIT, tr_type=TrType.Satellite):
         handlers = {"on_system_changed": self.on_system_changed,
                     "on_save": self.on_save,
                     "on_tr_edit_toggled": self.on_tr_edit_toggled,
@@ -80,7 +80,7 @@ class ServiceDetailsDialog:
         self._dialog = builder.get_object("service_details_dialog")
         self._dialog.set_transient_for(app.app_window)
         self._s_type = settings.setting_type
-        self._tr_type = TrType.Satellite
+        self._tr_type = tr_type
         self._picons_path = settings.profile_picons_path
         self._services_view = app.services_view
         self._fav_view = app.fav_view
@@ -174,29 +174,51 @@ class ServiceDetailsDialog:
     def show(self):
         self._dialog.show()
 
-    @run_idle
     def init_default_data_elements(self):
-        srv = Service(None, "s", None, "New", None, None, "New", "TV", None,
-                      "1_0_1_0_0_0_000000_0_0_0.png", "0", "10700", "27500", "H", "3/4", "DVB-S", "0.0E",
-                      "0:00000000:0:0000:0:0:0:0:0:0", "1:0:1:0:0:0:000000:0:0:0::0:0:0:0",
-                      "s 10720000:27500000:0:1:0:0:0:0:0")
+        srv_data = [None] * 20
+        srv_data[Column.SRV_CAS_FLAGS] = "f:40"
+        srv_data[Column.SRV_SERVICE] = "New"
+        srv_data[Column.SRV_PACKAGE] = "New"
+        srv_data[Column.SRV_SSID] = "0"
+        srv_data[Column.SRV_PICON_ID] = "1_0_1_0_0_0_000000_0_0_0.png"
+        srv_data[Column.SRV_FAV_ID] = "1:0:1:0:0:0:000000:0:0:0::0:0:0:0"
+
+        if self._tr_type is TrType.Cable:
+            srv_data[Column.SRV_STANDARD] = "c"
+            srv_data[Column.SRV_FREQ] = "300"
+            srv_data[Column.SRV_RATE] = "6000"
+            srv_data[Column.SRV_SYSTEM] = "DVB-C"
+            srv_data[Column.SRV_POS] = "C"
+            srv_data[Column.SRV_DATA_ID] = "0000:00000000:0:0:1:0"
+            srv_data[Column.SRV_TRANSPONDER] = "t 300000000:0:0:0:0:0:0:0:0:0:0:0"
+        elif self._tr_type is TrType.Terrestrial:
+            srv_data[Column.SRV_STANDARD] = "t"
+            srv_data[Column.SRV_FREQ] = "420000"
+            srv_data[Column.SRV_RATE] = "0"
+            srv_data[Column.SRV_SYSTEM] = "DVB-T2"
+            srv_data[Column.SRV_POS] = "T"
+            srv_data[Column.SRV_DATA_ID] = "0000:00000000:0:0:1:0"
+            srv_data[Column.SRV_TRANSPONDER] = "t 420000000:0:5:5:3:2:4:4:2:1:0:0"
+        else:
+            srv_data[Column.SRV_STANDARD] = "s"
+            srv_data[Column.SRV_FREQ] = "10720"
+            srv_data[Column.SRV_RATE] = "27500"
+            srv_data[Column.SRV_POL] = "H"
+            srv_data[Column.SRV_FEC] = "Auto"
+            srv_data[Column.SRV_SYSTEM] = "DVB-S"
+            srv_data[Column.SRV_POS] = "0.0E"
+            srv_data[Column.SRV_DATA_ID] = "0:00000000:0:0000:1:0:0:0:0:0"
+            srv_data[Column.SRV_TRANSPONDER] = "s 10720000:27500000:0:1:0:0:0:0:0"
+
+        srv = Service(*srv_data)
 
         self._old_service = srv
         self._apply_button.set_visible(False)
         self._create_button.set_visible(True)
         self._tr_edit_switch.set_sensitive(False)
         self.on_tr_edit_toggled(self._tr_edit_switch.set_active(True), True)
-        [elem.set_text("0") for elem in self._non_empty_elements.values()]
 
-        self._new_check_button.set_active(True)
-        self._name_entry.set_text(srv.service)
-        self._package_entry.set_text(srv.package)
-        self._freq_entry.set_text(srv.freq)
-        self._service_type_combo_box.set_active(0)
-        self._pol_combo_box.set_active(0)
-        self._fec_combo_box.set_active(0)
-        self._sys_combo_box.set_active(0)
-        self._invertion_combo_box.set_active(2)
+        self.init_service_data(srv)
 
         self._current_model = get_base_model(self._services_view.get_model())
 
@@ -224,6 +246,9 @@ class ServiceDetailsDialog:
         srv = Service(*self._current_model[itr][: Column.SRV_TOOLTIP])
         self._old_service = srv
         self._current_itr = itr
+        self.init_service_data(srv)
+
+    def init_service_data(self, srv):
         # Service
         self._name_entry.set_text(srv.service)
         self._package_entry.set_text(srv.package)
@@ -235,6 +260,15 @@ class ServiceDetailsDialog:
         self.select_active_text(self._pol_combo_box, srv.pol)
         self.select_active_text(self._fec_combo_box, srv.fec)
         self.select_active_text(self._sys_combo_box, srv.system)
+        self.update_ui(srv)
+        if self._s_type is SettingsType.ENIGMA_2:
+            self.init_enigma2_service_data(srv)
+            self.init_enigma2_transponder_data(srv)
+        elif self._s_type is SettingsType.NEUTRINO_MP:
+            self.init_neutrino_data(srv)
+            self.init_neutrino_ui_elements()
+
+    def update_ui(self, srv):
         if self._tr_type is TrType.Terrestrial:
             self.update_ui_for_terrestrial()
         elif self._tr_type is TrType.Cable:
@@ -243,13 +277,6 @@ class ServiceDetailsDialog:
             self.update_ui_for_atsc()
         else:
             self.set_sat_positions(srv.pos)
-
-        if self._s_type is SettingsType.ENIGMA_2:
-            self.init_enigma2_service_data(srv)
-            self.init_enigma2_transponder_data(srv)
-        elif self._s_type is SettingsType.NEUTRINO_MP:
-            self.init_neutrino_data(srv)
-            self.init_neutrino_ui_elements()
 
     # ***************** Init Enigma2 data *********************#
 
@@ -413,7 +440,7 @@ class ServiceDetailsDialog:
         self.save_data()
 
     def save_data(self):
-        if self._s_type is SettingsType.NEUTRINO_MP and self._tr_type is not TrType.Satellite:
+        if self._s_type is SettingsType.NEUTRINO_MP:
             show_dialog(DialogType.ERROR, transient=self._dialog, text="Not implemented yet!")
             return
 
@@ -430,9 +457,11 @@ class ServiceDetailsDialog:
     def on_new(self):
         """ Create new service. """
         srv_data = self.update_service_data()
-        if srv_data:
-            service, data = srv_data
-            self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
+        if not srv_data:
+            return False
+
+        service, data = srv_data
+        self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
         return True
 
     def on_edit(self):
@@ -460,6 +489,7 @@ class ServiceDetailsDialog:
             except Exception as e:
                 log(f"Edit service error: {e}")
                 show_dialog(DialogType.ERROR, transient=self._dialog, text="Error getting transponder parameters!")
+                return False
             else:
                 if self._transponder_services_iters:
                     self.update_transponder_services(transponder, self.get_sat_position())

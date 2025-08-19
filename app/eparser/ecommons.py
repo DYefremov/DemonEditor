@@ -72,11 +72,15 @@ CableTransponder = namedtuple("CableTransponder", ["frequency", "symbol_rate", "
 
 
 class TrType(Enum):
-    """ Transponders type """
+    """ Transponders type. """
     Satellite = "s"
     Terrestrial = "t"
     Cable = "c"
     ATSC = "a"
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls.Satellite
 
 
 class BqType(Enum):
