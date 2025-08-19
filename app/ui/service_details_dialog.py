@@ -38,7 +38,7 @@ from app.eparser.ecommons import (MODULATION, Inversion, ROLL_OFF, Pilot, Flag, 
 from app.eparser.neutrino import get_attributes, SP, KSP
 from app.settings import SettingsType
 from .dialogs import show_dialog, DialogType, Action, get_builder
-from .main_helper import get_base_model
+from .main_helper import get_base_model, scroll_to
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, CODED_ICON, Column
 
 _UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
@@ -461,7 +461,9 @@ class ServiceDetailsDialog:
             return False
 
         service, data = srv_data
-        self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
+        itr = self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
+        scroll_to(self._current_model.get_path(itr), self._services_view)
+        
         return True
 
     def on_edit(self):
