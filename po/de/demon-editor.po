@@ -1595,3 +1595,18 @@ msgstr "Beim Laden der Bouquets sind Fehler [%s] aufgetreten!"
 
 msgid "Check the log for more info."
 msgstr "Weitere Informationen finden Sie im Log."
+
+msgid "Satellite channel"
+msgstr "Satellitenkanal"
+
+msgid "Terrestrial channel"
+msgstr "Terrestrischer Kanal"
+
+msgid "Cable channel"
+msgstr "Kabelkanal"
+
+msgid "Save current changes"
+msgstr "Aktuelle Änderungen speichern"
+
+msgid "Create a new service"
+msgstr "Erstellen eines neuen Service"

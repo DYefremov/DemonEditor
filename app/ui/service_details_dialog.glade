@@ -290,7 +290,7 @@ Author: Dmitriy Yefremov
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Save current service</property>
+        <property name="tooltip_text" translatable="yes">Save current changes</property>
         <property name="valign">center</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
         <accelerator key="Return" signal="activate"/>
@@ -301,7 +301,6 @@ Author: Dmitriy Yefremov
         <property name="label" translatable="yes">Add</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Create and save as new service</property>
         <property name="valign">center</property>
         <signal name="clicked" handler="on_save" swapped="no"/>
         <accelerator key="Return" signal="activate"/>

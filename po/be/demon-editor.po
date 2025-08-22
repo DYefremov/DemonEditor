@@ -1581,3 +1581,18 @@ msgstr "Пры загрузцы букетаў узніклі памылкі [%s
 
 msgid "Check the log for more info."
 msgstr "Глядзіце логі для пашыранай інфармацыі."
+
+msgid "Satellite channel"
+msgstr "Спадарожнікавы канал"
+
+msgid "Terrestrial channel"
+msgstr "Эфірны канал"
+
+msgid "Cable channel"
+msgstr "Кабельны канал"
+
+msgid "Save current changes"
+msgstr "Захаваць бягучыя змены"
+
+msgid "Create a new service"
+msgstr "Стварыць новы сэрвіс"
