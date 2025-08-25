@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-16 15:59+0300\n"
-"PO-Revision-Date: 2025-08-03 21:34+0300\n"
+"PO-Revision-Date: 2025-08-24 12:50+0300\n"
 "Last-Translator: audi06_19 <info@dreamosat-forum.com>\n"
 "Language-Team: audi06_19 <info@dreamosat-forum.com>\n"
 "Language: tr\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.7\n"
 
 msgid "translator-credits"
 msgstr "audi06_19 <info@dreamosat-forum.com>"
@@ -1612,3 +1612,18 @@ msgstr "Buketler yüklenirken [%s] hata oluştu!"
 
 msgid "Check the log for more info."
 msgstr "Daha fazla bilgi için günlüğü kontrol edin."
+
+msgid "Satellite channel"
+msgstr "Uydu kanalı"
+
+msgid "Terrestrial channel"
+msgstr "Karasal kanal"
+
+msgid "Cable channel"
+msgstr "Kablo kanalı"
+
+msgid "Save current changes"
+msgstr "Mevcut değişiklikleri kaydet"
+
+msgid "Create a new service"
+msgstr "Yeni bir hizmet oluşturun"
