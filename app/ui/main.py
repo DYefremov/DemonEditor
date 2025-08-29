@@ -248,6 +248,7 @@ class Application(Gtk.Application):
         self._is_data_open_enabled = True
         self._is_data_extract_enabled = False
         self._is_data_save_enabled = False
+        self._ext_data_path = None
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -2243,14 +2244,18 @@ class Application(Gtk.Application):
             self.upload_data(download_type)
 
     @run_task
-    def upload_data(self, download_type):
+    def upload_data(self, download_type, files_filter=None):
         opts = self._settings
         multiple = len(self._settings.hosts) > 1
         for host in self._settings.hosts:
             if multiple:
                 log(f"##### Uploading data on [{host}] #####")
             try:
-                upload_data(settings=opts, download_type=download_type, ext_host=host)
+                upload_data(settings=opts,
+                            download_type=download_type,
+                            files_filter=files_filter,
+                            ext_host=host,
+                            ext_path=self._ext_data_path)
             except Exception as e:
                 msg = "Uploading data error: {}"
                 log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
@@ -2333,6 +2338,7 @@ class Application(Gtk.Application):
         return tmp_path
 
     def update_data(self, data_path, callback=None):
+        self._ext_data_path = data_path
         self._services_load_spinner.start()
         self.on_info_bar_close()
         self._profile_combo_box.set_sensitive(False)
@@ -2358,14 +2364,6 @@ class Application(Gtk.Application):
             data_path = self._settings.profile_data_path if data_path is None else data_path
             local_path = self._settings.profile_data_path
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
-
-            if data_path != local_path:
-                from shutil import copyfile
-
-                for f in STC_XML_FILE:
-                    xml_src = data_path + f
-                    if os.path.isfile(xml_src):
-                        copyfile(xml_src, local_path + f)
 
             prf = self._s_type
             black_list = get_blacklist(data_path)

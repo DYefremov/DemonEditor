@@ -460,10 +460,9 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
 
 
 def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_callback=None,
-                files_filter=None, ext_host=None):
+                files_filter=None, ext_host=None, ext_path=None):
     s_type = settings.setting_type
     use_http = s_type is SettingsType.ENIGMA_2 and settings.use_http
-    data_path = settings.profile_data_path
     host, port, use_ssl = ext_host or settings.host, settings.http_port, settings.http_use_ssl
     user, password = settings.user, settings.password
     base_url = f"http{'s' if use_ssl else ''}://{host}:{port}"
@@ -471,6 +470,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
     url = f"{base_url}/{base}/"
     tn, ht = None, None  # Telnet, HTTP.
     ftp_port, telnet_port = settings.port, settings.telnet_port
+    data_path = ext_path or settings.profile_data_path
 
     try:
         use_http = use_http and test_http(host, port, user, password, use_ssl=use_ssl, skip_message=True, s_type=s_type)
@@ -588,7 +588,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
                         ht.send((f"{url}servicelistreload?mode=2", "Reloading Userbouquets."))
                     elif download_type is DownloadType.ALL or download_type is DownloadType.SERVICES:
                         ht.send((f"{url}servicelistreload?mode=0", "Reloading lamedb and Userbouquets."))
-                        time.sleep(1)
+                        time.sleep(2)
                         ht.send((f"{url}servicelistreload?mode=4", "Updating parental control."))
                         if not settings.keep_power_mode:
                             ht.send((f"{url}powerstate?newstate=4", "Wakeup from Standby."))
