@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2025-08-04 17:49+0200\n"
+"PO-Revision-Date: 2025-08-30 09:41+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -1645,3 +1645,18 @@ msgstr "Si sono verificati errori [%s] durante il caricamento dei bouquet!"
 
 msgid "Check the log for more info."
 msgstr "Per maggiori informazioni consulta il log."
+
+msgid "Satellite channel"
+msgstr "Canale satellitare"
+
+msgid "Terrestrial channel"
+msgstr "Canale terrestre"
+
+msgid "Cable channel"
+msgstr "Canale via cavo"
+
+msgid "Save current changes"
+msgstr "Salva le modifiche attuali"
+
+msgid "Create a new service"
+msgstr "Crea un nuovo servizio"
