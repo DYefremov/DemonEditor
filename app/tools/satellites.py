@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -392,7 +392,7 @@ class SatellitesParser(HTMLParser):
         mod_pat = re.compile(r"(.*PSK).*?(?:.*Stream\s+(\d+))?.*")
         sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
 
-        for row in filter(lambda r: len(r) == 16 and self.POS_PAT.match(r[0]), self._rows):
+        for row in filter(lambda r: len(r) == 14 and self.POS_PAT.match(r[0]), self._rows):
             freq, pol = row[2].replace(".", "0"), row[3]
             if not freq.isdigit() or pol not in "VHLR":
                 continue
@@ -581,9 +581,9 @@ class ServicesParser(HTMLParser):
             elif self._source is SatelliteSource.KINGOFSAT:
                 trs = []
                 for r in self._rows:
-                    if len(r) == 13 and SatellitesParser.POS_PAT.match(r[0].text):
+                    if len(r) == 12 and SatellitesParser.POS_PAT.match(r[0].text):
                         t_cell = r[4]
-                        if t_cell.url and t_cell.url.startswith("tp.php?tp="):
+                        if t_cell.url and t_cell.url.startswith("tp"):
                             t_cell.url = f"https://{self._lang}.kingofsat.tv/{t_cell.url}"
                             t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
                             trs.append(t_cell)
@@ -681,7 +681,7 @@ class ServicesParser(HTMLParser):
     def get_kingofsat_services(self, sat_position=None, use_pids=False):
         services = []
         # Transponder
-        tr = list(filter(lambda r: len(r) == 13 and r[4].url and r[4].url.startswith("tp.php?tp="), self._rows))
+        tr = list(filter(lambda r: len(r) == 12 and r[4].url and r[4].url.startswith("tp"), self._rows))
         if not tr:
             log(f"ServicesParser error [get transponder services]: Transponder [{self._t_url}] not found!")
             return services
@@ -689,9 +689,9 @@ class ServicesParser(HTMLParser):
         tr, multi_tr, tid, nid, nsp = None, None, None, None, None
         freq, sr, pol, fec, sys, pos = None, None, None, None, None, None
 
-        for r in filter(lambda x: len(x) > 12, self._rows):
+        for r in filter(lambda x: len(x) > 11, self._rows):
             r_size = len(r)
-            if r_size == 13 and r[4].url and r[4].url.startswith("tp.php?tp="):
+            if r_size == 12 and r[4].url and r[4].url.startswith("tp"):
                 res = re.match(self._KING_TR_PAT, f"{r[6].text} {r[7].text}")
                 if not res:
                     continue
