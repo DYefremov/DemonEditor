@@ -2215,7 +2215,7 @@ class Application(Gtk.Application):
             self.on_task_done(app, task)
 
     @run_task
-    def on_download_data(self, download_type=DownloadType.ALL):
+    def on_download_data(self, download_type=DownloadType.ALL, files_filter=None):
         backup, backup_src, data_path = self._settings.backup_before_downloading, None, None
         try:
             if backup and download_type is not DownloadType.SATELLITES:
@@ -2223,7 +2223,7 @@ class Application(Gtk.Application):
                 backup_path = self._settings.profile_backup_path or self._settings.default_backup_path
                 backup_src = backup_data(data_path, backup_path, download_type is DownloadType.ALL)
 
-            download_data(settings=self._settings, download_type=download_type)
+            download_data(settings=self._settings, download_type=download_type, files_filter=files_filter)
         except Exception as e:
             msg = "Downloading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
@@ -2236,12 +2236,12 @@ class Application(Gtk.Application):
             else:
                 GLib.idle_add(self.open_data)
 
-    def on_upload_data(self, download_type=DownloadType.ALL):
+    def on_upload_data(self, download_type=DownloadType.ALL, files_filter=None):
         if not self.is_data_saved():
-            gen = self.save_data(lambda: self.upload_data(download_type))
+            gen = self.save_data(lambda: self.upload_data(download_type, files_filter=files_filter))
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
         else:
-            self.upload_data(download_type)
+            self.upload_data(download_type, files_filter=files_filter)
 
     @run_task
     def upload_data(self, download_type, files_filter=None):

@@ -443,7 +443,7 @@ def download_data(*, settings, download_type=DownloadType.ALL, callback=log, fil
             ftp.download_files(save_path, file_list, callback)
         # *.xml and webtv
         if download_type in (DownloadType.ALL, DownloadType.SATELLITES):
-            ftp.download_xml(save_path, settings.satellites_xml_path, STC_XML_FILE, callback)
+            ftp.download_xml(save_path, settings.satellites_xml_path, files_filter or STC_XML_FILE, callback)
         if download_type in (DownloadType.ALL, DownloadType.WEBTV):
             ftp.download_xml(save_path, settings.satellites_xml_path, WEB_TV_XML_FILE, callback)
 
@@ -524,7 +524,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
 
             if download_type is DownloadType.ALL or download_type is DownloadType.SERVICES:
                 if download_type is DownloadType.ALL:
-                    ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
+                    ftp.upload_xml(data_path, sat_xml_path, files_filter or STC_XML_FILE, callback)
 
                 if s_type is SettingsType.NEUTRINO_MP:
                     ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)

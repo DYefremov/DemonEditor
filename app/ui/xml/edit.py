@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -580,11 +580,11 @@ class SatellitesTool(Gtk.Box):
 
     def on_download(self, app, page):
         if page is Page.SATELLITE:
-            self._app.on_download_data(DownloadType.SATELLITES)
+            self._app.on_download_data(DownloadType.SATELLITES, files_filter=(f"{self._dvb_type}.xml",))
 
     def on_upload(self, app, page):
         if page is Page.SATELLITE:
-            self._app.upload_data(DownloadType.SATELLITES)
+            self._app.upload_data(DownloadType.SATELLITES, files_filter=(f"{self._dvb_type}.xml",))
 
     @run_idle
     def on_update(self, item=None):
