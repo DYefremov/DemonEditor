@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2023 Dmitriy Yefremov
+Copyright (c) 2018-2025 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -424,7 +424,9 @@ Author: Dmitriy Yefremov
                                 <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                                 <signal name="realize" handler="on_terrestrial_view_realize" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="ter_name_column">
@@ -522,7 +524,9 @@ Author: Dmitriy Yefremov
                                 <signal name="key-press-event" handler="on_key_press" swapped="no"/>
                                 <signal name="realize" handler="on_cable_view_realize" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="cable_name_column">
@@ -947,7 +951,9 @@ Author: Dmitriy Yefremov
                                 <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="ter_freq_column">
@@ -1188,7 +1194,9 @@ Author: Dmitriy Yefremov
                                 <signal name="button-press-event" handler="on_tr_button_press" object="transponder_popup_menu" swapped="no"/>
                                 <signal name="key-press-event" handler="on_tr_key_press" swapped="no"/>
                                 <child internal-child="selection">
-                                  <object class="GtkTreeSelection"/>
+                                  <object class="GtkTreeSelection">
+                                    <property name="mode">multiple</property>
+                                  </object>
                                 </child>
                                 <child>
                                   <object class="GtkTreeViewColumn" id="cable_freq_column">
