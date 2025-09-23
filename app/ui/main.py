@@ -40,7 +40,7 @@ from urllib.parse import urlparse, unquote
 from gi.repository import GLib, Gio, GObject
 
 from app.commons import run_idle, log, run_task, run_with_delay, init_logger, DefaultDict
-from app.connections import (HttpAPI, download_data, DownloadType, upload_data, STC_XML_FILE)
+from app.connections import (HttpAPI, download_data, DownloadType, upload_data)
 from app.eparser import get_blacklist, write_blacklist, write_bouquet
 from app.eparser import get_services, get_bouquets, write_bouquets, write_services, Bouquets, Bouquet, Service
 from app.eparser.ecommons import CAS, Flag, BouquetService, TrType
@@ -398,6 +398,7 @@ class Application(Gtk.Application):
         self._bq_name_label = builder.get_object("bq_name_label")
         self._iptv_model = builder.get_object("iptv_list_store")
         self._iptv_menu_button = builder.get_object("iptv_menu_button")
+        self._send_button = builder.get_object("send_button")
         # Setting custom sort function for position column.
         self._services_view.get_model().set_sort_func(Column.SRV_POS, self.position_sort_func, Column.SRV_POS)
         # App info
@@ -1174,6 +1175,7 @@ class Application(Gtk.Application):
 
     def on_visible_page(self, stack, param):
         self._page = Page(stack.get_visible_child_name())
+        self._send_button.set_visible(self._page is not Page.SERVICES)
         self._fav_paned.set_visible(self._page in self._fav_pages)
         self.is_data_save_enabled = self._page in self.DATA_SAVE_PAGES
         self.is_data_open_enabled = self._page in self.DATA_OPEN_PAGES

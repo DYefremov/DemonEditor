@@ -4770,97 +4770,185 @@ Author: Dmitriy Yefremov
     <property name="can-focus">False</property>
     <property name="stack">stack</property>
   </object>
-  <object class="GtkButtonBox" id="toolbar_main_box">
+  <object class="GtkPopover" id="send_popover">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkButtonBox">
+        <property name="width-request">100</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="border-width">5</property>
+        <property name="orientation">vertical</property>
+        <property name="homogeneous">True</property>
+        <property name="layout-style">expand</property>
+         <child>
+          <object class="GtkModelButton" id="send_srv_button">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.on_send</property>
+            <property name="text" translatable="yes">All</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="send_bq_button">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.upload_bouquets</property>
+            <property name="text" translatable="yes">Bouquets</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkBox" id="toolbar_main_box">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
-    <property name="homogeneous">True</property>
-    <property name="layout-style">expand</property>
+    <property name="spacing">2</property>
     <child>
-      <object class="GtkButton" id="open_tool_button">
+      <object class="GtkButtonBox" id="osv_button_box">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
-        <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Open</property>
-        <property name="action-name">app.on_data_open</property>
+        <property name="can-focus">False</property>
+        <property name="layout-style">expand</property>
         <child>
-          <object class="GtkImage" id="open_image">
+          <object class="GtkButton" id="open_tool_button">
             <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="icon-name">document-open-symbolic</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Open</property>
+            <property name="action-name">app.on_data_open</property>
+            <child>
+              <object class="GtkImage" id="open_image">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">document-open-symbolic</property>
+              </object>
+            </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_tool_button">
+            <property name="can-focus">False</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Save</property>
+            <property name="action-name">app.on_data_save</property>
+            <child>
+              <object class="GtkImage" id="save_image">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">document-save-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
       <packing>
-        <property name="expand">True</property>
+        <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">0</property>
+        <property name="position">4</property>
       </packing>
     </child>
     <child>
-      <object class="GtkButton" id="receive_button">
+      <object class="GtkButtonBox" id="send_receive_button_box">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
-        <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Download from the receiver</property>
-        <property name="action-name">app.on_receive</property>
-        <property name="always-show-image">True</property>
+        <property name="layout-style">expand</property>
         <child>
-          <object class="GtkImage" id="download_image">
-            <property name="width-request">32</property>
+          <object class="GtkButton" id="receive_button">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="icon-name">network-receive-symbolic</property>
-            <property name="icon_size">1</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Download from the receiver</property>
+            <property name="action-name">app.on_receive</property>
+            <property name="always-show-image">True</property>
+            <child>
+              <object class="GtkImage" id="download_image">
+                <property name="width-request">32</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">network-receive-symbolic</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="send_button">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Transfer to receiver</property>
+            <property name="action-name">app.on_send</property>
+            <property name="always-show-image">True</property>
+            <child>
+              <object class="GtkImage" id="send_image">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">network-transmit-symbolic</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="send_menu_button">
+            <property name="visible" bind-source="send_button" bind-property="visible" bind-flags="invert-boolean">False</property>
+            <property name="can-focus">False</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
+            <property name="tooltip-text" translatable="yes">Transfer to receiver</property>
+            <property name="popover">send_popover</property>
+            <child>
+              <object class="GtkImage" id="send_menu_image">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">network-transmit-symbolic</property>
+                <property name="icon_size">1</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
         </child>
       </object>
       <packing>
-        <property name="expand">True</property>
+        <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButton" id="send_button">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Transfer to receiver</property>
-        <property name="action-name">app.on_send</property>
-        <property name="always-show-image">True</property>
-        <child>
-          <object class="GtkImage" id="send_image">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="icon-name">network-transmit-symbolic</property>
-            <property name="icon_size">1</property>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">2</property>
-      </packing>
-    </child>
-    <child>
-      <object class="GtkButton" id="save_tool_button">
-        <property name="can-focus">False</property>
-        <property name="receives-default">True</property>
-        <property name="tooltip-text" translatable="yes">Save</property>
-        <property name="action-name">app.on_data_save</property>
-        <child>
-          <object class="GtkImage" id="save_image">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="icon-name">document-save-symbolic</property>
-          </object>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">3</property>
+        <property name="position">5</property>
       </packing>
     </child>
   </object>
