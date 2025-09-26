@@ -513,7 +513,7 @@ def upload_data(*, settings, download_type=DownloadType.ALL, callback=log, done_
             services_path = settings.services_path
 
             if download_type is DownloadType.SATELLITES:
-                ftp.upload_xml(data_path, sat_xml_path, STC_XML_FILE, callback)
+                ftp.upload_xml(data_path, sat_xml_path, files_filter or STC_XML_FILE, callback)
 
             if s_type is SettingsType.NEUTRINO_MP and download_type is DownloadType.WEBTV:
                 ftp.upload_xml(data_path, sat_xml_path, WEB_TV_XML_FILE, callback)
@@ -614,7 +614,7 @@ def get_upload_info_message(download_type):
     elif download_type is DownloadType.ALL:
         return "All user data will be reloaded!"
     elif download_type is DownloadType.SATELLITES:
-        return "Satellites.xml file will be updated!"
+        return "*.xml file will be updated!"
     elif download_type is DownloadType.PICONS:
         return "Picons will be updated!"
     return ""
