@@ -2653,7 +2653,7 @@ class Application(Gtk.Application):
     def save_data(self, callback=None, ext_path=None):
         self._save_tool_button.set_sensitive(False)
         profile = self._s_type
-        path = ext_path or self._settings.profile_data_path
+        path = ext_path or self._ext_data_path or self._settings.profile_data_path
         backup_path = self._settings.profile_backup_path
         # Backup data or clearing data path
         backup_data(path, backup_path) if not ext_path and self._settings.backup_before_save else clear_data_path(path)
