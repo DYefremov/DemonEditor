@@ -2725,8 +2725,8 @@ Author: Dmitriy Yefremov
                                                 <property name="height-request">26</property>
                                                 <property name="visible">True</property>
                                                 <property name="can-focus">False</property>
-                                                <property name="margin-left">5</property>
-                                                <property name="margin-right">5</property>
+                                                <property name="margin-start">5</property>
+                                                <property name="margin-end">5</property>
                                                 <property name="resize-mode">queue</property>
                                                 <property name="spacing">2</property>
                                                 <child>
@@ -2860,17 +2860,49 @@ Author: Dmitriy Yefremov
                                                 </child>
                                                 <child>
                                                   <object class="GtkSpinner" id="services_load_spinner">
-                                                    <property name="visible">True</property>
+                                                    <property name="visible" bind-source="services_load_spinner" bind-property="active">False</property>
                                                     <property name="can-focus">False</property>
                                                     <property name="tooltip-text" translatable="yes">Loading data...</property>
                                                     <property name="halign">center</property>
                                                     <property name="valign">center</property>
+                                                    <property name="margin-start">15</property>
                                                   </object>
                                                   <packing>
                                                     <property name="expand">False</property>
                                                     <property name="fill">True</property>
                                                     <property name="pack-type">end</property>
                                                     <property name="position">10</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkImage" id="current_data_path_image">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="tooltip-text" translatable="yes">Current data path</property>
+                                                    <property name="icon-name">document-open-symbolic</property>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">False</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">11</property>
+                                                  </packing>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkLabel" id="current_data_path_label">
+                                                    <property name="visible">True</property>
+                                                    <property name="can-focus">False</property>
+                                                    <property name="tooltip-text" translatable="yes">Current data path</property>
+                                                    <property name="label"> </property>
+                                                    <property name="ellipsize">end</property>
+                                                    <property name="xalign">0</property>
+                                                    <attributes>
+                                                      <attribute name="size" value="8000"/>
+                                                    </attributes>
+                                                  </object>
+                                                  <packing>
+                                                    <property name="expand">True</property>
+                                                    <property name="fill">True</property>
+                                                    <property name="position">12</property>
                                                   </packing>
                                                 </child>
                                               </object>

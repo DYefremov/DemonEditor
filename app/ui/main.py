@@ -424,6 +424,7 @@ class Application(Gtk.Application):
         self._tv_count_label = builder.get_object("tv_count_label")
         self._radio_count_label = builder.get_object("radio_count_label")
         self._data_count_label = builder.get_object("data_count_label")
+        self._current_data_path_label = builder.get_object("current_data_path_label")
         self._iptv_count_label = builder.get_object("iptv_count_label")
         self._services_load_spinner = builder.get_object("services_load_spinner")
         self._iptv_services_load_spinner = builder.get_object("iptv_services_load_spinner")
@@ -2364,6 +2365,7 @@ class Application(Gtk.Application):
                 self.init_profiles()
 
             data_path = self._settings.profile_data_path if data_path is None else data_path
+            self._current_data_path_label.set_text(data_path)
             local_path = self._settings.profile_data_path
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
 
