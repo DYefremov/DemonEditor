@@ -815,7 +815,7 @@ class Application(Gtk.Application):
         # Open and download/upload data.
         self.set_action("open_data", lambda a, v: self.open_data())
         self.set_action("upload_all", lambda a, v: self.emit("data-send", self._page))
-        self.set_action("upload_bouquets", lambda a, v: self.on_upload_data(DownloadType.BOUQUETS))
+        self.set_action("upload_bouquets", self.on_upload_bouquets)
         sa = self.set_action("on_data_save", lambda a, v: self.emit("data-save", self._page), False)
         self.bind_property("is-data-save-enabled", sa, "enabled")
         sa = self.set_action("on_data_save_as", lambda a, v: self.emit("data-save-as", self._page), False)
@@ -2201,6 +2201,10 @@ class Application(Gtk.Application):
             self.on_upload_data()
         elif page is Page.SERVICES:
             self.on_upload_data(DownloadType.SERVICES)
+
+    def on_upload_bouquets(self, action, value=None):
+        self.change_action_state("on_logs_show", GLib.Variant.new_boolean(True))
+        self.on_upload_data(DownloadType.BOUQUETS)
 
     def on_bg_task_add(self, app, task):
         if len(self._task_box) <= self.BG_TASK_LIMIT:
