@@ -249,6 +249,7 @@ class Application(Gtk.Application):
         self._is_data_extract_enabled = False
         self._is_data_save_enabled = False
         self._ext_data_path = None
+        self._arch_data_path = None
         # Used for copy/paste. When adding the previous data will not be deleted.
         # Clearing only after the insertion!
         self._rows_buffer = []
@@ -2308,9 +2309,9 @@ class Application(Gtk.Application):
 
     def open_compressed_data(self, data_path):
         """ Opening archived data.  """
-        arch_path = self.get_archive_path(data_path)
-        if arch_path:
-            gen = self.update_data(f"{arch_path.name}{os.sep}", callback=arch_path.cleanup)
+        self._arch_data_path = self.get_archive_path(data_path)
+        if self._arch_data_path:
+            gen = self.update_data(f"{self._arch_data_path.name}{os.sep}")
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def get_archive_path(self, data_path):
