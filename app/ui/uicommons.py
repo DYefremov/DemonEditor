@@ -143,7 +143,7 @@ def get_yt_icon(icon_name, size=24):
         if n_theme.has_icon(icon_name):
             return n_theme.load_icon(icon_name, size, 0)
 
-    return default_theme.load_icon("emblem-important-symbolic", size, 0)
+    return get_icon("emblem-important-symbolic", size, LINK_ICON)
 
 
 def show_notification(message, timeout=10000, urgency=1):
