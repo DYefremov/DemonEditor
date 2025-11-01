@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ from urllib import parse
 from urllib.error import URLError
 from urllib.request import Request, urlopen, urlretrieve
 
-from app.commons import log
+from app.commons import log, run_task
 from app.settings import SEP
 from app.ui.uicommons import show_notification
 
@@ -338,13 +338,13 @@ class YouTubeDL:
         return cls._DL_INSTANCE
 
     def init(self):
-        if not os.path.isfile(f"{self._path}yt_dlp{SEP}version.py"):
+        if os.path.isfile(f"{self._path}yt_dlp{SEP}version.py"):
+            if self._path not in sys.path:
+                sys.path.append(self._path)
+
+            self.init_dl()
+        else:
             self.get_latest_release()
-
-        if self._path not in sys.path:
-            sys.path.append(self._path)
-
-        self.init_dl()
 
     def init_dl(self):
         try:
@@ -360,22 +360,15 @@ class YouTubeDL:
                 log(msg)
                 raise YouTubeException(msg)
 
-            if self._update:
-                if hasattr(yt_dlp.version, "__version__"):
-                    l_ver = self.get_last_release_id()
-                    cur_ver = yt_dlp.version.__version__
-                    if l_ver and yt_dlp.version.__version__ < l_ver:
-                        msg = f"yt-dlp has new release!\nCurrent: {cur_ver}. Last: {l_ver}."
-                        show_notification(msg)
-                        log(msg)
-                        self._callback(msg, False)
-                        self.get_latest_release()
-
             self._DownloadError = yt_dlp.utils.DownloadError
             self._dl = yt_dlp.YoutubeDL(self._OPTIONS)
             msg = "yt-dlp initialized..."
             show_notification(msg)
             log(msg)
+
+            if self._update:
+                if hasattr(yt_dlp.version, "__version__"):
+                    self.update(yt_dlp.version.__version__)
 
     @staticmethod
     def get_last_release_id():
@@ -387,7 +380,18 @@ class YouTubeDL:
         except URLError as e:
             log(f"YouTubeDLHelper error [get last release id]: {e}")
 
-    def get_latest_release(self):
+    @run_task
+    def update(self, current_version):
+        l_ver = self.get_last_release_id()
+        if l_ver and current_version < l_ver:
+            msg = f"yt-dlp has new release!\nCurrent: {current_version}. Last: {l_ver}."
+            show_notification(msg)
+            log(msg)
+            self._callback(msg, False)
+            self.get_latest_release(update=True)
+
+    @run_task
+    def get_latest_release(self, update=False):
         try:
             self._is_update_process = True
             log("Getting the last yt-dlp release...")
@@ -425,6 +429,8 @@ class YouTubeDL:
             raise YouTubeException(e)
         finally:
             self._is_update_process = False
+            if not update:
+                self.init()
 
     def get_yt_link(self, url, skip_errors=False):
         """ Returns tuple from the video links [dict] and title. """
