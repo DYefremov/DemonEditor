@@ -427,8 +427,8 @@ class Application(Gtk.Application):
         self._data_count_label = builder.get_object("data_count_label")
         self._current_data_path_label = builder.get_object("current_data_path_label")
         self._iptv_count_label = builder.get_object("iptv_count_label")
-        self._services_load_spinner = builder.get_object("services_load_spinner")
-        self._iptv_services_load_spinner = builder.get_object("iptv_services_load_spinner")
+        self._services_progress_bar = builder.get_object("services_progress_bar")
+        self._iptv_progress_bar = builder.get_object("iptv_progress_bar")
         self._save_tool_button = builder.get_object("save_tool_button")
         self.bind_property("is-data-save-enabled", self._save_tool_button, "visible")
         self._receiver_info_box.bind_property("visible", self._http_status_image, "visible", 4)
@@ -469,7 +469,6 @@ class Application(Gtk.Application):
         self._filter_free_button = builder.get_object("filter_free_button")
         self._filter_coded_button = builder.get_object("filter_coded_button")
         self._filter_not_in_bq_button = builder.get_object("filter_not_in_bq_button")
-        self._services_load_spinner.bind_property("active", self._filter_services_button, "sensitive", 4)
         self._filter_iptv_services_button = builder.get_object("filter_iptv_services_button")
         # Search.
         services_search_provider = SearchProvider(self._services_view,
@@ -604,10 +603,6 @@ class Application(Gtk.Application):
         iptv_button.bind_property("active", self._filter_iptv_services_button, "visible")
         iptv_button.bind_property("active", self._iptv_search_button, "visible")
         iptv_button.bind_property("active", builder.get_object("iptv_export_to_m3u_button"), "visible")
-        self._iptv_services_load_spinner.bind_property("active", self._filter_iptv_services_button, "sensitive", 4)
-        self._iptv_services_load_spinner.bind_property("active", self._profile_combo_box, "sensitive", 4)
-        self._iptv_services_load_spinner.bind_property("active", self._dvb_button, "sensitive", 4)
-        self._services_load_spinner.bind_property("active", self._iptv_button, "sensitive", 4)
         self.connect("profile-changed", self.init_iptv)
         self.connect("iptv-service-added", self.on_iptv_service_added)
         self.connect("iptv-service-edited", self.on_iptv_service_edited)
@@ -2549,7 +2544,7 @@ class Application(Gtk.Application):
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
         self._wait_dialog.hide()
-        self._services_load_spinner.start()
+        self._services_progress_bar.show()
         factor = self.DEL_FACTOR / 4
 
         for index, srv in enumerate(to_add):
@@ -2559,11 +2554,11 @@ class Application(Gtk.Application):
             if index % factor == 0:
                 yield True
 
-        self._services_load_spinner.stop()
+        self._services_progress_bar.hide()
         yield True
 
     def append_iptv_data(self, services=None):
-        self._iptv_services_load_spinner.start()
+        self._iptv_progress_bar.show()
         services = services or self._services.values()
 
         for index, s in enumerate(filter(lambda x: x.service_type == BqServiceType.IPTV.name, services), start=1):
@@ -2574,7 +2569,7 @@ class Application(Gtk.Application):
                 yield True
 
         self._iptv_count_label.set_text(str(len(self._iptv_model)))
-        self._iptv_services_load_spinner.stop()
+        self._iptv_progress_bar.hide()
         yield True
 
     def get_new_background(self, flags):
@@ -3910,7 +3905,7 @@ class Application(Gtk.Application):
 
     @run_with_delay(1)
     def on_filter_changed(self, item=None):
-        self._services_load_spinner.start()
+        self._services_progress_bar.show()
         self.update_filter_cache()
         self.update_filter_state()
 
@@ -3940,7 +3935,7 @@ class Application(Gtk.Application):
                 yield True
 
         view.set_model(main_model)
-        GLib.idle_add(self._services_load_spinner.stop)
+        GLib.idle_add(self._services_progress_bar.hide)
 
     def update_filter_cache(self):
         self._filter_cache.clear()
@@ -4201,7 +4196,7 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def mark_not_in_bouquets(self):
-        self._services_load_spinner.start()
+        self._services_progress_bar.show()
         ids = set(chain.from_iterable(self._bouquets.values()))
 
         for index, row in enumerate(self._services_model):
@@ -4212,7 +4207,7 @@ class Application(Gtk.Application):
             if index % self.FAV_FACTOR == 0:
                 yield True
 
-        self._services_load_spinner.stop()
+        self._services_progress_bar.hide()
         yield True
 
     def on_services_clear_marked(self, item):
@@ -4224,13 +4219,13 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def clear_marked(self):
-        self._services_load_spinner.start()
+        self._services_progress_bar.show()
         for index, row in enumerate(self._services_model):
             row[Column.SRV_BACKGROUND] = self.get_new_background(row[Column.SRV_CAS_FLAGS])
             if index % self.FAV_FACTOR == 0:
                 yield True
 
-        self._services_load_spinner.stop()
+        self._services_progress_bar.hide()
         yield True
 
     def on_services_clear_new_marked(self, item):
@@ -4247,7 +4242,7 @@ class Application(Gtk.Application):
         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def clear_new_marked(self, model, paths):
-        self._services_load_spinner.start()
+        self._services_progress_bar.show()
 
         paths = get_base_paths(paths, model)
         model = get_base_model(model)
@@ -4278,7 +4273,7 @@ class Application(Gtk.Application):
                 yield True
 
         self.show_info_message("Done!", Gtk.MessageType.INFO)
-        self._services_load_spinner.stop()
+        self._services_progress_bar.hide()
         yield True
 
     # ***************** Picons ********************* #
@@ -4635,8 +4630,8 @@ class Application(Gtk.Application):
         self._info_bar.set_visible(False)
 
     def is_data_loading(self):
-        is_services_loading = self._services_load_spinner.get_property("active")
-        return is_services_loading or self._iptv_services_load_spinner.get_property("active")
+        is_services_loading = self._services_progress_bar.get_visible()
+        return is_services_loading or self._iptv_progress_bar.get_visible()
 
     def is_data_saved(self):
         if self._data_hash != 0 and self._data_hash != self.get_data_hash():

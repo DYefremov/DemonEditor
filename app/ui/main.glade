@@ -1701,6 +1701,7 @@ Author: Dmitriy Yefremov
   </object>
   <object class="GtkComboBoxText" id="profile_combo_box">
     <property name="visible">True</property>
+    <property name="sensitive" bind-source="iptv_progress_bar" bind-property="visible" bind-flags="invert-boolean">True</property>
     <property name="can-focus">False</property>
     <property name="focus-on-click">False</property>
     <property name="active">0</property>
@@ -1905,6 +1906,7 @@ Author: Dmitriy Yefremov
                                                 <property name="label" translatable="yes">DVB</property>
                                                 <property name="width-request">80</property>
                                                 <property name="visible">True</property>
+                                                <property name="sensitive" bind-source="iptv_progress_bar" bind-property="visible" bind-flags="invert-boolean">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="receives-default">False</property>
                                                 <property name="active">True</property>
@@ -1921,6 +1923,7 @@ Author: Dmitriy Yefremov
                                               <object class="GtkRadioButton" id="iptv_button">
                                                 <property name="label" translatable="yes">IPTV</property>
                                                 <property name="visible">True</property>
+                                                <property name="sensitive" bind-source="services_progress_bar" bind-property="visible" bind-flags="invert-boolean">True</property>
                                                 <property name="can-focus">False</property>
                                                 <property name="receives-default">False</property>
                                                 <property name="active">True</property>
@@ -1944,7 +1947,7 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkToggleButton" id="filter_services_button">
                                             <property name="visible">True</property>
-                                            <property name="sensitive">False</property>
+                                            <property name="sensitive" bind-source="services_progress_bar" bind-property="visible" bind-flags="invert-boolean">False</property>
                                             <property name="can-focus">False</property>
                                             <property name="focus-on-click">False</property>
                                             <property name="receives-default">True</property>
@@ -1966,6 +1969,7 @@ Author: Dmitriy Yefremov
                                         </child>
                                         <child>
                                           <object class="GtkToggleButton" id="filter_iptv_services_button">
+                                            <property name="sensitive" bind-source="iptv_progress_bar" bind-property="visible" bind-flags="invert-boolean">False</property>
                                             <property name="can-focus">False</property>
                                             <property name="focus-on-click">False</property>
                                             <property name="receives-default">True</property>
@@ -2859,8 +2863,8 @@ Author: Dmitriy Yefremov
                                                   </packing>
                                                 </child>
                                                 <child>
-                                                  <object class="GtkSpinner" id="services_load_spinner">
-                                                    <property name="visible" bind-source="services_load_spinner" bind-property="active">False</property>
+                                                  <object class="GtkProgressBar" id="services_progress_bar">
+                                                    <property name="visible">False</property>
                                                     <property name="can-focus">False</property>
                                                     <property name="tooltip-text" translatable="yes">Loading data...</property>
                                                     <property name="halign">center</property>
@@ -3239,8 +3243,8 @@ Author: Dmitriy Yefremov
                                                   </packing>
                                                 </child>
                                                 <child>
-                                                  <object class="GtkSpinner" id="iptv_services_load_spinner">
-                                                    <property name="visible">True</property>
+                                                  <object class="GtkProgressBar" id="iptv_progress_bar">
+                                                    <property name="visible">False</property>
                                                     <property name="can-focus">False</property>
                                                     <property name="tooltip-text" translatable="yes">Loading data...</property>
                                                     <property name="halign">center</property>
