@@ -2536,22 +2536,25 @@ class Application(Gtk.Application):
                     break
 
     def append_services(self, services):
+        self._services_progress_bar.show()
         to_add = []
         for srv in services:
             if srv.fav_id not in self._services:
                 to_add.append(srv)
             #  Adding channels to dict with fav_id as keys.
             self._services[srv.fav_id] = srv
+
         self.update_services_counts(len(self._services.values()))
         self._wait_dialog.hide()
-        self._services_progress_bar.show()
         factor = self.DEL_FACTOR / 4
+        size = len(to_add)
 
         for index, srv in enumerate(to_add):
             background = self.get_new_background(srv.flags_cas)
             s = srv + (None, background)
             self._services_model.append(s)
             if index % factor == 0:
+                self._services_progress_bar.set_fraction(index / size)
                 yield True
 
         self._services_progress_bar.hide()
@@ -2560,12 +2563,15 @@ class Application(Gtk.Application):
     def append_iptv_data(self, services=None):
         self._iptv_progress_bar.show()
         services = services or self._services.values()
+        services = [s for s in services if s.service_type == BqServiceType.IPTV.name]
+        size = len(services)
 
-        for index, s in enumerate(filter(lambda x: x.service_type == BqServiceType.IPTV.name, services), start=1):
+        for index, s in enumerate(services, start=1):
             ref, url = get_iptv_data(s.fav_id)
             self._iptv_model.append((s.service, None, None, ref, url, s.fav_id, s.picon_id, None))
             if index % self.DEL_FACTOR == 0:
                 self._iptv_count_label.set_text(str(index))
+                self._iptv_progress_bar.set_fraction(index / size)
                 yield True
 
         self._iptv_count_label.set_text(str(len(self._iptv_model)))
