@@ -2347,7 +2347,6 @@ class Application(Gtk.Application):
 
     def update_data(self, data_path, callback=None):
         self._ext_data_path = data_path
-        self._services_load_spinner.start()
         self.on_info_bar_close()
         self._profile_combo_box.set_sensitive(False)
         self._alt_revealer.set_visible(False)
@@ -2387,21 +2386,19 @@ class Application(Gtk.Application):
         except FileNotFoundError as e:
             msg = translate("Please, download files from receiver or setup your path for read data!")
             self.show_error_message(getattr(e, "message", str(e)) + "\n\n" + msg)
-            self._services_load_spinner.stop()
             return
         except SyntaxError as e:
             self.show_error_message(str(e))
-            self._services_load_spinner.stop()
             return
         except Exception as e:
             msg = "Reading data error: {}"
             log(msg.format(e), debug=self._settings.debug_mode, fmt_message=msg)
             self.show_error_message("{}\n{}".format(translate("Reading data error!"), e))
-            self._services_load_spinner.stop()
             return
         else:
             self.append_blacklist(black_list)
-            yield from self.append_data(bouquets, services)
+            data_gen = self.append_data(bouquets, services)
+            yield from data_gen
             if callback:
                 callback()
             yield True
@@ -2419,7 +2416,8 @@ class Application(Gtk.Application):
         if self._app_info_box.get_visible():
             yield from self.show_app_info(False)
         self.append_bouquets(bouquets)
-        yield from self.append_services(services)
+        s_gen = self.append_services(services)
+        yield from s_gen
         self.update_sat_positions()
         yield True
 
@@ -2551,6 +2549,7 @@ class Application(Gtk.Application):
             self._services[srv.fav_id] = srv
         self.update_services_counts(len(self._services.values()))
         self._wait_dialog.hide()
+        self._services_load_spinner.start()
         factor = self.DEL_FACTOR / 4
 
         for index, srv in enumerate(to_add):
