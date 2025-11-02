@@ -106,9 +106,7 @@ Support for DVB-T/T2 and DVB-C channels for Neutrino is not fully implemented an
 Main supported *lamedb* format is version **4**. Versions **3** and **5** has only **experimental** support! For version **3** is only read mode available. When saving, version **4** format is used instead.   
 
 When using the multiple import feature, from *lamedb* will be taken data **only for channels that are in the selected bouquets!**
-If you need full set of the data, including *[satellites, terrestrial, cables].xml* (current files will be overwritten), 
-just load your data via *"File/Open"* and press *"Save"*. When importing separate bouquet files, only those services 
-(excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.
+When importing separate bouquet files, only those services (excluding IPTV) that are in the **current open lamedb** (main list of services) will be imported.
 
 **The built-in Telnet client does not support ANSI escape sequences!**
 
