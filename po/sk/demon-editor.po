@@ -1,0 +1,1512 @@
+# Copyright (C) 2018-2025 Dmitriy Yefremov
+# This file is distributed under the MIT license.
+#
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DemonEditor\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2025-11-09 11:56+0200\n"
+"Last-Translator: EnoSat <enosat@yahoo.com>\n"
+"Language-Team: Slovak\n"
+"Language: sk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural= (n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 3.4.4\n"
+
+msgid "translator-credits"
+msgstr ""
+"EnoSat <enosat@yahoo.com>\n"
+"HomePage <https://enosat.euweb.cz>"
+
+# Main
+msgid "Service"
+msgstr "Služba"
+
+msgid "Package"
+msgstr "Poskytovateľ"
+
+msgid "Type"
+msgstr "Typ"
+
+msgid "Picon"
+msgstr "Piktogram"
+
+msgid "Freq"
+msgstr "Kmitočet"
+
+msgid "Rate"
+msgstr "Rýchlosť"
+
+msgid "Pol"
+msgstr "Polarizácia"
+
+msgid "System"
+msgstr "Systém"
+
+msgid "Pos"
+msgstr "Pozícia"
+
+msgid "Num"
+msgstr "Číslo"
+
+msgid "Current IP:"
+msgstr "Aktuálna IP:"
+
+msgid "Assign"
+msgstr "Priradiť"
+
+msgid "Bouquet details"
+msgstr "Podrobnosti balíčka"
+
+msgid "Bouquets"
+msgstr "Balíčky"
+
+msgid "Copy"
+msgstr "Kopírovať"
+
+msgid "Copy reference"
+msgstr "Kopírovať referencie"
+
+msgid "Download"
+msgstr "Stiahnuť"
+
+msgid "Edit"
+msgstr "Upraviť"
+
+msgid "Edit mаrker text"
+msgstr "Upraviť text značky"
+
+msgid "FTP-transfer"
+msgstr "FTP prenos"
+
+msgid "Global search"
+msgstr "Celkové vyhľadávanie"
+
+msgid "Hide"
+msgstr "Skryť"
+
+msgid "Hide/Skip On/Off     Ctrl + H"
+msgstr "Skryť/Preskočiť Zap/Vyp     Ctrl + H"
+
+msgid "Add IPTV or stream service"
+msgstr "Pridať IPTV alebo streamovaciu službu"
+
+msgid "Import m3u"
+msgstr "Importovať m3u"
+
+msgid "Import m3u file"
+msgstr "Importovať súbor m3u"
+
+msgid "List configuration"
+msgstr "Nastavenie zoznamu"
+
+msgid "Rename for this bouquet"
+msgstr "Premenovať tento balíček"
+
+msgid "Set default name"
+msgstr "Nastaviť prednastavený názov"
+
+msgid "Insert marker"
+msgstr "Vložiť značku"
+
+msgid "Insert space"
+msgstr "Vložiť medzeru"
+
+msgid "Locate in services"
+msgstr "Nájsť v službách"
+
+msgid "Locked"
+msgstr "Zamknúť"
+
+msgid "Move"
+msgstr "Presunúť"
+
+msgid "New"
+msgstr "Nové"
+
+msgid "New bouquet"
+msgstr "Nový balíček"
+
+msgid "Create bouquet"
+msgstr "Vytvoriť balíček"
+
+msgid "For current satellite"
+msgstr "Pre aktuálnu družicu"
+
+msgid "For current package"
+msgstr "Pre aktuálneho poskytovateľa"
+
+msgid "For current type"
+msgstr "Pre aktuálny typ"
+
+msgid "For each satellite"
+msgstr "Pre každú družicu"
+
+msgid "For each package"
+msgstr "Pre každého poskytovateľa"
+
+msgid "For each type"
+msgstr "Pre každý typ"
+
+msgid "Open"
+msgstr "Otvoriť"
+
+msgid "Parent lock On/Off     Ctrl + L"
+msgstr "Rodičovský zámok Zap/Vyp     Ctrl + L"
+
+msgid "Picons"
+msgstr "Piktogramy"
+
+msgid "Picons downloader"
+msgstr "Stiahnuť piktogramy"
+
+msgid "Satellites downloader"
+msgstr "Stiahnuť družice"
+
+msgid "Remove"
+msgstr "Odstrániť"
+
+msgid "Remove all unavailable"
+msgstr "Odstrániť všetky nedostupné"
+
+msgid "Satellites editor"
+msgstr "Úprava družíc"
+
+msgid "Save"
+msgstr "Uložiť"
+
+msgid "Search"
+msgstr "Hľadať"
+
+msgid "Services"
+msgstr "Služby"
+
+msgid "Services filter"
+msgstr "Filtrovať služby"
+
+msgid "Settings"
+msgstr "Nastavenia"
+
+msgid "Up"
+msgstr "Nahor"
+
+msgid "Down"
+msgstr "Nadol"
+
+msgid "Active profile:"
+msgstr "Aktuálny profil:"
+
+msgid "All"
+msgstr "Všetko"
+
+msgid "Are you sure?"
+msgstr "Ste si istý?"
+
+msgid "Current data path:"
+msgstr "Aktuálny adresár údajov:"
+
+msgid "Data:"
+msgstr "Údaje:"
+
+msgid "Enigma2 channel and satellite list editor."
+msgstr "Enigma2 editor služieb a zoznamov."
+
+msgid "Host:"
+msgstr "Hostiteľ:"
+
+msgid "Loading data..."
+msgstr "Nahrávanie údajov..."
+
+msgid "Receive"
+msgstr "Nahrať"
+
+msgid "Receive files from receiver"
+msgstr "Nahrať súbory z prijímača"
+
+msgid "Receiver IP:"
+msgstr "Adresa IP prijímača:"
+
+msgid "Remove unused bouquets"
+msgstr "Odstrániť nepoužité balíčky"
+
+msgid "Reset profile"
+msgstr "Obnoviť profil"
+
+msgid "Satellites"
+msgstr "Družice"
+
+msgid "Satellites.xml file:"
+msgstr "Súbor satellites.xml:"
+
+msgid "Selected"
+msgstr "Vybrané"
+
+msgid "Send"
+msgstr "Odoslať"
+
+msgid "Send files to receiver"
+msgstr "Odoslať súbory do prijímača"
+
+msgid "Services and Bouquets files:"
+msgstr "Súbory služieb a balíčkov:"
+
+msgid "User bouquet files:"
+msgstr "Súbory užívateľského balíčka:"
+
+msgid "Extra:"
+msgstr "Doplnkové:"
+
+# Filter bar
+msgid "Only free"
+msgstr "Len nekódované"
+
+msgid "All positions"
+msgstr "Všetky pozície"
+
+msgid "All types"
+msgstr "Všetky typy"
+
+# Streams player
+msgid "Play"
+msgstr "Prehrať"
+
+msgid "Stop playback"
+msgstr "Zastaviť prehrávanie"
+
+msgid "Previous stream in the list"
+msgstr "Predchádzajúci stream v zozname"
+
+msgid "Next stream in the list"
+msgstr "Nasledujúci stream v zozname"
+
+msgid "Toggle in fullscreen"
+msgstr "Zobraziť na celom okne"
+
+msgid "Close"
+msgstr "Zatvoriť"
+
+# Picons dialog
+msgid "Load providers"
+msgstr "Nahrať poskytovateľov"
+
+msgid "Providers"
+msgstr "Poskytovatelia"
+
+msgid "Receive picons"
+msgstr "Nahrať piktogramy"
+
+msgid "Picons name format:"
+msgstr "Formát názvu piktogramov:"
+
+msgid "Resize:"
+msgstr "Zmeniť rozmer:"
+
+msgid "Current picons path"
+msgstr "Aktuálny adresár piktogramov"
+
+msgid "Receiver picons path:"
+msgstr "Adresár piktogramov v prijímači:"
+
+msgid "Picons download tool"
+msgstr "Správca sťahovania piktogramov"
+
+msgid "Transfer to receiver"
+msgstr "Presun do prijímača"
+
+msgid "Downloader"
+msgstr "Sťahovač"
+
+msgid "Converter"
+msgstr "Prevodník"
+
+msgid "Convert"
+msgstr "Konvertovať"
+
+msgid "Path to save:"
+msgstr "Adresár pre uloženie:"
+
+msgid "Path to Enigma2 picons:"
+msgstr "Adresár pre Enigma2 piktogramy:"
+
+msgid "Specify the correct position value for the provider!"
+msgstr "Zadajte správnu hodnotu pozície pre poskytovateľa!"
+
+msgid "Converter between name formats"
+msgstr "Prevodník medzi formátmi mien"
+
+msgid "Receive picons for providers"
+msgstr "Stiahnuť piktogramy pre poskytovateľov"
+
+msgid "Load satellite providers."
+msgstr "Nahrať poskytovateľov."
+
+msgid ""
+"To automatically set the identifiers for picons,\n"
+"first load the required services list into the main application window."
+msgstr ""
+"Ak chcete automaticky nastaviť identifikátory pre piktogramy,\n"
+"najprv nahrajte požadovaný zoznam služieb do hlavného okna aplikácie."
+
+# Satellites editor
+msgid "Satellites edit tool"
+msgstr "Úprava družíc"
+
+msgid "Add"
+msgstr "Pridať"
+
+msgid "Satellite"
+msgstr "Družica"
+
+msgid "Transponder"
+msgstr "Transpondér"
+
+msgid "Satellite properties:"
+msgstr "Vlastnosti družice:"
+
+msgid "Transponder properties:"
+msgstr "Vlastnosti transpondéra:"
+
+msgid "Name"
+msgstr "Názov"
+
+msgid "Position"
+msgstr "Pozícia"
+
+# Satellites update dialog
+msgid "Satellites update"
+msgstr "Aktualizácia družíc"
+
+msgid "Remove selection"
+msgstr "Odstrániť vybrané"
+
+# Service details dialog
+msgid "Service data:"
+msgstr "Údaje služby:"
+
+msgid "Transponder data:"
+msgstr "Údaje transpondéra:"
+
+msgid "Service data"
+msgstr "Údaje služby"
+
+msgid "Transponder details"
+msgstr "Podrobnosti transpondéra"
+
+msgid ""
+"Changes will be applied to all services of this transponder!\n"
+"Continue?"
+msgstr ""
+"Zmeny sa použijú na všetky služby tohto transpondéra!\n"
+"Pokračovať?"
+
+msgid "Reference"
+msgstr "Referencie"
+
+msgid "Namespace"
+msgstr "Menný priestor"
+
+msgid "Flags:"
+msgstr "Príznaky:"
+
+msgid "Delays (ms):"
+msgstr "Spozdenie (ms):"
+
+msgid "Bitstream"
+msgstr "Bitstream"
+
+msgid "Description"
+msgstr "Popis"
+
+msgid "Source:"
+msgstr "Zdroj:"
+
+msgid "Cancel"
+msgstr "Zrušiť"
+
+msgid "Update"
+msgstr "Aktualizácia"
+
+msgid "Filter"
+msgstr "Filter"
+
+msgid "Find"
+msgstr "Nájsť"
+
+# IPTV dialog
+msgid "Stream data"
+msgstr "Údaje streamu"
+
+# IPTV list configuration dialog
+msgid "Starting values"
+msgstr "Počiatočné hodnoty"
+
+msgid "Reset to default"
+msgstr "Obnoviť predvolené"
+
+msgid "IPTV streams list configuration"
+msgstr "Nastavenie zoznamu IPTV streamov"
+
+# Settings dialog
+msgid "Preferences"
+msgstr "Preferencie"
+
+msgid "Profile:"
+msgstr "Profil:"
+
+msgid "Timeout between commands in seconds"
+msgstr "Časový limit medzi príkazmi v sekundách"
+
+msgid "Timeout:"
+msgstr "Časový limit:"
+
+msgid "Login:"
+msgstr "Prihlásenie:"
+
+msgid "Options"
+msgstr "Možnosti"
+
+msgid "Rename"
+msgstr "Zmeniť názov"
+
+msgid "Password:"
+msgstr "Heslo:"
+
+msgid "Picons:"
+msgstr "Piktogramy:"
+
+msgid "Port:"
+msgstr "Port:"
+
+msgid "Data path:"
+msgstr "Adresár údajov:"
+
+msgid "Picons path:"
+msgstr "Adresár piktogramov:"
+
+msgid "Network settings:"
+msgstr "Nastavenia siete:"
+
+msgid "STB file paths:"
+msgstr "Adresáre súborov STB:"
+
+msgid "Local file paths:"
+msgstr "Lokálne adresáre súborov:"
+
+# Dialogs messages
+msgid "Error. No bouquet is selected!"
+msgstr "Chyba. Nebol označený žiadny balíček!"
+
+msgid "This item is not allowed to be removed!"
+msgstr "Túto položku nie je možné odstrániť!"
+
+msgid "This item is not allowed to edit!"
+msgstr "Túto položku nie je možné upraviť!"
+
+msgid "Not allowed in this context!"
+msgstr "V tomto kontexte nie je povolené!"
+
+msgid "Please, download files from receiver or setup your path for read data!"
+msgstr "Prosím, stiahnite si súbory z prijímača alebo nastavte cestu pre načítanie údajov!"
+
+msgid "Reading data error!"
+msgstr "Chyba načítania údajov!"
+
+msgid "No m3u file is selected!"
+msgstr "Nie je vybraný žiadny súbor m3u!"
+
+msgid "Not implemented yet!"
+msgstr "Zatiaľ neimplementované!"
+
+msgid "The text of marker is empty, please try again!"
+msgstr "Text značky je prázdny, skúste to znova!"
+
+msgid "Please, select only one item!"
+msgstr "Prosím, vyberte iba jednu položku!"
+
+msgid "No png file is selected!"
+msgstr "Nie je vybraný žiadny súbor png!"
+
+msgid "No profile selected!"
+msgstr "Nie je vybraný žiadny profil!"
+
+msgid "No reference is present!"
+msgstr "Nie je k dispozícii žiadna referencia!"
+
+msgid "No selected item!"
+msgstr "Žiadna vybraná položka!"
+
+msgid "The task is already running!"
+msgstr "Úloha už beží!"
+
+msgid "Done!"
+msgstr "Hotovo!"
+
+msgid "Please, wait..."
+msgstr "Prosím, počkajte..."
+
+msgid "Resizing..."
+msgstr "Zmena veľkosti..."
+
+msgid "Select paths!"
+msgstr "Vyberte si cesty!"
+
+msgid "No satellite is selected!"
+msgstr "Nie je vybraná žiadna družica!"
+
+msgid "Please, select only one satellite!"
+msgstr "Prosím, vyberte iba jedenu družicu!"
+
+msgid "Please check your parameters and try again."
+msgstr "Skontrolujte si parametre a skúste to znova."
+
+msgid "No satellites.xml file is selected!"
+msgstr "Nie je vybraný žiadny súbor satellites.xml!"
+
+msgid "Error. Verify the data!"
+msgstr "Chyba. Overte údaje!"
+
+msgid "Operation not allowed in this context!"
+msgstr "Operácia nie je v tomto kontexte povolená!"
+
+msgid "No VLC is found. Check that it is installed!"
+msgstr "Nenašiel sa žiadny VLC. Skontrolujte, či je nainštalovaný!"
+
+# Search unavailable streams dialog
+msgid "Please wait,  streams testing  in progress..."
+msgstr "Čakajte prosím,  prebieha  testovanie streamov..."
+
+msgid "Found"
+msgstr "Nájdené"
+
+msgid "unavailable streams."
+msgstr "nedostupné streamy."
+
+msgid "No changes required!"
+msgstr "Žiadne zmeny nie sú potrebné!"
+
+msgid "This list does not contains IPTV streams!"
+msgstr "Tento zoznam neobsahuje IPTV streamy!"
+
+msgid "New empty configuration"
+msgstr "Nová prázdna konfigurácia"
+
+msgid "No data to save!"
+msgstr "Žiadne dáta na uloženie!"
+
+msgid "Network"
+msgstr "Sieť"
+
+msgid "Paths"
+msgstr "Adresáre"
+
+msgid "Program"
+msgstr "Program"
+
+msgid "Backup:"
+msgstr "Kópia:"
+
+msgid "Backup"
+msgstr "Záloha"
+
+msgid "Backups"
+msgstr "Zálohy"
+
+msgid "Backup path:"
+msgstr "Adresár zálohy:"
+
+msgid "Restore bouquets"
+msgstr "Obnoviť balíčky"
+
+msgid "Restore all"
+msgstr "Obnoviť všetko"
+
+msgid "Before saving"
+msgstr "Pred uložením"
+
+msgid "Before downloading from the receiver"
+msgstr "Pred sťahovaním z prijímača"
+
+msgid "Set background color for the services"
+msgstr "Nastavenie farby pozadia pre služby"
+
+msgid "Marked as new:"
+msgstr "Označené ako nové:"
+
+msgid "With an extra name in the bouquet:"
+msgstr "S ďalším menom v balíčku:"
+
+msgid "Select"
+msgstr "Vyberte"
+
+msgid "About"
+msgstr "O programe"
+
+msgid "Exit"
+msgstr "Ukončiť"
+
+msgid "Tools"
+msgstr "Nástroje"
+
+# Import
+msgid "Import"
+msgstr "Importovať"
+
+msgid "Bouquet"
+msgstr "Balíček"
+
+msgid "Bouquets and services"
+msgstr "Balíčky a služby"
+
+msgid "The main list does not contain services for this bouquet!"
+msgstr "Hlavný zoznam neobsahuje služby pre tento balíček!"
+
+msgid "No bouquet file is selected!"
+msgstr "Nie je vybraný žiadny súbor s balíčkom!"
+
+msgid "Remove all unused"
+msgstr "Odstráňte všetky nepoužívané"
+
+msgid "Test"
+msgstr "Test"
+
+msgid "Test connection"
+msgstr "Overiť spojenie"
+
+msgid "Double click on the service in the bouquet list:"
+msgstr "Dvakrát kliknite na službu v zozname balíčka:"
+
+msgid "Zap"
+msgstr "Prepnúť"
+
+msgid "Play  stream"
+msgstr "Prehrať  stream"
+
+msgid "Disabled"
+msgstr "Zakázané"
+
+msgid "Enable lamedb ver. 5 support"
+msgstr "Povoliť podporu pre lamedb verzie 5"
+
+msgid "Enable HTTP API"
+msgstr "Povoliť HTTP API"
+
+msgid "Switch(zap) the channel(Ctrl + Z)"
+msgstr "Prepnúť(zapnúť) kanál (Ctrl + Z)"
+
+msgid "Switch the channel and watch in the program(Ctrl + W)"
+msgstr "Prepnúť kanál a sledovať reláciu (Ctrl + W)"
+
+msgid "Play IPTV or other stream in the program(Ctrl + P)"
+msgstr "Prehrať IPTV alebo iný stream v aplikácii (Ctrl + P)"
+
+msgid "Export to m3u"
+msgstr "Exportovať do m3u"
+
+msgid "EPG configuration"
+msgstr "Konfigurácia EPG"
+
+msgid "Apply"
+msgstr "Použiť"
+
+msgid "EPG source"
+msgstr "Zdroj EPG"
+
+msgid "Service names source:"
+msgstr "Zdroj názvov služieb:"
+
+msgid "Main service list"
+msgstr "Hlavný zoznam služieb"
+
+msgid "XML file"
+msgstr "Súbor XML"
+
+msgid "Use web source"
+msgstr "Použite webový zdroj"
+
+msgid "Url to *.xml.gz file:"
+msgstr "URL do súboru *.xml.gz:"
+
+msgid "Enable filtering"
+msgstr "Povoliť filtrovanie"
+
+msgid "Filter by presence in the epg.dat file."
+msgstr "Filtrovať podľa prítomnosti v súbore epg.dat."
+
+msgid "Paths to the epg.dat file:"
+msgstr "Adresáre pre súbor epg.dat:"
+
+msgid "Local path:"
+msgstr "Lokálny adresár:"
+
+msgid "STB path:"
+msgstr "Adresár STB:"
+
+msgid "Update on start"
+msgstr "Aktualizácia pri spustení"
+
+msgid "Auto configuration by service names."
+msgstr "Automatická konfigurácia podľa názvov služieb."
+
+msgid "Save list to xml."
+msgstr "Uložiť zoznam do XML."
+
+msgid "Download XML file error."
+msgstr "Chyba sťahovania súboru XML."
+
+msgid "Unsupported file type:"
+msgstr "Nepodporovaný typ súboru:"
+
+msgid "Unpacking data error."
+msgstr "Chyba pri rozbaľovaní údajov."
+
+msgid "XML parsing error:"
+msgstr "Chyba pri analýze XML:"
+
+msgid "Count of successfully configured services:"
+msgstr "Počet úspešne nakonfigurovaných služieb:"
+
+msgid "Current epg.dat file does not contains references for the services of this bouquet!"
+msgstr "Aktuálny súbor epg.dat neobsahuje referencie na služby tohto balíčka!"
+
+msgid "Use HTTP"
+msgstr "Použiť HTTP"
+
+msgid "Close playback"
+msgstr "Ukončiť prehrávanie"
+
+msgid "Import YouTube playlist"
+msgstr "Importovať playlist YouTube"
+
+msgid ""
+"Found a link to the YouTube resource!\n"
+"Try to get a direct link to the video?"
+msgstr ""
+"Našiel som odkaz na YouTube!\n"
+"Skúsili ste získať priamy odkaz na video?"
+
+msgid "Playlist import"
+msgstr "Import zoznamu skladieb"
+
+msgid "Getting link error:"
+msgstr "Chyba pri odkaze:"
+
+msgid "Extra"
+msgstr "Extra"
+
+msgid "Apply profile settings"
+msgstr "Použiť nastavenia profilu"
+
+msgid "Settings type:"
+msgstr "Typ nastavení:"
+
+msgid "Set default"
+msgstr "Nastaviť predvolené"
+
+msgid "Language:"
+msgstr "Jazyk:"
+
+msgid "Load the last open configuration at program startup"
+msgstr "Načítať poslednú otvorenú konfiguráciu pri spustení programu"
+
+msgid "Enable direct playback bar"
+msgstr "Povoliť panel priameho prehrávania"
+
+msgid "Enables direct sending and playback of media links on the receiver"
+msgstr "Umožňuje priame odosielanie a prehrávanie mediálnych odkazov na prijímači"
+
+msgid "Watch the channel in the program"
+msgstr "Sledujte kanál v aplikácii"
+
+msgid "Zap and Play"
+msgstr "Prepnúť a Prehrať"
+
+msgid "Drag  or paste the link here"
+msgstr "Presuňte  alebo vložte odkaz sem"
+
+msgid "Remove added links in the playlist"
+msgstr "Odstrániť pridané odkazy v zozname skladieb"
+
+msgid "A bouquet with that name exists!"
+msgstr "Balíček s týmto názvom existuje!"
+
+msgid "Details"
+msgstr "Podrobnosti"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Reset"
+msgstr "Obnoviť"
+
+msgid "File"
+msgstr "Súbor"
+
+msgid "Picons manager"
+msgstr "Správca piktogramov"
+
+msgid "Explorer"
+msgstr "Prieskumník"
+
+msgid "Satellite url:"
+msgstr "Satelitná url:"
+
+msgid "Cut"
+msgstr "Vystrihnúť"
+
+msgid "Paste"
+msgstr "Vložiť"
+
+msgid "To the top"
+msgstr "Na vrch"
+
+msgid "To the end"
+msgstr "Na spodok"
+
+msgid "View"
+msgstr "Zobraziť"
+
+msgid "Lock"
+msgstr "Zamknúť"
+
+msgid "Parent lock"
+msgstr "Rodičovský zámok"
+
+msgid "Hide/Skip"
+msgstr "Skryť/Preskočiť"
+
+msgid "IPTV tools"
+msgstr "IPTV nástroje"
+
+msgid "Make profile folder as default for the additional data"
+msgstr "Nastaviť priečinok profilu ako predvolený pre ďalšie údaje"
+
+msgid "Default data path:"
+msgstr "Predvolený adresár k údajom:"
+
+msgid "Streams record path:"
+msgstr "Adresár k záznamu streamov:"
+
+msgid "Record"
+msgstr "Nahrávky"
+
+msgid "Record:"
+msgstr "Nahrávanie:"
+
+msgid "Record to disk:"
+msgstr "Nahrávanie na disk:"
+
+msgid "Streaming"
+msgstr "Streamovanie"
+
+msgid "Activate transcoding"
+msgstr "Aktivovať prekódovanie"
+
+msgid "Presets:"
+msgstr "Predvoľby:"
+
+msgid "Video options:"
+msgstr "Možnosti obrazu:"
+
+msgid "Audio options:"
+msgstr "Možnosti zvuku:"
+
+msgid "Bitrate (kb/s):"
+msgstr "Bitová rýchlosť (kb/s):"
+
+msgid "Codec:"
+msgstr "Kodek:"
+
+msgid "Width (px):"
+msgstr "Šírka (px):"
+
+msgid "Height (px):"
+msgstr "Výška (px):"
+
+msgid "Channels:"
+msgstr "Kanály:"
+
+msgid "Sample rate (Hz):"
+msgstr "Vzorkovací kmitočet (Hz):"
+
+msgid "Play streams mode:"
+msgstr "Režim prehrávania streamov:"
+
+msgid "Built-in player"
+msgstr "Vstavaný prehrávač"
+
+msgid "In a separate window"
+msgstr "V samostatnom okne"
+
+msgid "Only get m3u file"
+msgstr "Získať iba súbor m3u"
+
+msgid "Save and restart the program to apply the settings."
+msgstr "Uložte a reštartujte program, aby sa nastavenia použili."
+
+msgid "Some images may have problems displaying the favorites list!"
+msgstr "Niektoré IMAGE môžu mať problémy so zobrazením zoznamu obľúbených!"
+
+msgid "Operates in standby mode or current active transponder!"
+msgstr "Funguje v pohotovostnom režime alebo pri aktuálne aktívnom transpondére!"
+
+msgid "No connection to the receiver!"
+msgstr "Žiadne spojenie s prijímačom!"
+
+msgid "Signal level"
+msgstr "Úroveň signálu"
+
+msgid "Receiver info"
+msgstr "Informácie o STB"
+
+msgid "A profile with that name exists!"
+msgstr "Profil s týmto menom už existuje!"
+
+msgid "Show short info as hints in the main services list"
+msgstr "Zobraziť krátke informácie ako rady v hlavnom zozname služieb"
+
+msgid "Show detailed info as hints in the bouquet list"
+msgstr "Zobraziť podrobné informácie ako rady v zozname balíčka"
+
+msgid "Enable alternate bouquet file naming"
+msgstr "Povoliť alternatívne pomenovanie súboru balíčka"
+
+msgid "Allows you to name bouquet files using their names."
+msgstr "Umožňuje pomenovať súbory balíčka pomocou ich názvov."
+
+msgid "Appearance"
+msgstr "Vzhľad"
+
+msgid "Enable Themes support"
+msgstr "Povoliť podporu tém"
+
+msgid "Gtk3 Theme:"
+msgstr "Téma Gtk3:"
+
+msgid "Icon Theme:"
+msgstr "Téma Ikon:"
+
+msgid "Gtk3 Themes and Icons:"
+msgstr "Témy Gtk3 a Ikon:"
+
+msgid "Deleting data..."
+msgstr "Mazanie údajov..."
+
+msgid "Download from the receiver"
+msgstr "Stiahnutie z prijímača"
+
+msgid "Remove all picons from the receiver"
+msgstr "Odstráňte všetky piktogramy z prijímača"
+
+msgid "Service reference"
+msgstr "Referencia služby"
+
+msgid "Enable support for"
+msgstr "Povoliť podporu pre"
+
+msgid "Auto-check for updates"
+msgstr "Automatická kontrola aktualizácií"
+
+msgid "Filter services"
+msgstr "Filtrovať služby"
+
+msgid "Filter services in the main list."
+msgstr "Filtrovať služby v hlavnom zozname."
+
+msgid "Destination:"
+msgstr "Destinácia:"
+
+msgid "EXPERIMENTAL!"
+msgstr "EXPERIMENTÁLNE!"
+
+msgid "Sorting data..."
+msgstr "Triedenie údajov..."
+
+msgid ""
+"There are unsaved changes.\n"
+"\n"
+"\t Save them now?"
+msgstr ""
+"Existujú neuložené zmeny.\n"
+"\n"
+"\t Uložiť ich teraz?"
+
+msgid ""
+"Are you sure you want to change the order\n"
+"\t of services in this bouquet?"
+msgstr ""
+"Naozaj chcete zmeniť poradie\n"
+"\t služieb v tomto balíčku?"
+
+msgid "Remove from the receiver"
+msgstr "Odstráňte z prijímača"
+
+msgid "Screenshot"
+msgstr "Snímka obrazovky"
+
+msgid "Video"
+msgstr "Video"
+
+msgid "The Neutrino has only experimental support. Not all features are supported!"
+msgstr "NEUTRINO má iba experimentálnu podporu. Nie všetky funkcie sú podporované!"
+
+msgid "Enable experimental features"
+msgstr "Povoliť experimentálne funkcie"
+
+msgid "Can't Playback!"
+msgstr "Nedá sa prehrať!"
+
+msgid "Enable Dark Mode"
+msgstr "Povoliť tmavý režim"
+
+msgid "Extract..."
+msgstr "Rozbaľovanie..."
+
+msgid "Unsupported format!"
+msgstr "Nepodporovaný formát!"
+
+msgid "Combine with the current data?"
+msgstr "Kombinovať s aktuálnymi údajmi?"
+
+msgid "Importing data done!"
+msgstr "Import údajov je dokončený!"
+
+msgid "Current service"
+msgstr "Aktuálna služba"
+
+msgid "Open folder"
+msgstr "Otvoriť priečinok"
+
+msgid "Open archive"
+msgstr "Otvoriť archív"
+
+msgid "Import from Web"
+msgstr "Importovať z webu"
+
+msgid "Control"
+msgstr "Ovládanie"
+
+msgid "Timers"
+msgstr "Časovače"
+
+msgid "Timer"
+msgstr "Časovač"
+
+msgid "Add timer"
+msgstr "Pridať časovač"
+
+msgid "Hr."
+msgstr "Hod."
+
+msgid "Min."
+msgstr "Min."
+
+msgid "Power"
+msgstr "Zapnúť"
+
+msgid "Standby"
+msgstr "Uspať"
+
+msgid "Wake Up"
+msgstr "Zobudiť"
+
+msgid "Reboot"
+msgstr "Reštart"
+
+msgid "Restart GUI"
+msgstr "Reštart grafického rozhrania (GUI)"
+
+msgid "Shutdown"
+msgstr "Vypnúť"
+
+msgid "Shut down"
+msgstr "Vypnutie"
+
+msgid "Do Nothing"
+msgstr "Nerobiť nič"
+
+msgid "Auto"
+msgstr "Auto"
+
+msgid "Grab screenshot"
+msgstr "Zachytiť snímku obrazovky"
+
+msgid "Enabled:"
+msgstr "Povolené:"
+
+msgid "Name:"
+msgstr "Názov:"
+
+msgid "Description:"
+msgstr "Popis:"
+
+msgid "Service:"
+msgstr "Služba:"
+
+msgid "Service reference:"
+msgstr "Referencie služby:"
+
+msgid "Event ID:"
+msgstr "ID udalosti:"
+
+msgid "Begins:"
+msgstr "Začína:"
+
+msgid "Ends:"
+msgstr "Končí:"
+
+msgid "Repeated:"
+msgstr "Opakované:"
+
+msgid "Action:"
+msgstr "Akcia:"
+
+msgid "After event:"
+msgstr "Po udalosti:"
+
+msgid "Location:"
+msgstr "Poloha:"
+
+msgid "Mo"
+msgstr "Po"
+
+msgid "Tu"
+msgstr "Ut"
+
+msgid "We"
+msgstr "St"
+
+msgid "Th"
+msgstr "Št"
+
+msgid "Fr"
+msgstr "Pi"
+
+msgid "Sa"
+msgstr "So"
+
+msgid "Su"
+msgstr "Ne"
+
+msgid "Set"
+msgstr "Nastaviť"
+
+msgid "Services update"
+msgstr "Aktualizácia služieb"
+
+msgid "Create folder"
+msgstr "Vytvoriť adresár"
+
+msgid "FTP client"
+msgstr "FTP klient"
+
+msgid "The file size is too large!"
+msgstr "Veľkosť súboru je príliš veľká!"
+
+msgid "Connect"
+msgstr "Pripojiť"
+
+msgid "Disconnect"
+msgstr "Odpojiť"
+
+msgid "Size"
+msgstr "Veľkosť"
+
+msgid "Date"
+msgstr "Dátum"
+
+msgid "Toggle display position"
+msgstr "Prepnúť polohu zobrazenia"
+
+msgid "Alternatives"
+msgstr "Alternatívy"
+
+msgid "Add alternatives"
+msgstr "Pridať alternatívy"
+
+msgid "DreamOS only!"
+msgstr "Len DreamOS!"
+
+msgid "A similar service is already in this list!"
+msgstr "Podobná služba sa už v tomto zozname nachádza!"
+
+msgid ""
+"Play mode has been changed!\n"
+"Restart the program to apply the settings."
+msgstr ""
+"Režim prehrávania bol zmenený!\n"
+"Reštartujte program, aby sa nastavenia použili."
+
+msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
+msgstr "Nastavte hodnoty pre TID, NID a Menný priestor pre správne pomenovanie piktogramov!"
+
+msgid "Streams detected:"
+msgstr "Zistené streamy:"
+
+msgid "Download picons"
+msgstr "Stiahnite si piktogramy"
+
+msgid "Errors:"
+msgstr "Chyby:"
+
+msgid "Use to play streams:"
+msgstr "Na prehrávanie streamov použite:"
+
+msgid "Font in the lists:"
+msgstr "Písmo v zoznamoch:"
+
+msgid "Picons size in the lists:"
+msgstr "Veľkosť piktogramov v zoznamoch:"
+
+msgid "Logo size in tooltips:"
+msgstr "Veľkosť loga v popisoch:"
+
+msgid "Save as"
+msgstr "Uložiť ako"
+
+msgid "Mark duplicates"
+msgstr "Označiť duplikáty"
+
+msgid "Load only for selected bouquet"
+msgstr "Načítať iba pre vybraný balíček"
+
+msgid "The task is canceled!"
+msgstr "Úloha je zrušená!"
+
+msgid "Data loading in progress!"
+msgstr "Prebieha načítavanie údajov!"
+
+msgid "Recordings"
+msgstr "Nahrávania"
+
+msgid "Help"
+msgstr "Nápoveda"
+
+msgid "HTTP API is not activated. Check your settings!"
+msgstr "HTTP API nie je aktivované. Skontrolujte si nastavenia!"
+
+msgid "Add picons"
+msgstr "Pridať piktogramy"
+
+msgid "Logs"
+msgstr "Logovanie"
+
+msgid "Title"
+msgstr "Titul"
+
+msgid "Time"
+msgstr "Čas"
+
+msgid "Length"
+msgstr "Dĺžka"
+
+msgid "Additional source"
+msgstr "Dodatočný zdroj"
+
+msgid "Automatically set the name selected in the favorites list."
+msgstr "Automaticky nastaví názov vybraný v zozname obľúbených."
+
+msgid "Playback"
+msgstr "Prehrávanie"
+
+msgid "Audio"
+msgstr "Audio"
+
+msgid "Audio Track"
+msgstr "Audio stopa"
+
+msgid "Subtitle"
+msgstr "Titulky"
+
+msgid "Subtitle Track"
+msgstr "Titulková stopa"
+
+msgid "Aspect ratio"
+msgstr "Pomer strán"
+
+msgid "This may change the settings of other profiles!"
+msgstr "Toto môže zmeniť nastavenia iných profilov!"
+
+msgid "Drag the services to the desired picon or picon to the list of selected services."
+msgstr "Potiahnite služby na požadovaný piktogram alebo piktogram do zoznamu vybratých služieb."
+
+msgid "Sets the profile folder as default to store picons, backups, etc."
+msgstr "Nastaví priečinok profilu ako predvolený na ukladanie obrázkov, záloh atď."
+
+msgid "New sub-bouquet"
+msgstr "Nový sub-balíček"
+
+msgid "Mark not presented in Bouquets"
+msgstr "Značka nie je prezentovaná v balíčkoch"
+
+msgid "Not in Bouquets"
+msgstr "Nie je v balíčkoch"
+
+msgid "Do not show services present in Bouquets."
+msgstr "Nezobrazovať služby prítomné v balíčkoch."
+
+msgid "IPTV services only"
+msgstr "Len IPTV služby"
+
+msgid "Display picons"
+msgstr "Zobraziť piktogramy"
+
+msgid "Alternate layout"
+msgstr "Alternatívne rozloženie"
+
+msgid "Layout of elements has been changed!"
+msgstr "Rozloženie prvkov bolo zmenené!"
+
+msgid "Restart the program to apply all changes."
+msgstr "Reštartujte program, aby sa prejavili všetky zmeny."
+
+msgid "New folder"
+msgstr "Nový adresár"
+
+msgid "Bookmarks"
+msgstr "Záložky"
+
+msgid "Add bookmark"
+msgstr "Pridať záložku"
+
+msgid "All bouquets"
+msgstr "Všetky balíčky"
+
+msgid "Playback from the main list"
+msgstr "Prehrávanie z hlavného zoznamu"
+
+msgid "Enables URL parsing using yt-dlp to get direct links to media."
+msgstr "Umožňuje analýzu URL adries pomocou yt-dlp na získanie priamych odkazov na médiá."
+
+msgid "Permissions..."
+msgstr "Povolenia..."
+
+msgid "Display EPG in bouquet list"
+msgstr "Zobraziť EPG v zozname balíčkov"
+
+msgid "EPG *.dat file:"
+msgstr "Súbor EPG *.dat:"
+
+msgid "Use HTTP to reload data in the receiver"
+msgstr "Použitie HTTP na opätovné načítanie údajov v prijímači"
+
+msgid "Enable picons compression"
+msgstr "Povoliť kompresiu piktogramov"
+
+msgid "Update interval (sec):"
+msgstr "Interval aktualizácie (sek):"
+
+msgid "Update:"
+msgstr "Aktualizácia:"
+
+msgid "Daily"
+msgstr "Denne"
+
+msgid "Assign reference"
+msgstr "Priradiť referenciu"
+
+msgid "Specify hostname or IP address"
+msgstr "Zadajte názov hostiteľa alebo IP adresu"
+
+msgid "Default selection"
+msgstr "Predvolený výber"
+
+msgid "Don't change power state"
+msgstr "Nemeniť stav napájania"
+
+msgid "Don't toggle standby mode when updating bouquets and services."
+msgstr "Pri aktualizácii balíčkov a služieb neprepínajte do pohotovostného režimu."
+
+msgid "Region"
+msgstr "Región"
+
+msgid "Provider"
+msgstr "Poskytovateľ"
+
+msgid ""
+"Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
+"                          Recommended only if you have external storage."
+msgstr ""
+"Umožňuje nahranie ako archívu, ak je vybraný veľký počet piktogramov (> 1000).\n"
+"                            Odporúča sa iba v prípade, že máte externé úložisko."
+
+msgid "Clear \"New\" flag"
+msgstr "Vymazať príznak \"Nové\" "
+
+msgid "Group by"
+msgstr "Zoskupiť podľa"
+
+msgid "Replace existing"
+msgstr "Nahradiť existujúce"
+
+msgid "Already exists"
+msgstr "Už existuje"
+
+msgid "Enable unlimited copy buffer"
+msgstr "Povoliť neobmedzenú vyrovnávaciu pamäť kópírovania"
+
+msgid "Enables unlimited copy buffer for the bouquets tab."
+msgstr "Umožňuje neobmedzenú vyrovnávaciu pamäť pre kopírovanie pre kartu baličkov."
+
+msgid "Start time"
+msgstr "Čas začiatku"
+
+msgid "End time"
+msgstr "Čas konca"
+
+msgid "Enable extensions support"
+msgstr "Povoliť podporu rozšírení"
+
+msgid "After uploading the changes you may need to completely reboot the receiver!"
+msgstr "Po nahraní zmien bude možno potrebné úplne reštartovať prijímač!"
+
+msgid "Remove duplicates"
+msgstr "Odstrániť duplikáty"
+
+msgid "Removed"
+msgstr "Odstránené"
+
+msgid "Enables overwriting existing main list services."
+msgstr "Umožňuje prepísať existujúce služby hlavného zoznamu."
+
+msgid "Enables skipping services import from lamedb."
+msgstr "Umožňuje preskočiť import služieb z lamedb."
+
+msgid "Bouquets data only"
+msgstr "Iba údaje balíčkov"
+
+msgid "Create Category bouquets"
+msgstr "Vytvoriť balíčky podľa kategórie"
+
+msgid "Create Regional bouquets"
+msgstr "Vytvoriť regionálne balíčky"
+
+msgid "Skip C-band"
+msgstr "Preskočiť C-pásmo"
+
+msgid "Automatically set the name selected in the bouquet list."
+msgstr "Automaticky nastaví názov vybraný v zozname balíčka."
+
+msgid "Merge satellites by positions"
+msgstr "Zlúčiť družice podľa pozícií"
+
+msgid "Save satellite selection"
+msgstr "Uložiť výber družice"
+
+msgid "Extract direct links"
+msgstr "Extrahovať priame odkazy"
+
+msgid "URL prefix:"
+msgstr "Predpona URL:"
+
+msgid "Invalid prefix for the given URL!"
+msgstr "Neplatná predpona pre danú URL adresu!"
+
+msgid "Alternate window title"
+msgstr "Alternatívny názov okna"
+
+msgid "Selected type:"
+msgstr "Vybraný typ:"
