@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DemonEditor\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2025-11-09 11:56+0200\n"
+"PO-Revision-Date: 2025-11-09 20:14+0100\n"
 "Last-Translator: EnoSat <enosat@yahoo.com>\n"
 "Language-Team: Slovak\n"
 "Language: sk\n"
@@ -18,9 +18,7 @@ msgstr ""
 "X-Generator: Poedit 3.4.4\n"
 
 msgid "translator-credits"
-msgstr ""
-"EnoSat <enosat@yahoo.com>\n"
-"HomePage <https://enosat.euweb.cz>"
+msgstr "EnoSat <enosat@yahoo.com>\nHomePage <https://enosat.euweb.cz>"
 
 # Main
 msgid "Service"
@@ -58,6 +56,9 @@ msgstr "Aktuálna IP:"
 
 msgid "Assign"
 msgstr "Priradiť"
+
+msgid "Assign file"
+msgstr "Priradiť súbor"
 
 msgid "Bouquet details"
 msgstr "Podrobnosti balíčka"
@@ -135,7 +136,7 @@ msgid "Create bouquet"
 msgstr "Vytvoriť balíček"
 
 msgid "For current satellite"
-msgstr "Pre aktuálnu družicu"
+msgstr "Pre aktuálny satelit"
 
 msgid "For current package"
 msgstr "Pre aktuálneho poskytovateľa"
@@ -144,7 +145,7 @@ msgid "For current type"
 msgstr "Pre aktuálny typ"
 
 msgid "For each satellite"
-msgstr "Pre každú družicu"
+msgstr "Pre každý satelit"
 
 msgid "For each package"
 msgstr "Pre každého poskytovateľa"
@@ -162,10 +163,10 @@ msgid "Picons"
 msgstr "Piktogramy"
 
 msgid "Picons downloader"
-msgstr "Stiahnuť piktogramy"
+msgstr "Sťahovač piktogramov"
 
 msgid "Satellites downloader"
-msgstr "Stiahnuť družice"
+msgstr "Sťahovač satelitov"
 
 msgid "Remove"
 msgstr "Odstrániť"
@@ -174,7 +175,7 @@ msgid "Remove all unavailable"
 msgstr "Odstrániť všetky nedostupné"
 
 msgid "Satellites editor"
-msgstr "Úprava družíc"
+msgstr "Editor satelitov"
 
 msgid "Save"
 msgstr "Uložiť"
@@ -237,7 +238,10 @@ msgid "Reset profile"
 msgstr "Obnoviť profil"
 
 msgid "Satellites"
-msgstr "Družice"
+msgstr "Satelity"
+
+msgid "Transponders"
+msgstr "Transpondéry"
 
 msgid "Satellites.xml file:"
 msgstr "Súbor satellites.xml:"
@@ -261,8 +265,14 @@ msgid "Extra:"
 msgstr "Doplnkové:"
 
 # Filter bar
-msgid "Only free"
-msgstr "Len nekódované"
+msgid "Access"
+msgstr "Prístup"
+
+msgid "Free (FTA)"
+msgstr "Nekódované (FTA)"
+
+msgid "Coded"
+msgstr "Kódované"
 
 msgid "All positions"
 msgstr "Všetky pozície"
@@ -284,7 +294,7 @@ msgid "Next stream in the list"
 msgstr "Nasledujúci stream v zozname"
 
 msgid "Toggle in fullscreen"
-msgstr "Zobraziť na celom okne"
+msgstr "Zobraziť v celom okne"
 
 msgid "Close"
 msgstr "Zatvoriť"
@@ -335,8 +345,8 @@ msgstr "Adresár pre Enigma2 piktogramy:"
 msgid "Specify the correct position value for the provider!"
 msgstr "Zadajte správnu hodnotu pozície pre poskytovateľa!"
 
-msgid "Converter between name formats"
-msgstr "Prevodník medzi formátmi mien"
+msgid "Converter between formats"
+msgstr "Prevodník medzi formátmi"
 
 msgid "Receive picons for providers"
 msgstr "Stiahnuť piktogramy pre poskytovateľov"
@@ -344,28 +354,24 @@ msgstr "Stiahnuť piktogramy pre poskytovateľov"
 msgid "Load satellite providers."
 msgstr "Nahrať poskytovateľov."
 
-msgid ""
-"To automatically set the identifiers for picons,\n"
-"first load the required services list into the main application window."
-msgstr ""
-"Ak chcete automaticky nastaviť identifikátory pre piktogramy,\n"
-"najprv nahrajte požadovaný zoznam služieb do hlavného okna aplikácie."
+msgid "To automatically set the identifiers for picons,\nfirst load the required services list into the main application window."
+msgstr "Ak chcete automaticky nastaviť identifikátory pre piktogramy,\nnajprv nahrajte požadovaný zoznam služieb do hlavného okna aplikácie."
 
 # Satellites editor
 msgid "Satellites edit tool"
-msgstr "Úprava družíc"
+msgstr "Nástroj na úpravu satelitov"
 
 msgid "Add"
 msgstr "Pridať"
 
 msgid "Satellite"
-msgstr "Družica"
+msgstr "Satelit"
 
 msgid "Transponder"
 msgstr "Transpondér"
 
 msgid "Satellite properties:"
-msgstr "Vlastnosti družice:"
+msgstr "Vlastnosti satelitu:"
 
 msgid "Transponder properties:"
 msgstr "Vlastnosti transpondéra:"
@@ -378,7 +384,7 @@ msgstr "Pozícia"
 
 # Satellites update dialog
 msgid "Satellites update"
-msgstr "Aktualizácia družíc"
+msgstr "Aktualizácia satelitov"
 
 msgid "Remove selection"
 msgstr "Odstrániť vybrané"
@@ -396,12 +402,8 @@ msgstr "Údaje služby"
 msgid "Transponder details"
 msgstr "Podrobnosti transpondéra"
 
-msgid ""
-"Changes will be applied to all services of this transponder!\n"
-"Continue?"
-msgstr ""
-"Zmeny sa použijú na všetky služby tohto transpondéra!\n"
-"Pokračovať?"
+msgid "Changes will be applied to all services of this transponder!\nContinue?"
+msgstr "Zmeny sa použijú na všetky služby tohto transpondéra!\nPokračovať?"
 
 msgid "Reference"
 msgstr "Referencie"
@@ -468,9 +470,6 @@ msgstr "Prihlásenie:"
 
 msgid "Options"
 msgstr "Možnosti"
-
-msgid "Rename"
-msgstr "Zmeniť názov"
 
 msgid "Password:"
 msgstr "Heslo:"
@@ -555,10 +554,10 @@ msgid "Select paths!"
 msgstr "Vyberte si cesty!"
 
 msgid "No satellite is selected!"
-msgstr "Nie je vybraná žiadna družica!"
+msgstr "Nie je vybraný žiadny satelit!"
 
 msgid "Please, select only one satellite!"
-msgstr "Prosím, vyberte iba jedenu družicu!"
+msgstr "Prosím, vyberte iba jeden satelit!"
 
 msgid "Please check your parameters and try again."
 msgstr "Skontrolujte si parametre a skúste to znova."
@@ -781,12 +780,8 @@ msgstr "Ukončiť prehrávanie"
 msgid "Import YouTube playlist"
 msgstr "Importovať playlist YouTube"
 
-msgid ""
-"Found a link to the YouTube resource!\n"
-"Try to get a direct link to the video?"
-msgstr ""
-"Našiel som odkaz na YouTube!\n"
-"Skúsili ste získať priamy odkaz na video?"
+msgid "Found a link to the YouTube resource!\nTry to get a direct link to the video?"
+msgstr "Našiel som odkaz na YouTube!\nSkúsili ste získať priamy odkaz na video?"
 
 msgid "Playlist import"
 msgstr "Import zoznamu skladieb"
@@ -891,7 +886,7 @@ msgid "Streams record path:"
 msgstr "Adresár k záznamu streamov:"
 
 msgid "Record"
-msgstr "Nahrávky"
+msgstr "Nahrať"
 
 msgid "Record:"
 msgstr "Nahrávanie:"
@@ -1025,21 +1020,11 @@ msgstr "EXPERIMENTÁLNE!"
 msgid "Sorting data..."
 msgstr "Triedenie údajov..."
 
-msgid ""
-"There are unsaved changes.\n"
-"\n"
-"\t Save them now?"
-msgstr ""
-"Existujú neuložené zmeny.\n"
-"\n"
-"\t Uložiť ich teraz?"
+msgid "There are unsaved changes.\n\n\t Save them now?"
+msgstr "Existujú neuložené zmeny.\n\n\t Uložiť ich teraz?"
 
-msgid ""
-"Are you sure you want to change the order\n"
-"\t of services in this bouquet?"
-msgstr ""
-"Naozaj chcete zmeniť poradie\n"
-"\t služieb v tomto balíčku?"
+msgid "Are you sure you want to change the order\n\t of services in this bouquet?"
+msgstr "Naozaj chcete zmeniť poradie\n\t služieb v tomto balíčku?"
 
 msgid "Remove from the receiver"
 msgstr "Odstráňte z prijímača"
@@ -1218,6 +1203,9 @@ msgstr "Veľkosť"
 msgid "Date"
 msgstr "Dátum"
 
+msgid "Attr."
+msgstr "Atribúty"
+
 msgid "Toggle display position"
 msgstr "Prepnúť polohu zobrazenia"
 
@@ -1233,12 +1221,8 @@ msgstr "Len DreamOS!"
 msgid "A similar service is already in this list!"
 msgstr "Podobná služba sa už v tomto zozname nachádza!"
 
-msgid ""
-"Play mode has been changed!\n"
-"Restart the program to apply the settings."
-msgstr ""
-"Režim prehrávania bol zmenený!\n"
-"Reštartujte program, aby sa nastavenia použili."
+msgid "Play mode has been changed!\nRestart the program to apply the settings."
+msgstr "Režim prehrávania bol zmenený!\nReštartujte program, aby sa nastavenia použili."
 
 msgid "Set values for TID, NID and Namespace for correct naming of the picons!"
 msgstr "Nastavte hodnoty pre TID, NID a Menný priestor pre správne pomenovanie piktogramov!"
@@ -1282,6 +1266,9 @@ msgstr "Prebieha načítavanie údajov!"
 msgid "Recordings"
 msgstr "Nahrávania"
 
+msgid "Recordings:"
+msgstr "Nahrávky:"
+
 msgid "Help"
 msgstr "Nápoveda"
 
@@ -1311,6 +1298,9 @@ msgstr "Automaticky nastaví názov vybraný v zozname obľúbených."
 
 msgid "Playback"
 msgstr "Prehrávanie"
+
+msgid "Playback:"
+msgstr "Prehrávanie:"
 
 msgid "Audio"
 msgstr "Audio"
@@ -1365,6 +1355,9 @@ msgstr "Reštartujte program, aby sa prejavili všetky zmeny."
 
 msgid "New folder"
 msgstr "Nový adresár"
+
+msgid "Rename"
+msgstr "Premenovať"
 
 msgid "Bookmarks"
 msgstr "Záložky"
@@ -1426,12 +1419,8 @@ msgstr "Región"
 msgid "Provider"
 msgstr "Poskytovateľ"
 
-msgid ""
-"Enables upload as an archive if a large number of picon (> 1000) is selected.\n"
-"                          Recommended only if you have external storage."
-msgstr ""
-"Umožňuje nahranie ako archívu, ak je vybraný veľký počet piktogramov (> 1000).\n"
-"                            Odporúča sa iba v prípade, že máte externé úložisko."
+msgid "Enables upload as an archive if a large number of picon (> 1000) is selected.\n                          Recommended only if you have external storage."
+msgstr "Umožňuje nahranie ako archívu, ak je vybraný veľký počet piktogramov (> 1000).\n                          Odporúča sa iba v prípade, že máte externé úložisko."
 
 msgid "Clear \"New\" flag"
 msgstr "Vymazať príznak \"Nové\" "
@@ -1491,10 +1480,10 @@ msgid "Automatically set the name selected in the bouquet list."
 msgstr "Automaticky nastaví názov vybraný v zozname balíčka."
 
 msgid "Merge satellites by positions"
-msgstr "Zlúčiť družice podľa pozícií"
+msgstr "Zlúčiť satelity podľa pozícií"
 
 msgid "Save satellite selection"
-msgstr "Uložiť výber družice"
+msgstr "Uložiť výber satelitu"
 
 msgid "Extract direct links"
 msgstr "Extrahovať priame odkazy"
@@ -1510,3 +1499,105 @@ msgstr "Alternatívny názov okna"
 
 msgid "Selected type:"
 msgstr "Vybraný typ:"
+
+msgid "Extension Manager"
+msgstr "Správca rozšírení"
+
+msgid "Ver."
+msgstr "Ver."
+
+msgid "Installed"
+msgstr "Nainštalované"
+
+msgid "Use common folder for picons"
+msgstr "Použiť spoločný priečinok pre piktogramy"
+
+msgid "Activates single folder use for several profiles."
+msgstr "Aktivuje použitie jedného priečinka pre viacero profilov."
+
+msgid "Events"
+msgstr "Udalosti"
+
+msgid "Markers"
+msgstr "Značky"
+
+msgid "IPTV only"
+msgstr "Len IPTV"
+
+msgid "No"
+msgstr "Nie"
+
+msgid "Not found."
+msgstr "Nenájdené."
+
+msgid "Current EPG cache contents."
+msgstr "Aktuálny obsah vyrovnávacej pamäte EPG."
+
+msgid "Source error!"
+msgstr "Chyba zdroja!"
+
+msgid "The EPG source for the favorites list is not set!"
+msgstr "Zdroj EPG pre zoznam obľúbených nie je nastavený!"
+
+msgid "Add to EPG sources list"
+msgstr "Pridať do zoznamu zdrojov EPG"
+
+msgid "Current bouquet"
+msgstr "Aktuálny balíček"
+
+msgid "Single bouquet"
+msgstr "Jeden balíček"
+
+msgid "Split by groups"
+msgstr "Rozdeliť podľa skupín"
+
+msgid "Create sub-bouquets"
+msgstr "Vytvorte si sub-balíčky"
+
+msgid "Add image"
+msgstr "Pridať obrázok"
+
+msgid "TV Format"
+msgstr "TV formát"
+
+msgid "Use with Streamrelay"
+msgstr "Použiť so Streamrelay"
+
+msgid "Remove use with Streamrelay"
+msgstr "Nepoužiť so Streamrelay"
+
+msgid "Enable additional name cache for EPG"
+msgstr "Povoliť dodatočnú vyrovnávaciu pamäť názvov pre EPG"
+
+msgid "Enables additional cache to display EPG for some IPTV channels imported from *.m3u."
+msgstr "Umožňuje pridanie dodatočnej vyrovnávacej pamäte na zobrazenie EPG pre niektoré IPTV kanály importované z *.m3u."
+
+msgid "Enable deep name comparison"
+msgstr "Povoliť podrobné porovnávanie názvov"
+
+msgid "Enables deeper name matching. Possible inaccuracies!"
+msgstr "Umožňuje hlbšie zhodovanie mien. Možné nepresnosti!"
+
+msgid "Convert for selected bouquets"
+msgstr "Konvertovať pre vybrané balíčky"
+
+msgid "There were errors [%s] during bouquets loading!"
+msgstr "Počas načítavania balíčkov sa vyskytli [%s] chyby!"
+
+msgid "Check the log for more info."
+msgstr "Viac informácií nájdete v protokole."
+
+msgid "Satellite channel"
+msgstr "Satelitný kanál"
+
+msgid "Terrestrial channel"
+msgstr "Terestriálny kanál"
+
+msgid "Cable channel"
+msgstr "Káblový kanál"
+
+msgid "Save current changes"
+msgstr "Uložiť aktuálne zmeny"
+
+msgid "Create a new service"
+msgstr "Vytvoriť novú službu"
