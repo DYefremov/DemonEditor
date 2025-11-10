@@ -64,7 +64,7 @@ Terrestrial = namedtuple("Terrestrial", ["name", "flags", "countrycode", "transp
 Cable = namedtuple("Cable", ["name", "flags", "satfeed", "countrycode", "transponders"])
 
 Transponder = namedtuple("Transponder", ["frequency", "symbol_rate", "polarization", "fec_inner", "system",
-                                         "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id"])
+                                         "modulation", "pls_mode", "pls_code", "is_id", "t2mi_plp_id", "t2mi_pid"])
 TerTransponder = namedtuple("TerTransponder", ["centre_frequency", "system", "bandwidth", "constellation",
                                                "code_rate_hp", "code_rate_lp", "guard_interval", "transmission_mode",
                                                "hierarchy_information", "inversion", "plp_id"])

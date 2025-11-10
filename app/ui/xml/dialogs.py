@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -207,6 +207,7 @@ class SatTransponderDialog(TransponderDialog):
         self._pls_code_entry = builder.get_object("pls_code_entry")
         self._is_id_entry = builder.get_object("is_id_entry")
         self._t2mi_plp_id_entry = builder.get_object("t2mi_plp_id_entry")
+        self._t2mi_pid_entry = builder.get_object("t2mi_pid_entry")
 
         self.set_style_provider(self._freq_entry)
         self.set_style_provider(self._rate_entry)
@@ -230,6 +231,7 @@ class SatTransponderDialog(TransponderDialog):
             self._is_id_entry.set_text(transponder.is_id if transponder.is_id else "")
             self._pls_code_entry.set_text(transponder.pls_code if transponder.pls_code else "")
             self._t2mi_plp_id_entry.set_text(transponder.t2mi_plp_id if transponder.t2mi_plp_id else "")
+            self._t2mi_pid_entry.set_text(transponder.t2mi_pid if transponder.t2mi_pid else "")
 
     def to_transponder(self):
         return Transponder(frequency=self._freq_entry.get_text(),
@@ -241,7 +243,8 @@ class SatTransponderDialog(TransponderDialog):
                            pls_mode=get_key_by_value(PLS_MODE, self._pls_mode_box.get_active_id()),
                            pls_code=self._pls_code_entry.get_text(),
                            is_id=self._is_id_entry.get_text(),
-                           t2mi_plp_id=self._t2mi_plp_id_entry.get_text())
+                           t2mi_plp_id=self._t2mi_plp_id_entry.get_text(),
+                           t2mi_pid=self._t2mi_pid_entry.get_text())
 
     def is_accept(self):
         tr = self.to_transponder()
@@ -254,6 +257,8 @@ class SatTransponderDialog(TransponderDialog):
         elif self.digit_pattern.search(tr.pls_code) or self.digit_pattern.search(tr.is_id):
             return False
         elif self.digit_pattern.search(tr.t2mi_plp_id):
+            return False
+        elif self.digit_pattern.search(tr.t2mi_pid):
             return False
 
         return True

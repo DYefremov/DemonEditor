@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
+<!-- Generated with glade 3.40.0
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2024 Dmitriy Yefremov
+Copyright (c) 2018-2025 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ Author: Dmitriy Yefremov
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
-  <!-- interface-copyright 2018-2024 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2025 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <!-- n-columns=2 n-rows=4 -->
   <object class="GtkGrid" id="cable_tr_box">
@@ -879,7 +879,7 @@ Author: Dmitriy Yefremov
       </packing>
     </child>
     <child>
-      <!-- n-columns=2 n-rows=4 -->
+      <!-- n-columns=2 n-rows=5 -->
       <object class="GtkGrid" id="tr_dialog_grid2">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -911,7 +911,7 @@ Author: Dmitriy Yefremov
             <property name="max-width-chars">12</property>
             <property name="primary-icon-name">document-edit-symbolic</property>
             <property name="primary-icon-activatable">False</property>
-            <property name="placeholder-text" translatable="yes">0 - 262142</property>
+            <property name="placeholder-text">0 - 262142</property>
             <property name="input-purpose">digits</property>
             <signal name="changed" handler="on_entry_changed" swapped="no"/>
           </object>
@@ -928,7 +928,7 @@ Author: Dmitriy Yefremov
             <property name="max-width-chars">12</property>
             <property name="primary-icon-name">document-edit-symbolic</property>
             <property name="primary-icon-activatable">False</property>
-            <property name="placeholder-text" translatable="yes">0 - 255</property>
+            <property name="placeholder-text">0 - 255</property>
             <property name="input-purpose">digits</property>
             <signal name="changed" handler="on_entry_changed" swapped="no"/>
           </object>
@@ -945,7 +945,7 @@ Author: Dmitriy Yefremov
             <property name="max-width-chars">12</property>
             <property name="primary-icon-name">document-edit-symbolic</property>
             <property name="primary-icon-activatable">False</property>
-            <property name="placeholder-text" translatable="yes">0 - 255</property>
+            <property name="placeholder-text">0 - 255</property>
             <property name="input-purpose">digits</property>
             <signal name="changed" handler="on_entry_changed" swapped="no"/>
           </object>
@@ -1093,6 +1093,58 @@ Author: Dmitriy Yefremov
           <packing>
             <property name="left-attach">0</property>
             <property name="top-attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <child>
+              <object class="GtkLabel" id="tr_t2mi_pid_label">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">T2-MI PID</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label">:</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left-attach">0</property>
+            <property name="top-attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="t2mi_pid_entry">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="width-chars">5</property>
+            <property name="max-width-chars">12</property>
+            <property name="primary-icon-name">document-edit-symbolic</property>
+            <property name="primary-icon-activatable">False</property>
+            <property name="placeholder-text">0 - 8191</property>
+            <property name="input-purpose">digits</property>
+            <signal name="changed" handler="on_entry_changed" swapped="no"/>
+          </object>
+          <packing>
+            <property name="left-attach">1</property>
+            <property name="top-attach">4</property>
           </packing>
         </child>
       </object>

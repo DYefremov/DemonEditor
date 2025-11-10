@@ -338,7 +338,7 @@ class SatellitesParser(HTMLParser):
                                  self.FEC.get(fec, None),
                                  self.SYSTEM.get(sys, None),
                                  self.MODULATION.get(mod, None),
-                                 pls_mode, pls_code, None, None)
+                                 pls_mode, pls_code, None, None, None)
                 if is_transponder_valid(tr):
                     trs.append(tr)
 
@@ -379,7 +379,7 @@ class SatellitesParser(HTMLParser):
                              self.FEC.get(fec, None),
                              self.SYSTEM.get(sys, None),
                              self.MODULATION.get(mod, None),
-                             pls_mode, pls_code, is_id, None)
+                             pls_mode, pls_code, is_id, None, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 
@@ -421,7 +421,7 @@ class SatellitesParser(HTMLParser):
                              self.FEC.get(fec, None),
                              self.SYSTEM.get(sys, None),
                              self.MODULATION.get(mod, None),
-                             pls_id, pls_code, is_id, None)
+                             pls_id, pls_code, is_id, None, None)
             if is_transponder_valid(tr):
                 trs.append(tr)
 

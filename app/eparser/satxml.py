@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2023 Dmitriy Yefremov
+# Copyright (c) 2018-2025 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,8 @@ def get_sat_transponders(elem):
                         e.get("pls_mode", None),
                         e.get("pls_code", None),
                         e.get("is_id", None),
-                        e.get("t2mi_plp_id", None)) for e in elem.iter("transponder")]
+                        e.get("t2mi_plp_id", None),
+                        e.get("t2mi_pid", None)) for e in elem.iter("transponder")]
 
 
 def get_terrestrial(path):
