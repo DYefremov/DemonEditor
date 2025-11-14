@@ -2272,6 +2272,7 @@ class Application(Gtk.Application):
             response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, title="Open folder")
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
+
             self.open_data(response)
 
     def on_data_extract(self, app, page):
@@ -2347,6 +2348,7 @@ class Application(Gtk.Application):
         self._alt_revealer.set_visible(False)
         self._filter_services_button.set_active(False)
         self._wait_dialog.show()
+        self._services_progress_bar.show()
 
         yield from self.clear_current_data()
         # Reset of sorting
@@ -2405,6 +2407,7 @@ class Application(Gtk.Application):
         finally:
             self._profile_combo_box.set_sensitive(True)
             self._wait_dialog.hide()
+            self._services_progress_bar.hide()
             self.emit("data-load-done", self._settings.current_profile)
 
     def append_data(self, bouquets, services):
@@ -2536,7 +2539,6 @@ class Application(Gtk.Application):
                     break
 
     def append_services(self, services):
-        self._services_progress_bar.show()
         to_add = []
         for srv in services:
             if srv.fav_id not in self._services:
@@ -2557,7 +2559,6 @@ class Application(Gtk.Application):
                 self._services_progress_bar.set_fraction(index / size)
                 yield True
 
-        self._services_progress_bar.hide()
         yield True
 
     def append_iptv_data(self, services=None):
