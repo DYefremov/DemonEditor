@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2023-2024 Dmitriy Yefremov
+# Copyright (c) 2023-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:112.0) Gecko/20100101
 
 
 class ExtensionManager(Gtk.Window):
-    ICON_INFO = "emblem-important-symbolic"
+    ICON_INFO = "emblem-synchronizing-symbolic"
     ICON_UPDATE = "network-receive-symbolic"
 
     class Column(IntEnum):
@@ -281,6 +281,7 @@ class ExtensionManager(Gtk.Window):
                 ext_ver = ext[0].VERSION
                 path = ext[1]
                 if ext_ver < ver:
+                    desc = f"[ Update -> ver. {ver} ] {desc}"
                     ver = ext_ver
                     info = self.ICON_INFO
 
