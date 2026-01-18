@@ -35,7 +35,7 @@ import requests
 from gi.repository import Gtk, Gdk, GLib, Pango, GObject
 
 from app.commons import log, run_task, run_idle
-from app.ui.dialogs import translate
+from app.ui.dialogs import translate, show_dialog, DialogType
 from app.ui.uicommons import HeaderBar
 
 EXT_URL = "https://api.github.com/repos/DYefremov/demoneditor-extensions/contents/extensions/"
@@ -193,6 +193,22 @@ class ExtensionManager(Gtk.Window):
 
         self.connect("delete-event", lambda w, e: self._app.app_settings.add(ws_property, w.get_size()))
         self.connect("realize", self.init)
+        self.connect("show", self.on_show)
+
+    def on_show(self, window):
+        enabled = self._app.app_settings.extensions_support
+        self.set_sensitive(enabled)
+        if not enabled:
+            msg = f"\n{translate('Extension support is disabled! ')}\n\n\t{translate('Do you want to enable it?')}"
+            if show_dialog(DialogType.QUESTION, self, msg) != Gtk.ResponseType.OK:
+                self.close()
+                return True
+
+            self._app.app_settings.extensions_support = True
+            self._app.show_info_message(translate('Restart the program to apply all changes.'), Gtk.MessageType.WARNING)
+            self.close()
+
+        return False
 
     def init(self, widget):
         self._load_spinner.start()

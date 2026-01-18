@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -722,17 +722,20 @@ class Application(Gtk.Application):
                   self.on_iptv_list_configuration, self.on_remove_all_unavailable):
             iptv_elem.bind_property("sensitive", self.set_action(h.__name__, h, False), "enabled")
 
-        if self._settings.extensions_support:
-            self.init_extensions(builder)
+        self.init_extensions(builder)
 
     def init_extensions(self, builder):
-        import pkgutil
-        from importlib.util import module_from_spec
         from app.ui.extensions.management import ExtensionManager
         # Extensions (Plugins) section.
         ext_section = builder.get_object(f"{'mac_' if IS_DARWIN else ''}extension_section")
         self.set_action("on_extension_manager", lambda a, v: ExtensionManager(self).show())
         ext_section.append_item(Gio.MenuItem.new(translate("Extension Manager"), "app.on_extension_manager"))
+
+        if not self._settings.extensions_support:
+            return
+
+        import pkgutil
+        from importlib.util import module_from_spec
 
         ext_path = f"{self._settings.default_data_path}tools{os.sep}extensions"
         ext_paths = [f"{os.path.dirname(__file__)}{os.sep}extensions", ext_path, "extensions"]
