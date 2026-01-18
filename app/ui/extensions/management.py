@@ -199,7 +199,7 @@ class ExtensionManager(Gtk.Window):
         enabled = self._app.app_settings.extensions_support
         self.set_sensitive(enabled)
         if not enabled:
-            msg = f"\n{translate('Extension support is disabled! ')}\n\n\t{translate('Do you want to enable it?')}"
+            msg = f"\n{translate('Extension support is disabled!')}\n\n\t{translate('Do you want to enable it?')}"
             if show_dialog(DialogType.QUESTION, self, msg) != Gtk.ResponseType.OK:
                 self.close()
                 return True
