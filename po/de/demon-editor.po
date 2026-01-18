@@ -1610,3 +1610,9 @@ msgstr "Aktuelle Änderungen speichern"
 
 msgid "Create a new service"
 msgstr "Erstellen eines neuen Service"
+
+msgid "Extension support is disabled!"
+msgstr "Die Unterstützung für Erweiterungen ist deaktiviert!"
+
+msgid "Do you want to enable it?"
+msgstr "Möchtest du aktivieren?"

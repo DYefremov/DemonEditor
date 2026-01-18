@@ -1,4 +1,4 @@
-# Copyright (C) 2018-2025 Dmitriy Yefremov
+# Copyright (C) 2018-2026 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 #
@@ -1593,3 +1593,9 @@ msgstr "Сохранить текущие изменения"
 
 msgid "Create a new service"
 msgstr "Создать новый сервис"
+
+msgid "Extension support is disabled!"
+msgstr "Поддержка расширений отключена!"
+
+msgid "Do you want to enable it?"
+msgstr "Желаете включить?"
