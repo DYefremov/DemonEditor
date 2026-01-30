@@ -1,11 +1,11 @@
-# Copyright (C) 2018-2025 Dmitriy Yefremov
+# Copyright (C) 2018-2026 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
-# SPDX-FileCopyrightText: 2022, 2023, 2024, 2025 Massimo Pissarello <mapi68@gmail.com>
+# SPDX-FileCopyrightText: 2022, 2023, 2024, 2025, 2026 Massimo Pissarello <mapi68@gmail.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2025-08-30 09:41+0200\n"
+"PO-Revision-Date: 2026-01-30 17:27+0100\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,7 +13,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 25.08.0\n"
+"X-Generator: Lokalize 25.12.1\n"
 
 msgid "translator-credits"
 msgstr "Massimo Pissarello\nNicola Fanghella"
@@ -1660,3 +1660,9 @@ msgstr "Salva le modifiche attuali"
 
 msgid "Create a new service"
 msgstr "Crea un nuovo servizio"
+
+msgid "Extension support is disabled!"
+msgstr "Il supporto dell'estensione è disabilitato!"
+
+msgid "Do you want to enable it?"
+msgstr "Vuoi abilitarlo?"
