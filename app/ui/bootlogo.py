@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ from gi.repository.GObject import BindingFlags
 
 from app.commons import log, run_task
 from app.connections import UtfFTP
-from app.settings import IS_DARWIN
+from app.settings import IS_DARWIN, IS_WIN
 from app.ui.dialogs import translate, get_chooser_dialog, show_dialog, DialogType
 from app.ui.main_helper import get_picon_pixbuf, redraw_image
 from app.ui.uicommons import HeaderBar
@@ -64,6 +64,8 @@ class BootLogoManager(Gtk.Window):
         self._exe = f"{'./' if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS') else ''}ffmpeg"
         self._pix = None
         self._img_path = None
+        # subprocess creation flags
+        self._sbp_flags = subprocess.CREATE_NO_WINDOW if IS_WIN else 0
 
         margin = {"margin_start": 5, "margin_end": 5, "margin_top": 5, "margin_bottom": 5}
         base_margin = {"margin_start": 10, "margin_end": 10, "margin_top": 10, "margin_bottom": 10}
@@ -209,7 +211,9 @@ class BootLogoManager(Gtk.Window):
     def init(self, *args):
         log(f"{self.__class__.__name__} [init] Checking FFmpeg...")
         try:
-            out = subprocess.check_output([self._exe, "-version"], stderr=subprocess.STDOUT)
+            out = subprocess.check_output([self._exe, "-version"],
+                                          stderr=subprocess.STDOUT,
+                                          creationflags=self._sbp_flags)
         except FileNotFoundError as e:
             msg = translate("Check if FFmpeg is installed!")
             self._app.show_error_message(f"Error. {e} {msg}")
@@ -297,6 +301,11 @@ class BootLogoManager(Gtk.Window):
             return
 
         output = path.parent.joinpath(self._file_combo_box.get_active_id())
+        if Path(output).exists():
+            msg = f"\n{translate('The file already exists!')}\n\n\t{translate('Are you sure?')}"
+            if show_dialog(DialogType.QUESTION, self, msg) != Gtk.ResponseType.OK:
+                return True
+
         ffmpeg_output = path.parent.joinpath(f"{self._file_combo_box.get_active_text()}.m2v")
 
         cmd = [self._exe,
@@ -322,9 +331,9 @@ class BootLogoManager(Gtk.Window):
 
                 # Processing image.
                 log(f"{self.__class__.__name__} [convert] Converting...")
-                subprocess.run(cmd)
+                subprocess.run(cmd, creationflags=self._sbp_flags)
                 if Path(ffmpeg_output).exists():
-                    os.rename(ffmpeg_output, output)
+                    os.replace(ffmpeg_output, output)
                     log(f"{self.__class__.__name__} [convert] -> '{output}'. Done!")
 
                 if cmd[2] != self._img_path:
@@ -336,7 +345,7 @@ class BootLogoManager(Gtk.Window):
 
     def convert_to_image(self, video_path, img_path):
         cmd = [self._exe, "-y", "-i", video_path, img_path]
-        subprocess.run(cmd)
+        subprocess.run(cmd, creationflags=self._sbp_flags)
 
     @run_task
     def download_data(self, f_name):
