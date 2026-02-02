@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -74,6 +74,8 @@ class PiconsCzDownloader:
         self._provider_logos = {}
         self._picon_ids = picon_ids
         self._appender = appender
+        # subprocess creation flags
+        self._sbp_flags = subprocess.CREATE_NO_WINDOW if IS_WIN else 0
 
     def init(self):
         """ Initializes dict with values: download_id -> perm link and provider data.  """
@@ -149,7 +151,10 @@ class PiconsCzDownloader:
 
         cmd = [exe, "l", src]
         try:
-            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            out, err = subprocess.Popen(cmd,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        creationflags=self._sbp_flags).communicate()
             if err:
                 log(f"{self.__class__.__name__} [extract] error: {err}")
                 raise PiconsError(err)
@@ -174,7 +179,10 @@ class PiconsCzDownloader:
         cmd = [exe, "e", src, "-o{}".format(dest), "-y", "-r"]
         cmd.extend(to_extract)
         try:
-            out, err = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+            out, err = subprocess.Popen(cmd,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE,
+                                        creationflags=self._sbp_flags).communicate()
             if err:
                 log(f"{self.__class__.__name__} [extract] error: {err}")
                 raise PiconsError(err)
