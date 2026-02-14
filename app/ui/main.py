@@ -1477,7 +1477,7 @@ class Application(Gtk.Application):
         priority = GLib.PRIORITY_LOW
 
         if model_name == self.FAV_MODEL:
-            gen = self.remove_favs(itrs, model)
+            gen = self.remove_favorites(itrs, model)
         elif model_name == self.BQ_MODEL:
             gen = self.delete_bouquets(itrs, model)
             priority = GLib.PRIORITY_DEFAULT
@@ -1493,18 +1493,25 @@ class Application(Gtk.Application):
 
         return rows
 
-    def remove_favs(self, itrs, model):
+    def remove_favorites(self, itrs, model):
         """ Deleting bouquet services. """
         if self._bq_selected:
             fav_bouquet = self._bouquets.get(self._bq_selected, None)
             if fav_bouquet:
+                removed = []
                 for index, itr in enumerate(itrs):
-                    del fav_bouquet[int(model.get_path(itr)[0])]
-                    self._fav_model.remove(itr)
+                    path = model.get_path(itr)
+                    row = tuple(model[path])
+                    p_index = int(path[0])
+                    del fav_bouquet[p_index]
+
+                    if self._fav_model.remove(itr):
+                        removed.append((index, row))
+
                     if index % self.DEL_FACTOR == 0:
                         yield True
                 self.update_fav_num_column(model)
-                self.emit("fav-removed", self._bq_selected)
+                self.emit("fav-removed", removed)
 
         self.on_model_changed(self._fav_model)
         self._wait_dialog.hide()
@@ -3250,7 +3257,7 @@ class Application(Gtk.Application):
         fav_bqt = self._bouquets.get(self._bq_selected, None)
         response = SearchUnavailableDialog(self._main_window, self._fav_model, fav_bqt, iptv_rows, self._s_type).show()
         if response:
-            gen = self.remove_favs(response, self._fav_model)
+            gen = self.remove_favorites(response, self._fav_model)
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
 
     def on_reference_assign(self, view):
@@ -4192,7 +4199,7 @@ class Application(Gtk.Application):
         if count:
             if show_dialog(DialogType.QUESTION, self._main_window) != Gtk.ResponseType.OK:
                 return
-            gen = self.remove_favs(to_remove, self._fav_model)
+            gen = self.remove_favorites(to_remove, self._fav_model)
             GLib.idle_add(lambda: next(gen, False))
             self.show_info_message(f"{translate('Done!')} {translate('Removed')}: {count}")
         else:
