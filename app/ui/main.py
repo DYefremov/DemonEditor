@@ -2975,11 +2975,10 @@ class Application(Gtk.Application):
 
     def on_tree_view_key_press(self, view, event):
         """  Handling  keystrokes on press """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
-            return
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
+            return False
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
         if key is KeyboardKey.F:
             if ctrl:
@@ -3028,11 +3027,10 @@ class Application(Gtk.Application):
 
     def on_tree_view_key_release(self, view, event):
         """  Handling  keystrokes on release """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
         shift = event.state & Gdk.ModifierType.SHIFT_MASK
         model_name, model = get_model_data(view)
@@ -4539,11 +4537,10 @@ class Application(Gtk.Application):
                 self.emit("fav-changed", srv)
 
     def on_alt_view_key_press(self, view, event):
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
 
         if ctrl and key == KeyboardKey.V:

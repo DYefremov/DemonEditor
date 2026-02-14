@@ -1217,10 +1217,10 @@ class EpgDialog:
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
-        key = KeyboardKey(key_code)
+
         ctrl = event.state & Gdk.ModifierType.CONTROL_MASK
 
         if ctrl and key is KeyboardKey.C:

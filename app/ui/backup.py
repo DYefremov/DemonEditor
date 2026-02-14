@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -223,11 +223,11 @@ class BackupDialog:
             self._settings.add("backup_tool_window_size", window.get_size())
 
     def on_key_release(self, view, event):
-        """  Handling  keystrokes  """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        """  Handling  keystrokes.  """
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
-        key = KeyboardKey(key_code)
+
         ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -129,11 +129,10 @@ class TelnetClient(Gtk.Box):
             self.do_command()
             return True
 
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
-            return None
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
+            return False
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
         if ctrl and key is KeyboardKey.C:
             if self._tn and self._tn.sock:

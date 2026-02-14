@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -976,11 +976,10 @@ class PiconManager(Gtk.Box):
         return True
 
     def on_tree_view_key_press(self, view, event):
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         if key is KeyboardKey.DELETE:
             self.on_local_remove(view)
 

@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -310,11 +310,10 @@ class SatellitesTool(Gtk.Box):
 
     def on_key_press(self, view, event):
         """ Handling  keystrokes. """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:
@@ -329,12 +328,11 @@ class SatellitesTool(Gtk.Box):
             view.do_unselect_all(view)
 
     def on_tr_key_press(self, view, event):
-        """ Handling  transponder view keystrokes. """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        """ Handling transponder view keystrokes. """
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         ctrl = event.state & MOD_MASK
 
         if key is KeyboardKey.DELETE:

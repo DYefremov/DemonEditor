@@ -304,11 +304,10 @@ class RecordingsTool(Gtk.Box):
         self._filter_entry.grab_focus() if button.get_active() else self._filter_entry.set_text("")
 
     def on_recordings_key_press(self, view, event):
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
 
-        key = KeyboardKey(key_code)
         if key is KeyboardKey.DELETE:
             self.on_recording_remove()
 

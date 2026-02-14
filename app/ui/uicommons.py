@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -290,14 +290,8 @@ class Column(IntEnum):
 
 # *************** Keyboard keys *************** #
 
-class BaseKeyboardKey(Enum):
-    @classmethod
-    def value_exist(cls, value):
-        return value in (val.value for val in cls.__members__.values())
-
-
 if IS_LINUX:
-    class KeyboardKey(BaseKeyboardKey):
+    class KeyboardKey(IntEnum):
         """ The raw(hardware) codes [Linux] of the keyboard keys. """
         E = 26
         R = 27
@@ -335,8 +329,14 @@ if IS_LINUX:
         PAGE_UP_KP = 81
         PAGE_DOWN_KP = 89
 
+        UNDEFINED = -1
+
+        @classmethod
+        def _missing_(cls, value):
+            return cls.UNDEFINED
+
 elif IS_DARWIN:
-    class KeyboardKey(BaseKeyboardKey):
+    class KeyboardKey(IntEnum):
         """ The raw(hardware) codes [macOS] of the keyboard keys. """
         F = 3
         E = 14
@@ -376,8 +376,14 @@ elif IS_DARWIN:
         PAGE_UP_KP = -1
         PAGE_DOWN_KP = -1
 
+        UNDEFINED = -1
+
+        @classmethod
+        def _missing_(cls, value):
+            return cls.UNDEFINED
+
 else:
-    class KeyboardKey(BaseKeyboardKey):
+    class KeyboardKey(IntEnum):
         """ The raw(hardware) codes [Windows] of the keyboard keys. """
         E = 69
         R = 82
@@ -414,6 +420,12 @@ else:
         END_KP = -1
         PAGE_UP_KP = -1
         PAGE_DOWN_KP = -1
+
+        UNDEFINED = -1
+
+        @classmethod
+        def _missing_(cls, value):
+            return cls.UNDEFINED
 
 # Keys for move in lists. KEY_KP_(NAME) for laptop!
 MOVE_KEYS = {KeyboardKey.UP, KeyboardKey.PAGE_UP,

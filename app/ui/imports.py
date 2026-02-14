@@ -426,10 +426,9 @@ class ImportDialog:
 
     def on_key_press(self, view, event):
         """  Handling  keystrokes  """
-        key_code = event.hardware_keycode
-        if not KeyboardKey.value_exist(key_code):
+        key = KeyboardKey(event.hardware_keycode)
+        if key is KeyboardKey.UNDEFINED:
             return
-        key = KeyboardKey(key_code)
 
         if key is KeyboardKey.SPACE:
             model = view.get_model()
