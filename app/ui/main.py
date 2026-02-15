@@ -1109,7 +1109,7 @@ class Application(Gtk.Application):
             return True
         else:
             if len(self._task_box):
-                msg = f"{translate('There are running background tasks!!')}\n\n\t{translate('Are you sure?')}"
+                msg = f"{translate('There are running background tasks!!')}\n\n\t\t{translate('Are you sure?')}"
                 if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                     return True
                 log("Terminating the application...")
