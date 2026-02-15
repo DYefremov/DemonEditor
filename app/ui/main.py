@@ -1108,7 +1108,17 @@ class Application(Gtk.Application):
             GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
             return True
         else:
-            GLib.idle_add(self.quit)
+            if len(self._task_box):
+                msg = f"{translate('There are running background tasks!!')}\n\n\t{translate('Are you sure?')}"
+                if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
+                    return True
+                log("Terminating the application...")
+                import signal
+
+                os.kill(os.getpid(), signal.SIGTERM)
+            GLib.idle_add(self.quit, priority=GLib.PRIORITY_HIGH)
+
+        return False
 
     def on_main_window_state(self, window, event):
         if event.new_window_state & Gdk.WindowState.FULLSCREEN or event.new_window_state & Gdk.WindowState.MAXIMIZED:
