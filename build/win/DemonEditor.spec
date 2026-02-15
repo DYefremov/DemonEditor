@@ -7,8 +7,7 @@ PATH_EXE = [os.path.join(DIR_PATH, EXE_NAME)]
 block_cipher = None
 
 
-excludes = ['app.tools.mpv',
-            'gi.repository.Gst',
+excludes = ['gi.repository.Gst',
             'gi.repository.GstBase',
             'gi.repository.GstVideo',
             'youtube_dl',
@@ -48,9 +47,19 @@ a = Analysis([EXE_NAME],
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+
+
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
+
+
+splash = Splash('logo.png',
+				binaries=a.binaries,
+                datas=a.datas)
+
+
 exe = EXE(pyz,
+          splash,
           a.scripts,
           [],
           exclude_binaries=True,
@@ -59,13 +68,16 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           contents_directory='.',
           strip=False,
-          upx=True,
+          upx=False,
           console=False,
           icon='icon.ico')
+
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
                a.datas,
+               splash.binaries,
                strip=False,
                upx=True,
                upx_exclude=[],
