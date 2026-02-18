@@ -1,0 +1,26 @@
+Subject: [PATCH] hide_splash
+---
+Index: app/ui/main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/ui/main.py b/app/ui/main.py
+--- a/app/ui/main.py	(revision 0fc0ef1d3e80fc84f4da81e1117db63a1f1d3467)
++++ b/app/ui/main.py	(date 1771419933854)
+@@ -651,6 +651,15 @@
+         gen = self.init_http_api()
+         GLib.idle_add(lambda: next(gen, False), priority=GLib.PRIORITY_LOW)
+ 
++        if hasattr(sys, "_MEIPASS"):
++            import pyi_splash
++
++            if pyi_splash.is_alive():
++                pyi_splash.close()
++
++                if self._main_window.is_suspended():
++                    self._main_window.present()
++
+     def do_shutdown(self):
+         """  Performs shutdown tasks """
+         if self._settings.load_last_config:
