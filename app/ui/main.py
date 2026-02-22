@@ -1511,15 +1511,14 @@ class Application(Gtk.Application):
                 removed = []
                 for index, itr in enumerate(itrs):
                     path = model.get_path(itr)
-                    row = tuple(model[path])
                     p_index = int(path[0])
+                    removed.append((p_index, tuple(model[path])))
                     del fav_bouquet[p_index]
-
-                    if self._fav_model.remove(itr):
-                        removed.append((index, row))
+                    self._fav_model.remove(itr)
 
                     if index % self.DEL_FACTOR == 0:
                         yield True
+
                 self.update_fav_num_column(model)
                 self.emit("fav-removed", removed)
 
