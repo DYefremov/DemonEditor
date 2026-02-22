@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -352,7 +352,7 @@ class ServiceDetailsDialog:
                     self.select_active_text(self._mod_combo_box, MODULATION.get(tr_data[8]))
                     self.select_active_text(self._rolloff_combo_box, ROLL_OFF.get(tr_data[9]))
                     self.select_active_text(self._pilot_combo_box, Pilot(tr_data[10]).name)
-                    self._tr_flag_entry.set_text(tr_data[7])
+                    self._tr_flag_entry.set_text(tr_data[6])
                 if data_len > 12:
                     self._stream_id_entry.set_text(tr_data[11])
                     self._pls_code_entry.set_text(tr_data[12])
@@ -678,14 +678,13 @@ class ServiceDetailsDialog:
         sat_pos = self.get_sat_position()
 
         inv = get_value_by_name(Inversion, self._invertion_combo_box.get_active_id())
-        srv_sys = "0"  # !!!
+        flag = self._tr_flag_entry.get_text() or "0"
 
         if self._s_type is SettingsType.ENIGMA_2:
-            dvb_s_tr = self._ENIGMA2_TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, srv_sys)
+            dvb_s_tr = self._ENIGMA2_TRANSPONDER_DATA.format("s", freq, rate, pol, fec, sat_pos, inv, flag)
             if sys == "DVB-S":
                 return dvb_s_tr
             if sys == "DVB-S2":
-                flag = self._tr_flag_entry.get_text()
                 mod = self.get_value_from_combobox_id(self._mod_combo_box, MODULATION)
                 roll_off = self.get_value_from_combobox_id(self._rolloff_combo_box, ROLL_OFF)
                 pilot = get_value_by_name(Pilot, self._pilot_combo_box.get_active_id())
@@ -694,7 +693,7 @@ class ServiceDetailsDialog:
                 st_id = self._stream_id_entry.get_text()
                 pls = f":{st_id}:{pls_code}:{pls_mode}" if pls_mode and pls_code and st_id else ""
 
-                return f"{dvb_s_tr}:{flag}:{mod}:{roll_off}:{pilot}{pls}"
+                return f"{dvb_s_tr}:1:{mod}:{roll_off}:{pilot}{pls}"
 
         elif self._s_type is SettingsType.NEUTRINO_MP:
             tr_data = get_attributes(self._old_service.transponder)
