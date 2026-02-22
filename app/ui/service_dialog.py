@@ -92,15 +92,15 @@ class ServiceDetailsDialog:
         self._transponder_services_iters = None
         self._current_model = None
         self._current_itr = None
-        # Patterns
+        # Patterns.
         self._DIGIT_PATTERN = re.compile("\\D")
         self._NON_EMPTY_PATTERN = re.compile("(?:^[\\s]*$|\\D)")
         self._CAID_PATTERN = re.compile("(?:^[\\s]*$)|(C:[0-9a-fA-F]{1,4})(,C:[0-9a-fA-F]{1,4})*")
         self._PIDS_PATTERN = re.compile("(?:^[\\s]*$)|(c:[0-9]{2}[0-9a-fA-F]{1,4})(,c:[0-9]{2}[0-9a-fA-F]{1,4})*?")
-        # Buttons
+        # Buttons.
         self._apply_button = builder.get_object("apply_button")
         self._create_button = builder.get_object("create_button")
-        # style
+        # Style.
         self._style_provider = Gtk.CssProvider()
         self._style_provider.load_from_path(UI_RESOURCES_PATH + "style.css")
         # initialization only digit elements
@@ -411,6 +411,12 @@ class ServiceDetailsDialog:
         """ Sat positions initialisation """
         self._sat_pos_button.set_value(float(sat_pos[:-1]))
         self._pos_side_box.set_active_id(sat_pos[-1:])
+        self._sat_pos_button.connect("value-changed", self.on_sat_value_changed)
+
+    def on_sat_value_changed(self, button):
+        pos = int(self.get_sat_position())
+        namespace = int(f"{3600 - abs(pos) if pos < 0 else pos:04x}0000", 16)
+        self._namespace_entry.set_text(str(namespace))
 
     def on_system_changed(self, box):
         if not self._tr_edit_switch.get_active():
