@@ -41,7 +41,7 @@ from .dialogs import show_dialog, DialogType, Action, get_builder
 from .main_helper import get_base_model, scroll_to
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HIDE_ICON, CODED_ICON, Column
 
-_UI_PATH = UI_RESOURCES_PATH + "service_details_dialog.glade"
+_UI_PATH = f"{UI_RESOURCES_PATH}service_dialog.glade"
 
 
 class ServiceDetailsDialog:
@@ -463,7 +463,7 @@ class ServiceDetailsDialog:
         service, data = srv_data
         itr = self._current_model.append(service + (None, data.get(Column.SRV_BACKGROUND, None)))
         scroll_to(self._current_model.get_path(itr), self._services_view)
-        
+
         return True
 
     def on_edit(self):

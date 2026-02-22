@@ -69,7 +69,7 @@ from .iptv import (IptvDialog, SearchUnavailableDialog, IptvListConfigurationDia
 from .main_helper import *
 from .picons import PiconManager
 from .search import SearchProvider
-from .service_details_dialog import ServiceDetailsDialog, Action
+from .service_dialog import ServiceDetailsDialog, Action
 from .settings_dialog import SettingsDialog
 from .uicommons import (Gtk, Gdk, UI_RESOURCES_PATH, LOCKED_ICON, HIDE_ICON, IPTV_ICON, MOVE_KEYS, KeyboardKey, Column,
                         MOD_MASK, APP_FONT, Page, HeaderBar, LINK_ICON)
