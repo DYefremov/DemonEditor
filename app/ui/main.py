@@ -1109,7 +1109,7 @@ class Application(Gtk.Application):
             return True
         else:
             if len(self._task_box):
-                msg = f"{translate('There are running background tasks!!')}\n\n\t\t{translate('Are you sure?')}"
+                msg = f"{translate('There are running background tasks!')}\n\n\t\t{translate('Are you sure?')}"
                 if show_dialog(DialogType.QUESTION, self._main_window, msg) != Gtk.ResponseType.OK:
                     return True
                 log("Terminating the application...")
@@ -1228,7 +1228,7 @@ class Application(Gtk.Application):
 
         msg = translate("Restart the program to apply all changes.")
         if value:
-            warn = "It can cause some problems."
+            warn = translate("It can cause some problems.")
             msg = f"{translate('EXPERIMENTAL!')} {warn} {msg}"
         self.show_info_message(msg, Gtk.MessageType.WARNING)
 
