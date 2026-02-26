@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -568,6 +568,7 @@ class TabEpgSettingsPopover(EpgSettingsPopover):
         self._url_combo_box.get_model().clear()
         [self._url_combo_box.append(i, i) for i in settings.epg_xml_sources if i]
         self._url_combo_box.set_active_id(settings.epg_xml_source)
+        self._remove_url_button.set_sensitive(len(self._url_combo_box.get_model()) > 1)
 
     def on_apply(self, button):
         settings = self._app.app_settings
