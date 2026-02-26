@@ -2150,11 +2150,15 @@ class Application(Gtk.Application):
             name, model = get_model_data(view)
             self.delete_views_selection(name)
         elif event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS and event.button == Gdk.BUTTON_PRIMARY:
+            self._select_enabled = True
             if self._settings.main_list_playback and self._fav_click_mode is not PlaybackMode.DISABLED:
                 if view is self._services_view:
                     self.emit("srv-clicked", self._fav_click_mode)
                 elif view is self._iptv_services_view:
                     self.emit("iptv-clicked", self._fav_click_mode)
+            else:
+                if view is not self._fav_view:
+                    self.on_edit()
 
     def on_view_release(self, view, event):
         """ Handles a mouse click (release) to view. """
@@ -3177,9 +3181,9 @@ class Application(Gtk.Application):
     def on_fav_press(self, menu, event):
         if event.get_event_type() == Gdk.EventType.DOUBLE_BUTTON_PRESS:
             if self._fav_click_mode is PlaybackMode.DISABLED:
-                return
-
-            self.emit("fav-clicked", self._fav_click_mode)
+                self.on_service_edit(self._fav_view)
+            else:
+                self.emit("fav-clicked", self._fav_click_mode)
         else:
             return self.on_view_popup_menu(menu, event)
 
