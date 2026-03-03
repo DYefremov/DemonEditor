@@ -1,8 +1,8 @@
-# Copyright (C) 2018-2025 Dmitriy Yefremov
+# Copyright (C) 2018-2026 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # Charly, 2019.
-# Dmitriy Yefremov, 2020-2025.
+# Dmitriy Yefremov, 2020-2026.
 # Thomas Schmidt, 2021.
 msgid ""
 msgstr ""
@@ -1616,3 +1616,15 @@ msgstr "Die Unterstützung für Erweiterungen ist deaktiviert!"
 
 msgid "Do you want to enable it?"
 msgstr "Möchtest du aktivieren?"
+
+msgid "Playback of IPTV streams only!"
+msgstr "Wiedergabe nur IPTV-Streams!"
+
+msgid "There are running background tasks!"
+msgstr "Es laufen Hintergrundprozesse!"
+
+msgid "Check if FFmpeg is installed!"
+msgstr "Prüfe ob FFmpeg installiert ist!"
+
+msgid "It can cause some problems."
+msgstr "Das kann zu einigen Problemen führen."

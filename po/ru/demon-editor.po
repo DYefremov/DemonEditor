@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 msgid "translator-credits"
-msgstr "Dmitriy Yefremov"
+msgstr "Дмитрий Ефремов"
 
 # Main
 msgid "Service"
@@ -1599,3 +1599,15 @@ msgstr "Поддержка расширений отключена!"
 
 msgid "Do you want to enable it?"
 msgstr "Желаете включить?"
+
+msgid "Playback of IPTV streams only!"
+msgstr "Воспроизведение только IPTV-потоков!"
+
+msgid "There are running background tasks!"
+msgstr "Идет выполнение фоновых задач!"
+
+msgid "Check if FFmpeg is installed!"
+msgstr "Проверьте, установлен ли FFmpeg!"
+
+msgid "It can cause some problems."
+msgstr "Это может вызывать некоторые проблемы."
