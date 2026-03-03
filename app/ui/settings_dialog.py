@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -692,7 +692,7 @@ class SettingsDialog:
         if mode is PlaybackMode.PLAY:
             self.show_info_message("Operates in standby mode or current active transponder!", Gtk.MessageType.WARNING)
         elif mode is PlaybackMode.STREAM:
-            self.show_info_message("Playback IPTV streams only!", Gtk.MessageType.WARNING)
+            self.show_info_message("Playback of IPTV streams only!", Gtk.MessageType.WARNING)
         elif mode is PlaybackMode.DISABLED:
             self._allow_main_list_playback_switch.set_active(False)
         else:
