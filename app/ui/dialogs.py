@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ from functools import lru_cache
 from pathlib import Path
 
 from app.commons import run_idle
-from app.settings import SEP, IS_WIN, USE_HEADER_BAR
+from app.settings import SEP, USE_HEADER_BAR, IS_LINUX
 from .uicommons import Gtk, UI_RESOURCES_PATH, TEXT_DOMAIN
 
 
@@ -228,7 +228,7 @@ def translate(message):
 
 @lru_cache(maxsize=5)
 def get_dialogs_string(path, tag="property"):
-    if IS_WIN:
+    if not IS_LINUX:
         return translate_xml(path, tag)
     else:
         with open(path, "r", encoding="utf-8") as f:
@@ -257,7 +257,7 @@ def get_builder(path, handlers=None, use_str=False, objects=None, tag="property"
 
 
 def translate_xml(path, tag="property"):
-    """ Used to translate GUI from * .glade files in MS Windows.
+    """ Used to translate GUI from *.glade files to macOS and MS Windows.
 
         More info: https://gitlab.gnome.org/GNOME/gtk/-/issues/569
     """
