@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -257,62 +257,66 @@ class XmlTvReader(Reader):
             log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
             return
 
-        with requests.get(url=self._url, stream=True) as resp:
-            if resp.reason == "OK":
-                suf = self._url[self._url.rfind("."):]
-                if suf not in self.SUFFIXES:
-                    log(f"{self.__class__.__name__} [download] error: Unsupported file extension.")
-                    return
+        try:
+            with requests.get(url=self._url, stream=True, timeout=(5, 5)) as resp:
+                if resp.reason == "OK":
+                    suf = self._url[self._url.rfind("."):]
+                    if suf not in self.SUFFIXES:
+                        log(f"{self.__class__.__name__} [download] error: Unsupported file extension.")
+                        return
 
-                data_size = resp.headers.get("content-length")
-                if not data_size:
-                    log(f"{self.__class__.__name__} [download *.{suf}] error: Error getting data size.")
-                    if clb:
-                        clb()
-                    return
+                    data_size = resp.headers.get("content-length")
+                    if not data_size:
+                        log(f"{self.__class__.__name__} [download *.{suf}] error: Error getting data size.")
+                        if clb:
+                            clb()
+                        return
 
-                with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
-                    downloaded = 0
-                    data_size = int(data_size)
-                    completed = set()
+                    with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
+                        downloaded = 0
+                        data_size = int(data_size)
+                        completed = set()
 
-                    for data in resp.iter_content(chunk_size=1024):
-                        downloaded += len(data)
-                        tf.write(data)
-                        done = int(100 * downloaded / data_size)
-                        if done % 25 == 0 and done not in completed:
-                            completed.add(done)
-                            log(f"Downloading XMLTV file...{done}%" if done < 100 else "XMLTV file download complete.")
-                    tf.seek(0)
+                        for data in resp.iter_content(chunk_size=128):
+                            downloaded += len(data)
+                            tf.write(data)
+                            done = int(100 * downloaded / data_size)
+                            if done % 25 == 0 and done not in completed:
+                                completed.add(done)
+                                log(f"Downloading XMLTV file...{done}%" if done < 100 else "XMLTV file download complete.")
+                        tf.seek(0)
 
-                    os.makedirs(os.path.dirname(self._path), exist_ok=True)
+                        os.makedirs(os.path.dirname(self._path), exist_ok=True)
 
-                    if suf.endswith(".gz"):
-                        try:
-                            shutil.copyfile(tf.name, self._path)
-                        except OSError as e:
-                            log(f"{self.__class__.__name__} [download *.gz] error: {e}")
-                    elif self._url.endswith((".xz", ".lzma")):
-                        import lzma
+                        if suf.endswith(".gz"):
+                            try:
+                                shutil.copyfile(tf.name, self._path)
+                            except OSError as e:
+                                log(f"{self.__class__.__name__} [download *.gz] error: {e}")
+                        elif self._url.endswith((".xz", ".lzma")):
+                            import lzma
 
-                        try:
-                            with lzma.open(tf, "rb") as lzf:
-                                shutil.copyfileobj(lzf, self._path)
-                        except (lzma.LZMAError, OSError) as e:
-                            log(f"{self.__class__.__name__} [download *.xz] error: {e}")
-                    else:
-                        try:
-                            import gzip
-                            with gzip.open(self._path, "wb") as f_out:
-                                shutil.copyfileobj(tf, f_out)
-                        except OSError as e:
-                            log(f"{self.__class__.__name__} [download *.xml] error: {e}")
+                            try:
+                                with lzma.open(tf, "rb") as lzf:
+                                    shutil.copyfileobj(lzf, self._path)
+                            except (lzma.LZMAError, OSError) as e:
+                                log(f"{self.__class__.__name__} [download *.xz] error: {e}")
+                        else:
+                            try:
+                                import gzip
+                                with gzip.open(self._path, "wb") as f_out:
+                                    shutil.copyfileobj(tf, f_out)
+                            except OSError as e:
+                                log(f"{self.__class__.__name__} [download *.xml] error: {e}")
 
-                    if IS_WIN and os.path.isfile(tf.name):
-                        tf.close()
-                        os.remove(tf.name)
-            else:
-                log(f"{self.__class__.__name__} [download] error: {resp.reason}")
+                        if IS_WIN and os.path.isfile(tf.name):
+                            tf.close()
+                            os.remove(tf.name)
+                else:
+                    log(f"{self.__class__.__name__} [download] error: {resp.reason}")
+        except requests.exceptions.RequestException as e:
+            log(f"{self.__class__.__name__} [download] error: {e}")
+            return
 
         if clb:
             clb()
