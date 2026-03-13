@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2022 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 #
 # Author: Dmitriy Yefremov
 #
+
+
 from app.ui.dialogs import translate
 from .uicommons import Gtk, GLib
 
@@ -52,14 +54,13 @@ class BGTaskWidget(Gtk.Box):
         self.pack_start(close_button, False, False, 0)
 
         self.show_all()
-
         # Just prototype. -> It may not work properly!
-        # TODO: Different options need to be tested. Possibly with normal threads.
-        from concurrent.futures import ThreadPoolExecutor
+        from gi.repository.Gio import Task, Cancellable
 
-        self._executor = ThreadPoolExecutor(max_workers=self.TASK_LIMIT)
-        future = self._executor.submit(target, *args)
-        future.add_done_callback(lambda f: GLib.idle_add(self._app.emit, "task-done", self))
+        self._task = Task.new(self, Cancellable.new(), lambda s, t: GLib.idle_add(self._app.emit, "task-done", self))
+        self._task.set_priority(GLib.PRIORITY_LOW)
+        self._task.set_return_on_cancel(True)
+        self._task.run_in_thread(lambda t, s, d, c: target(*args))
 
     @property
     def text(self):
@@ -78,7 +79,10 @@ class BGTaskWidget(Gtk.Box):
         self.set_tooltip_text(value)
 
     def cancel(self):
-        self._executor.shutdown(wait=False)
+        cancelable = self._task.get_cancellable()
+        if cancelable:
+            cancelable.cancel()
+
         self._app.emit("task-canceled", None)
 
 
