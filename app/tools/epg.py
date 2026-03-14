@@ -268,8 +268,6 @@ class XmlTvReader(Reader):
                     data_size = resp.headers.get("content-length")
                     if not data_size:
                         log(f"{self.__class__.__name__} [download *.{suf}] error: Error getting data size.")
-                        if clb:
-                            clb()
                         return
 
                     with NamedTemporaryFile(suffix=suf, delete=not IS_WIN) as tf:
