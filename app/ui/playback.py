@@ -390,7 +390,7 @@ class PlayerBox(Gtk.Overlay):
             width, height = size
 
         if self._playback_window:
-            self._playback_window.show()
+            self._playback_window.present()
             self._playback_window.set_title(title or self.get_playback_title())
         else:
             self._playback_window = Gtk.Window(title=title or self.get_playback_title(),
