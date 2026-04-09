@@ -1,9 +1,38 @@
+# -*- coding: utf-8 -*-
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2018-2026 Dmitriy Yefremov
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
+#
+
+
 import logging
 from collections import defaultdict
 from functools import wraps
-from threading import Thread, Timer
+from threading import Timer
 
 from gi.repository import GLib
+from gi.repository.Gio import Task
 
 _LOG_FILE = "demon-editor.log"
 LOG_DATE_FORMAT = "%d-%m-%y %H:%M:%S"
@@ -41,12 +70,12 @@ def run_idle(func):
 
 
 def run_task(func):
-    """ Runs function in separate thread """
+    """ Runs a function in a separate thread. """
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        task = Thread(target=func, args=args, kwargs=kwargs, daemon=True)
-        task.start()
+        task = Task()
+        task.run_in_thread(lambda t, s, d, c: func(*args, **kwargs))
 
     return wrapper
 
