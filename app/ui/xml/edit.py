@@ -239,12 +239,6 @@ class SatellitesTool(Gtk.Box):
         self._transponders_stack.set_visible_child_name(self._dvb_type)
         self._update_header_button.set_sensitive(self._dvb_type is self.DVB.SAT)
 
-        if self._dvb_type is self.DVB.SAT:
-            self._app.on_info_bar_close()
-
-        else:
-            self._app.show_info_message("EXPERIMENTAL!", Gtk.MessageType.WARNING)
-
     def on_satellite_selection(self, view):
         model = self._sat_tr_view.get_model()
         model.clear()
