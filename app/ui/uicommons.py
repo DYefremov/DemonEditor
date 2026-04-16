@@ -434,5 +434,27 @@ MOVE_KEYS = {KeyboardKey.UP, KeyboardKey.PAGE_UP,
              KeyboardKey.HOME_KP, KeyboardKey.END_KP,
              KeyboardKey.PAGE_UP_KP, KeyboardKey.PAGE_DOWN_KP}
 
+
+class LoadingProgressBar(Gtk.ProgressBar):
+    """ A custom class for a progress bar.
+
+        Used as an alternative to Gtk.Spinner to reduce CPU load.
+    """
+    __gtype_name__ = "LoadingProgressBar"
+
+    def __init__(self, **properties):
+        super().__init__(**properties)
+
+        self.connect("notify::visible", self.on_visible)
+
+    def on_visible(self, bar, param):
+        if self.get_visible():
+            GLib.timeout_add(500, self.update, priority=GLib.PRIORITY_LOW)
+
+    def update(self):
+        self.pulse()
+        return self.get_visible()
+
+
 if __name__ == "__main__":
     pass
