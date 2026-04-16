@@ -101,8 +101,8 @@ class WaitDialog:
         builder, dialog = get_dialog_from_xml(DialogType.WAIT, transient)
         self._dialog = dialog
         self._dialog.set_transient_for(transient)
-        self._label = builder.get_object("wait_dialog_label")
-        self._default_text = text or self._label.get_text()
+        self._progress = builder.get_object("progress")
+        self._default_text = text or self._progress.get_text()
 
     def show(self, text=None):
         self.set_text(text)
@@ -110,7 +110,7 @@ class WaitDialog:
 
     @run_idle
     def set_text(self, text):
-        self._label.set_text(translate(text or self._default_text))
+        self._progress.set_text(translate(text or self._default_text))
 
     @run_idle
     def hide(self):
