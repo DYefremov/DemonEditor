@@ -158,7 +158,7 @@ Author: Dmitriy Yefremov
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="width-request">100</property>
+    <property name="width-request">170</property>
     <property name="window_position">center-on-parent</property>
     <property name="destroy_with_parent">True</property>
     <property name="type_hint">splashscreen</property>
@@ -171,6 +171,8 @@ Author: Dmitriy Yefremov
         <property name="can_focus">False</property>
         <property name="margin-top">10</property>
         <property name="margin-bottom">10</property>
+        <property name="margin-start">10</property>
+        <property name="margin_end">10</property>
         <property name="orientation">vertical</property>
         <child>
           <object class="LoadingProgressBar" id="progress">
@@ -178,8 +180,6 @@ Author: Dmitriy Yefremov
             <property name="can_focus">False</property>
             <property name="show-text">True</property>
             <property name="text" translatable="yes">Loading data...</property>
-            <property name="margin-start">10</property>
-            <property name="margin_end">10</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -190,7 +190,7 @@ Author: Dmitriy Yefremov
       </object>
     </child>                          <!-- NOP -->
     <style>
-      <class name="app-notification"/>
+      <class name="primary-toolbar"/>
     </style>
   </object>
 </interface>
