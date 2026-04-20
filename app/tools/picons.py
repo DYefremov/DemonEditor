@@ -31,9 +31,13 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from collections import namedtuple
+from datetime import datetime
 from enum import IntEnum
 from html.parser import HTMLParser
+from io import BytesIO
+from pathlib import Path
 
 import requests
 
@@ -74,48 +78,76 @@ class PiconsCzDownloader:
         self._provider_logos = {}
         self._picon_ids = picon_ids
         self._appender = appender
+        self._logo_map = self.get_logos_map()
+        self._name_map = self.get_name_map()
+        self._perm_cache_file = Path(tempfile.gettempdir()).joinpath("picon_cz_links")
         # subprocess creation flags
         self._sbp_flags = subprocess.CREATE_NO_WINDOW if IS_WIN else 0
+
+    @property
+    def providers(self):
+        return self._providers
 
     def init(self):
         """ Initializes dict with values: download_id -> perm link and provider data.  """
         if self._perm_links:
             return
 
-        self._HEADER["Referer"] = self._PERM_URL
+        if self._perm_cache_file.exists():
+            st = self._perm_cache_file.stat()
+            dif = datetime.now() - datetime.fromtimestamp(st.st_mtime)
+            # We will update daily.
+            if dif.days > 0:
+                self.download_permalinks()
+        else:
+            self.download_permalinks()
 
+        self.read_permalinks()
+
+    def download_permalinks(self):
+        self._HEADER["Referer"] = self._PERM_URL
         with requests.get(url=self._PERM_URL, headers=self._HEADER, stream=True) as request:
             if request.reason == "OK":
-                logo_map = self.get_logos_map()
-                name_map = self.get_name_map()
+                log(f"{self.__class__.__name__}: downloading permalinks file...")
+                buf = BytesIO()
+                [buf.write(chunk) for chunk in request.iter_content(chunk_size=128)]
+                buf.seek(0)
 
-                for line in request.iter_lines():
-                    data = line.decode(encoding="utf-8", errors="ignore").split(maxsplit=1)
-                    if len(data) != 2:
-                        continue
-
-                    l_id, perm_link = data
-                    self._perm_links[str(l_id)] = str(perm_link)
-                    data = re.match(self._LINK_PATTERN, perm_link)
-                    if data:
-                        sat_pos = data.group(3)
-                        # Logo url.
-                        logo = logo_map.get(data.group(2), None)
-                        l_name = name_map.get(sat_pos, None) or sat_pos.replace(".", "")
-                        logo_url = f"{self._BASE_LOGO_URL}{logo}/{l_name}.png" if logo else None
-
-                        prv = Provider(None, data.group(1), sat_pos, self._BASE_URL + l_id, l_id, logo_url, None, False)
-                        if sat_pos in self._providers:
-                            self._providers[sat_pos].append(prv)
-                        else:
-                            self._providers[sat_pos] = [prv]
+                self._perm_cache_file.touch()
+                self._perm_cache_file.write_bytes(buf.read())
             else:
                 log(f"{self.__class__.__name__} [get permalinks] error: {request.reason}")
                 raise PiconsError(request.reason)
 
-    @property
-    def providers(self):
-        return self._providers
+    def read_permalinks(self):
+        with self._perm_cache_file.open(encoding="utf-8", errors="ignore") as f:
+            for l in f.readlines():
+                data = l.split(maxsplit=1)
+                if len(data) != 2:
+                    continue
+
+                data = l.split(maxsplit=1)
+                if len(data) != 2:
+                    continue
+
+                l_id, perm_link = data
+                self._perm_links[str(l_id)] = str(perm_link)
+                self.update_provider_data(l_id, perm_link)
+
+    def update_provider_data(self, l_id, perm_link):
+        data = re.match(self._LINK_PATTERN, perm_link)
+        if data:
+            sat_pos = data.group(3)
+            # Logo url.
+            logo = self._logo_map.get(data.group(2), None)
+            l_name = self._name_map.get(sat_pos, None) or sat_pos.replace(".", "")
+            logo_url = f"{self._BASE_LOGO_URL}{logo}/{l_name}.png" if logo else None
+
+            prv = Provider(None, data.group(1), sat_pos, self._BASE_URL + l_id, l_id, logo_url, None, False)
+            if sat_pos in self._providers:
+                self._providers[sat_pos].append(prv)
+            else:
+                self._providers[sat_pos] = [prv]
 
     def get_sat_providers(self, url):
         return self._providers.get(url, [])
@@ -215,7 +247,8 @@ class PiconsCzDownloader:
         except requests.exceptions.ConnectionError as e:
             log(f"{self.__class__.__name__} error [get provider logo]: {e}")
 
-    def get_logos_map(self):
+    @staticmethod
+    def get_logos_map():
         return {"piconblack": "b50",
                 "picontransparent": "t50",
                 "piconwhite": "w50",
@@ -240,7 +273,8 @@ class PiconsCzDownloader:
                 "piconSNPblack": "b50",
                 }
 
-    def get_name_map(self):
+    @staticmethod
+    def get_name_map():
         return {"antiksat": "ANTIK",
                 "digiczsk": "DIGI",
                 "DTTitaly": "picon_trs-it",
