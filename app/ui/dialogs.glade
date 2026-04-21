@@ -176,7 +176,7 @@ Author: Dmitriy Yefremov
         <property name="orientation">vertical</property>
         <child>
           <object class="LoadingProgressBar" id="progress">
-            <property name="visible" bind-source="wait_dialog" bind-property="visible">True</property>
+            <property name="visible" bind-source="wait_dialog" bind-property="visible">False</property>
             <property name="can_focus">False</property>
             <property name="show-text">True</property>
             <property name="text" translatable="yes">Loading data...</property>
