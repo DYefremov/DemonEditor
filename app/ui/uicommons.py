@@ -449,11 +449,11 @@ class LoadingProgressBar(Gtk.ProgressBar):
 
     def on_visible(self, bar, param):
         if self.get_visible():
-            GLib.timeout_add(500, self.update, priority=GLib.PRIORITY_LOW)
+            self.add_tick_callback(self.update)
 
-    def update(self):
-        self.pulse()
-        return self.get_visible()
+    def update(self, widget, data):
+        GLib.timeout_add(500, self.pulse)
+        return widget.get_visible()
 
 
 if __name__ == "__main__":
