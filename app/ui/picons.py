@@ -147,7 +147,7 @@ class PiconManager(Gtk.Box):
         self._resize_no_radio_button = builder.get_object("resize_no_radio_button")
         self._resize_220_132_radio_button = builder.get_object("resize_220_132_radio_button")
         self._resize_100_60_radio_button = builder.get_object("resize_100_60_radio_button")
-        self._satellite_label = builder.get_object("satellite_label")
+        self._progress = builder.get_object("progress")
         self._src_link_button = builder.get_object("src_link_button")
         self._satellite_filter_switch = builder.get_object("satellite_filter_switch")
         self._bouquet_filter_switch = builder.get_object("bouquet_filter_switch")
@@ -191,7 +191,6 @@ class PiconManager(Gtk.Box):
             message = translate("To automatically set the identifiers for picons,\n"
                                 "first load the required services list into the main application window.")
             self.show_info_message(message, Gtk.MessageType.WARNING)
-            self._satellite_label.show()
 
     def on_tool_switched(self, button):
         if not button.get_active():
@@ -636,7 +635,8 @@ class PiconManager(Gtk.Box):
 
     @run_task
     def get_satellites(self, view):
-        self._sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT)
+        GLib.idle_add(self._progress.show)
+        self._sats = SatellitesParser().get_satellites_list(SatelliteSource.LYNGSAT) or {}
         if not self._sats:
             self.show_info_message("Getting satellites list error!", Gtk.MessageType.ERROR)
 
@@ -675,12 +675,12 @@ class PiconManager(Gtk.Box):
                     return
                 yield model.append((name, sat[3], pos))
         finally:
-            self._satellite_label.show()
+            self._progress.hide()
 
     def on_satellite_selection(self, view, path, column):
+        self._progress.show()
         model = self._providers_view.get_model()
         model.clear()
-        self._satellite_label.set_visible(False)
         self.get_providers(view.get_model()[path][1], model)
 
     @run_task
@@ -705,7 +705,7 @@ class PiconManager(Gtk.Box):
                 model.append(p._replace(logo=get_pixbuf_from_data(logo_data) if logo_data else TV_ICON))
 
         self.update_receive_button_state()
-        GLib.idle_add(self._satellite_label.set_visible, True)
+        GLib.idle_add(self._progress.hide)
 
     def on_receive(self, item):
         if self._is_downloading:

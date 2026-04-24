@@ -960,7 +960,7 @@ Author: Dmitriy Yefremov
                                 <property name="margin-bottom">5</property>
                                 <child>
                                   <object class="GtkComboBoxText" id="download_source_button">
-                                    <property name="sensitive" bind-source="satellite_label" bind-property="visible">False</property>
+                                    <property name="sensitive" bind-source="progress" bind-property="visible" bind-flags="invert-boolean">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="tooltip-text" translatable="yes">Source:</property>
                                     <property name="active">0</property>
@@ -1023,6 +1023,7 @@ Author: Dmitriy Yefremov
                                         <property name="spacing">2</property>
                                         <child>
                                           <object class="GtkLabel" id="satellite_label">
+                                            <property name="visible">True</property>
                                             <property name="can-focus">False</property>
                                             <property name="label" translatable="yes">Satellite</property>
                                           </object>
@@ -1030,32 +1031,6 @@ Author: Dmitriy Yefremov
                                             <property name="expand">False</property>
                                             <property name="fill">True</property>
                                             <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkLabel" id="loading_data_label">
-                                            <property name="visible" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="label" translatable="yes">Loading data...</property>
-                                            <property name="ellipsize">end</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">1</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkSpinner" id="loading_data_spinner">
-                                            <property name="visible" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="margin-right">5</property>
-                                            <property name="active" bind-source="satellite_label" bind-property="visible" bind-flags="invert-boolean">True</property>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">2</property>
                                           </packing>
                                         </child>
                                         <child>
@@ -1080,6 +1055,7 @@ Author: Dmitriy Yefremov
                                             <child>
                                               <object class="GtkSwitch" id="satellite_filter_switch">
                                                 <property name="visible">True</property>
+                                                <property name="sensitive" bind-source="progress" bind-property="visible" bind-flags="invert-boolean">True</property>
                                                 <property name="can-focus">True</property>
                                                 <signal name="state-set" handler="on_satellite_filter_toggled" swapped="no"/>
                                               </object>
@@ -1093,7 +1069,7 @@ Author: Dmitriy Yefremov
                                             <property name="expand">False</property>
                                             <property name="fill">True</property>
                                             <property name="pack-type">end</property>
-                                            <property name="position">3</property>
+                                            <property name="position">1</property>
                                           </packing>
                                         </child>
                                       </object>
@@ -1111,7 +1087,7 @@ Author: Dmitriy Yefremov
                                         <child>
                                           <object class="GtkTreeView" id="satellites_view">
                                             <property name="visible">True</property>
-                                            <property name="sensitive" bind-source="satellite_label" bind-property="visible">False</property>
+                                            <property name="sensitive" bind-source="progress" bind-property="visible" bind-flags="invert-boolean">True</property>
                                             <property name="can-focus">True</property>
                                             <property name="model">satellites_list_store</property>
                                             <property name="headers-visible">False</property>
@@ -1852,6 +1828,20 @@ Author: Dmitriy Yefremov
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="LoadingProgressBar" id="progress">
+                    <property name="can-focus">False</property>
+                    <property name="margin-end">5</property>
+                    <property name="tooltip-text" translatable="yes">Loading data...</property>
+                    <property name="valign">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>
