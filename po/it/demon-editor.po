@@ -1,11 +1,11 @@
-# Copyright (C) 2018-2026 Dmitriy Yefremov
+# Copyright (C) 2018-2025 Dmitriy Yefremov
 # This file is distributed under the MIT license.
 #
 # SPDX-FileCopyrightText: 2022, 2023, 2024, 2025, 2026 Massimo Pissarello <mapi68@gmail.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"PO-Revision-Date: 2026-01-30 17:27+0100\n"
+"PO-Revision-Date: 2026-04-25 20:43+0200\n"
 "Last-Translator: Massimo Pissarello <mapi68@gmail.com>\n"
 "Language-Team: Italian <>\n"
 "Language: it\n"
@@ -13,10 +13,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 25.12.1\n"
+"X-Generator: Lokalize 26.04.0\n"
 
 msgid "translator-credits"
-msgstr "Massimo Pissarello\nNicola Fanghella"
+msgstr "Massimo Pissarello"
 
 # Main
 msgid "Service"
@@ -1666,3 +1666,15 @@ msgstr "Il supporto dell'estensione è disabilitato!"
 
 msgid "Do you want to enable it?"
 msgstr "Vuoi abilitarlo?"
+
+msgid "Playback of IPTV streams only!"
+msgstr "Riproduzione solo di flussi IPTV!"
+
+msgid "There are running background tasks!"
+msgstr "Sono in esecuzione attività in background!"
+
+msgid "Check if FFmpeg is installed!"
+msgstr "Controlla se FFmpeg è installato!"
+
+msgid "It can cause some problems."
+msgstr "Può causare alcuni problemi."
