@@ -27,23 +27,19 @@
 
 
 from app.ui.dialogs import translate
-from .uicommons import Gtk, GLib
+from .uicommons import Gtk, GLib, LoadingProgressBar
 
 
 class BGTaskWidget(Gtk.Box):
     """ Widget for displaying and running background tasks. """
 
-    TASK_LIMIT = 1
-
     def __init__(self, app, text, target, *args):
         super().__init__(spacing=2, orientation=Gtk.Orientation.HORIZONTAL, valign=Gtk.Align.CENTER)
         self._app = app
 
-        self._label = Gtk.Label(translate(text))
-        self.pack_start(self._label, False, False, 0)
-
-        self._spinner = Gtk.Spinner(active=True)
-        self.pack_start(self._spinner, False, False, 0)
+        self._progress = LoadingProgressBar(margin_start=5, margin_end=5, show_text=True, valign=Gtk.Align.CENTER)
+        self._progress.set_text(translate(text))
+        self.pack_start(self._progress, False, False, 0)
 
         close_button = Gtk.Button.new_from_icon_name("window-close", Gtk.IconSize.MENU)
         close_button.set_relief(Gtk.ReliefStyle.NONE)
@@ -64,11 +60,11 @@ class BGTaskWidget(Gtk.Box):
 
     @property
     def text(self):
-        return self._label.get_text()
+        return self._progress.get_text()
 
     @text.setter
     def text(self, value):
-        self._label.set_text(value)
+        self._progress.set_text(value)
 
     @property
     def tooltip(self):
