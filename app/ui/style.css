@@ -49,8 +49,12 @@ paned.vertical > separator {
   background-size: 24px 2px;
 }
 
+progressbar > text {
+  font-size: 10px;
+}
+
 progressbar > trough {
-    min-width: 75px;
+  min-width: 50px;
 }
 
 .red-button {
