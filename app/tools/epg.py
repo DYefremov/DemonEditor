@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -331,21 +331,27 @@ class XmlTvReader(Reader):
 
         return events
 
-    @staticmethod
-    def process_event(ev, events, offset, srv):
+    def process_event(self, ev, events, offset, srv):
         start = datetime.fromtimestamp(ev.start) + offset
         end_time = datetime.fromtimestamp(ev.duration) + offset
         start = start.timestamp()
         end_time = end_time.timestamp()
         duration = end_time - start
 
+        data = self.get_event_data(srv.id, ev, start, duration)
+        events[srv.id].append(EpgEvent(srv.id, ev.title, start, end_time, duration, ev.desc, data))
+
         for n in srv.names:
-            data = {"e2eventservicename": n,
-                    "e2eventtitle": ev.title,
-                    "e2eventdescription": ev.desc,
-                    "e2eventstart": start,
-                    "e2eventduration": duration}
+            data = self.get_event_data(n, ev, start, duration)
             events[n].append(EpgEvent(n, ev.title, start, end_time, duration, ev.desc, data))
+
+    @staticmethod
+    def get_event_data(name, ev, start, duration):
+        return {"e2eventservicename": name,
+                "e2eventtitle": ev.title,
+                "e2eventdescription": ev.desc,
+                "e2eventstart": start,
+                "e2eventduration": duration}
 
     def parse(self):
         """ Parses XML. """
