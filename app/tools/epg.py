@@ -252,12 +252,12 @@ class XmlTvReader(Reader):
 
     def download(self, clb=None):
         """ Downloads an XMLTV file. """
-        res = urlparse(self._url)
-        if not all((res.scheme, res.netloc)):
-            log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
-            return
-
         try:
+            res = urlparse(self._url)
+            if not all((res.scheme, res.netloc)):
+                log(f"{self.__class__.__name__} [download] error: Invalid URL {self._url}")
+                return
+
             with requests.get(url=self._url, stream=True, timeout=(5, 5)) as resp:
                 if resp.reason == "OK":
                     suf = self._url[self._url.rfind("."):]
@@ -314,10 +314,9 @@ class XmlTvReader(Reader):
                     log(f"{self.__class__.__name__} [download] error: {resp.reason}")
         except requests.exceptions.RequestException as e:
             log(f"{self.__class__.__name__} [download] error: {e}")
-            return
-
-        if clb:
-            clb()
+        finally:
+            if clb:
+                clb()
 
     def get_current_events(self, names: set) -> dict:
         events = defaultdict(list)
