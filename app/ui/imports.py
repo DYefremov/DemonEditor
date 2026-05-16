@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -40,7 +40,7 @@ from app.ui.main_helper import on_popup_menu, get_iptv_data, show_info_bar_messa
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, Page, HeaderBar
 
 
-def import_bouquet(app, model, path, appender, file_path=None):
+def import_bouquet(app, model, path, appender, file_paths=None):
     """ Import of single bouquet """
     itr = model.get_iter(path)
     bq_type = BqType(model.get(itr, Column.BQ_TYPE)[0])
@@ -61,38 +61,42 @@ def import_bouquet(app, model, path, appender, file_path=None):
         elif bq_type is BqType.WEBTV:
             f_pattern = "webtv.xml"
 
-    file_path = file_path or get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
-    if file_path == Gtk.ResponseType.CANCEL:
+    if file_paths is None:
+        res = get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
+        if res == Gtk.ResponseType.CANCEL:
+            return
+        file_paths = [res]
+
+    file_paths = list(filter(lambda fp: str(fp).endswith(pattern), file_paths))
+    if not file_paths:
+        app.show_error_message("No bouquet file is selected!")
         return
 
-    if not str(file_path).endswith(pattern):
-        show_dialog(DialogType.ERROR, transient, text="No bouquet file is selected!")
-        return
+    for file_path in file_paths:
+        if profile is SettingsType.ENIGMA_2:
+            if IS_DARWIN and file_path.rfind("userbouquet.") < 0:
+                app.show_error_message("Not allowed in this context!")
+                return
 
-    if profile is SettingsType.ENIGMA_2:
-        if IS_DARWIN and file_path.rfind("userbouquet.") < 0:
-            show_dialog(DialogType.ERROR, transient, text="Not allowed in this context!")
-            return
+            bq = get_enigma2_bouquet(file_path)
+            imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
 
-        bq = get_enigma2_bouquet(file_path)
-        imported = list(filter(lambda x: x.data in services or x.type is BqServiceType.IPTV, bq.services))
+            if len(imported) == 0:
+                app.show_error_message("The main list does not contain services for this bouquet!")
+                return
 
-        if len(imported) == 0:
-            show_dialog(DialogType.ERROR, transient, text="The main list does not contain services for this bouquet!")
-            return
-
-        if model.iter_n_children(itr):
-            appender(bq, itr)
-        else:
-            p_itr = model.iter_parent(itr)
-            appender(bq, p_itr) if p_itr else appender(bq, itr)
-    elif profile is SettingsType.NEUTRINO_MP:
-        if bq_type is BqType.WEBTV:
-            bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
-        else:
-            bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
-        file_path = f"{Path(file_path).parent}{SEP}"
-        ImportDialog(app, file_path, lambda b, s: appender(b), (bqs,)).show()
+            if model.iter_n_children(itr):
+                appender(bq, itr)
+            else:
+                p_itr = model.iter_parent(itr)
+                appender(bq, p_itr) if p_itr else appender(bq, itr)
+        elif profile is SettingsType.NEUTRINO_MP:
+            if bq_type is BqType.WEBTV:
+                bqs = parse_webtv(file_path, "WEBTV", bq_type.value)
+            else:
+                bqs = get_neutrino_bouquets(file_path, "", bq_type.value)
+            file_path = f"{Path(file_path).parent}{SEP}"
+            ImportDialog(app, file_path, lambda b, s: appender(b), (bqs,)).show()
 
 
 def get_enigma2_bouquet(path):

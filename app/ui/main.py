@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -952,6 +952,7 @@ class Application(Gtk.Application):
         self._bouquets_view.drag_source_set_target_list(None)
         self._bouquets_view.drag_dest_add_text_targets()
         self._bouquets_view.drag_source_add_text_targets()
+        self._bouquets_view.drag_dest_add_uri_targets()
 
         self._alt_view.drag_source_set_target_list(None)
         self._alt_view.drag_source_add_text_targets()
@@ -2033,15 +2034,23 @@ class Application(Gtk.Application):
     def on_bq_view_drag_data_received(self, view, drag_context, x, y, data, info, time):
         model_name, model = get_model_data(view)
         drop_info = view.get_dest_row_at_pos(x, y)
-        data = data.get_text()
-        if not data:
+
+        uris = data.get_uris()
+        if uris:
+            f_paths = [p for p in (urlparse(unquote(u)).path for u in uris) if os.path.isfile(p)]
+            self.on_import_bouquet(None, file_paths=f_paths)
             return
 
-        if data.startswith("file://"):
-            self.on_import_bouquet(None, file_path=urlparse(unquote(data)).path.strip())
+        text = data.get_text()
+        if not text:
             return
 
-        itr_str, sep, source = data.partition(self.DRAG_SEP)
+        itr_str, sep, source = text.partition(self.DRAG_SEP)
+        if not source or text.startswith("file://"):
+            f_paths = [p for p in (urlparse(unquote(u)).path for u in text.split()) if os.path.isfile(p)]
+            self.on_import_bouquet(None, file_paths=f_paths)
+            return
+
         if source != self.BQ_MODEL:
             return
 
@@ -3378,14 +3387,14 @@ class Application(Gtk.Application):
                 path += os.sep
             self.open_data(path)
 
-    def on_import_bouquet(self, action, value=None, file_path=None):
+    def on_import_bouquet(self, action, value=None, file_paths=None):
         model, paths = self._bouquets_view.get_selection().get_selected_rows()
         if not paths:
             self.show_error_message("No selected item!")
             return
 
         appender = self.append_bouquet if self._s_type is SettingsType.ENIGMA_2 else self.append_bouquets
-        import_bouquet(self, model, paths[0], appender, file_path)
+        import_bouquet(self, model, paths[0], appender, file_paths)
 
     def on_import_bouquets(self, action, value=None):
         response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings)
