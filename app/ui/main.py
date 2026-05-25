@@ -36,6 +36,7 @@ from functools import lru_cache
 from html import escape
 from itertools import chain
 from urllib.parse import urlparse, unquote
+from urllib.request import url2pathname
 
 from gi.repository import GLib, Gio, GObject
 
@@ -2037,7 +2038,8 @@ class Application(Gtk.Application):
 
         uris = data.get_uris()
         if uris:
-            f_paths = [p for p in (urlparse(unquote(u)).path for u in uris) if os.path.isfile(p)]
+            # MacOS or Windows.
+            f_paths = [p for p in (url2pathname(urlparse(unquote(u)).path) for u in uris) if os.path.isfile(p)]
             self.on_import_bouquet(None, file_paths=f_paths)
             return
 
@@ -2047,6 +2049,7 @@ class Application(Gtk.Application):
 
         itr_str, sep, source = text.partition(self.DRAG_SEP)
         if not source or text.startswith("file://"):
+            # Linux.
             f_paths = [p for p in (urlparse(unquote(u)).path for u in text.split()) if os.path.isfile(p)]
             self.on_import_bouquet(None, file_paths=f_paths)
             return
