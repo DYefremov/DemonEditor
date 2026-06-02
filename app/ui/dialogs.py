@@ -140,10 +140,7 @@ def show_dialog(dialog_type, transient, text=None, settings=None, action_type=No
 
 def show_chooser_dialog(transient, settings, name, patterns, title=None, file_filter=None):
     if not file_filter:
-        file_filter = Gtk.FileFilter()
-        file_filter.set_name(name)
-        [file_filter.add_pattern(p) for p in patterns]
-
+        file_filter = get_file_filter(name, patterns)
 
     return show_dialog(dialog_type=DialogType.CHOOSER,
                        transient=transient,
@@ -153,35 +150,24 @@ def show_chooser_dialog(transient, settings, name, patterns, title=None, file_fi
                        title=title)
 
 
-def show_file_chooser_dialog(transient, settings, action_type, file_filter, accept_label=None, title=None, dirs=False):
+def show_file_chooser_dialog(transient, settings, action_type, file_filter, accept_label=None, title=None, dirs=False,
+                             multiple=False):
     dialog = get_file_chooser_native_dialog(action_type, dirs, file_filter, settings, title, transient, accept_label)
+    dialog.set_select_multiple(multiple)
     response = dialog.run()
 
     if response == Gtk.ResponseType.ACCEPT:
-        path = Path(dialog.get_filename() or dialog.get_current_folder())
-        if path.is_dir():
-            response = f"{path.resolve()}{SEP}"
-        elif path.is_file():
-            response = str(path.resolve())
+        if multiple:
+            response = dialog.get_filenames()
+        else:
+            path = Path(dialog.get_filename() or dialog.get_current_folder())
+            if path.is_dir():
+                response = f"{path.resolve()}{SEP}"
+            elif path.is_file():
+                response = str(path.resolve())
     dialog.destroy()
 
     return response
-
-
-def get_file_chooser_native_dialog(action_type, dirs, file_filter, settings, title, transient, accept_label=None):
-    """ Returns native file chooser dialog. """
-    action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
-    accept_label = translate(accept_label) if accept_label else accept_label
-    dialog = Gtk.FileChooserNative.new(translate(title) if title else "", transient, action_type, accept_label)
-    dialog.set_create_folders(dirs)
-    dialog.set_modal(True)
-
-    if file_filter is not None:
-        dialog.add_filter(file_filter)
-    dialog.set_current_folder(settings.profile_data_path)
-
-    return dialog
-
 
 def show_input_dialog(transient, text):
     builder, dialog = get_dialog_from_xml(DialogType.INPUT, transient, use_header=USE_HEADER_BAR)
@@ -215,6 +201,28 @@ def show_about_dialog(transient):
     dialog.destroy()
 
     return response
+
+
+def get_file_chooser_native_dialog(action_type, dirs, file_filter, settings, title, transient, accept_label=None):
+    """ Returns native file chooser dialog. """
+    action_type = Gtk.FileChooserAction.SELECT_FOLDER if action_type is None else action_type
+    accept_label = translate(accept_label) if accept_label else accept_label
+    dialog = Gtk.FileChooserNative.new(translate(title) if title else "", transient, action_type, accept_label)
+    dialog.set_create_folders(dirs)
+    dialog.set_modal(True)
+
+    if file_filter is not None:
+        dialog.add_filter(file_filter)
+    dialog.set_current_folder(settings.profile_data_path)
+
+    return dialog
+
+
+def get_file_filter(name, patterns):
+    file_filter = Gtk.FileFilter()
+    file_filter.set_name(name)
+    [file_filter.add_pattern(p) for p in patterns]
+    return file_filter
 
 
 def get_dialog_from_xml(dialog_type, transient, use_header=0, title=""):
