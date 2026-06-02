@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -42,7 +42,7 @@ from app.settings import SettingsType, Settings, SEP, IS_DARWIN
 from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_to, download_picon, PiconsCzDownloader,
                               PiconsError, PiconFormat)
 from app.tools.satellites import SatellitesParser, SatelliteSource
-from .dialogs import show_dialog, DialogType, translate, get_builder, get_chooser_dialog
+from .dialogs import show_dialog, DialogType, translate, get_builder, show_chooser_dialog
 from .main_helper import (scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog,
                           get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale, get_pos_num)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
@@ -457,8 +457,8 @@ class PiconManager(Gtk.Box):
             file_filter.add_mime_type("application/zip")
             file_filter.add_mime_type("application/gzip")
 
-        response = get_chooser_dialog(self._app_window, self._settings, "*.zip, *.gz files",
-                                      ("*.zip", "*.gz"), "Extract picons", file_filter)
+        response = show_chooser_dialog(self._app_window, self._settings, "*.zip, *.gz files",
+                                       ("*.zip", "*.gz"), "Extract picons", file_filter)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 

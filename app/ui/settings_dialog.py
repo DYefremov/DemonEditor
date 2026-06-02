@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -33,7 +33,7 @@ from collections import Counter
 from app.commons import run_task, run_idle, log
 from app.connections import test_telnet, test_ftp, TestException, test_http, HttpApiException
 from app.settings import SettingsType, Settings, PlayStreamsMode, PlaybackMode, IS_LINUX, SEP, IS_WIN
-from app.ui.dialogs import show_dialog, DialogType, translate, get_chooser_dialog, get_builder
+from app.ui.dialogs import show_dialog, DialogType, translate, show_chooser_dialog, get_builder
 from .main_helper import update_entry_data, scroll_to, get_picon_pixbuf, show_info_bar_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, DEFAULT_ICON, APP_FONT, HeaderBar
 
@@ -790,7 +790,7 @@ class SettingsDialog:
 
     @run_idle
     def add_theme(self, path, button):
-        response = get_chooser_dialog(self._dialog, self._settings, "Themes Archive [*.xz, *.zip]", ("*.xz", "*.zip"))
+        response = show_chooser_dialog(self._dialog, self._settings, "Themes Archive [*.xz, *.zip]", ("*.xz", "*.zip"))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
         self._theme_view.set_sensitive(False)

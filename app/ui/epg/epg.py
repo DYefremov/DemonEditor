@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -49,7 +49,7 @@ from app.connections import download_data, DownloadType, HttpAPI
 from app.eparser.ecommons import BouquetService, BqServiceType
 from app.settings import SEP, EpgSource, IS_WIN
 from app.tools.epg import EPG, ChannelsParser, EpgEvent, XmlTvReader
-from app.ui.dialogs import translate, show_dialog, DialogType, get_builder, get_chooser_dialog
+from app.ui.dialogs import translate, show_dialog, DialogType, get_builder, show_chooser_dialog
 from app.ui.tasks import BGTaskWidget
 from app.ui.timers import TimerTool
 from ..main_helper import on_popup_menu, update_entry_data, scroll_to, update_toggle_model, update_filter_sat_positions, \
@@ -647,7 +647,7 @@ class EpgTool(Gtk.Box):
         if page is not Page.EPG:
             return
 
-        response = get_chooser_dialog(self._app.app_window, self._app.app_settings, "XMLTV", ("*.xml",))
+        response = show_chooser_dialog(self._app.app_window, self._app.app_settings, "XMLTV", ("*.xml",))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -663,7 +663,7 @@ class EpgTool(Gtk.Box):
         f_filter.add_mime_type("application/gzip")
         f_filter.add_mime_type("application/x-xz")
 
-        response = get_chooser_dialog(self._app.app_window, self._app.app_settings,
+        response = show_chooser_dialog(self._app.app_window, self._app.app_settings,
                                       "*.zip, *.gz, *.xz files", ("*.zip", "*.gz", "*.xz"), "Open archive", f_filter)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return

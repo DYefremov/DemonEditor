@@ -63,7 +63,7 @@ from app.ui.telnet import TelnetClient
 from app.ui.timers import TimerTool
 from app.ui.transmitter import LinksTransmitter
 from .backup import BackupDialog, backup_data, clear_data_path, restore_data
-from .dialogs import show_dialog, DialogType, get_chooser_dialog, WaitDialog, translate, get_builder
+from .dialogs import show_dialog, DialogType, show_chooser_dialog, WaitDialog, translate, get_builder
 from .imports import ImportDialog, import_bouquet
 from .iptv import (IptvDialog, SearchUnavailableDialog, IptvListConfigurationDialog, YtListImportDialog,
                    M3uImportDialog, ExportM3uDialog)
@@ -2321,7 +2321,7 @@ class Application(Gtk.Application):
                 file_filter.add_mime_type("application/zip")
                 file_filter.add_mime_type("application/gzip")
 
-            response = get_chooser_dialog(self._main_window, self._settings,
+            response = show_chooser_dialog(self._main_window, self._settings,
                                           "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
@@ -2679,8 +2679,10 @@ class Application(Gtk.Application):
             self.show_error_message("No data to save!")
             return
 
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
-                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK),
+        response = show_dialog(DialogType.CHOOSER,
+                               self._main_window,
+                               settings=self._settings,
+                               accept_label="Save",
                                create_dir=True)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
@@ -3355,7 +3357,7 @@ class Application(Gtk.Application):
 
     def on_import_m3u(self, action, value=None):
         """ Imports iptv from m3u files. """
-        response = get_chooser_dialog(self._main_window, self._settings, "*.m3u* files", ("*.m3u", "*.m3u8"))
+        response = show_chooser_dialog(self._main_window, self._settings, "*.m3u* files", ("*.m3u", "*.m3u8"))
         if response == Gtk.ResponseType.CANCEL:
             return
 
@@ -3477,8 +3479,7 @@ class Application(Gtk.Application):
             self.show_error_message("Please, select only one bouquet!")
             return
 
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
-                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, accept_label="Save")
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -3518,8 +3519,7 @@ class Application(Gtk.Application):
 
     def save_bouquet_to_m3u(self, bq_services, url=None, name=None):
         """ Saves bouquet services to *.m3u file. """
-        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings,
-                               buttons=(Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
+        response = show_dialog(DialogType.CHOOSER, self._main_window, settings=self._settings, accept_label="Save")
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 

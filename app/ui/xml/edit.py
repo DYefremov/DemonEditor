@@ -40,7 +40,7 @@ from app.eparser.ecommons import (POLARIZATION, FEC, SYSTEM, MODULATION, T_SYSTE
 from app.eparser.satxml import get_terrestrial, get_cable, write_terrestrial, write_cable, get_pos_str
 from .dialogs import (SatelliteDialog, SatellitesUpdateDialog, TerrestrialDialog, CableDialog, SatTransponderDialog,
                       CableTransponderDialog, TerTransponderDialog)
-from ..dialogs import show_dialog, DialogType, get_chooser_dialog, translate, get_builder
+from ..dialogs import show_dialog, DialogType, show_chooser_dialog, translate, get_builder
 from ..main_helper import move_items, on_popup_menu, scroll_to
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, MOVE_KEYS, KeyboardKey, MOD_MASK, Page
 
@@ -525,7 +525,7 @@ class SatellitesTool(Gtk.Box):
         elif self._dvb_type is self.DVB.CABLE:
             xml_file = "cables.xml"
 
-        response = get_chooser_dialog(self._app.app_window, self._settings, xml_file, ("*.xml",))
+        response = show_chooser_dialog(self._app.app_window, self._settings, xml_file, ("*.xml",))
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 
@@ -563,8 +563,11 @@ class SatellitesTool(Gtk.Box):
         if page is not Page.SATELLITE:
             return
 
-        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, Gtk.STOCK_SAVE, Gtk.ResponseType.OK)
-        response = show_dialog(DialogType.CHOOSER, self._app.app_window, settings=self._settings, buttons=buttons)
+        response = show_dialog(DialogType.CHOOSER,
+                               self._app.app_window,
+                               settings=self._settings,
+                               accept_label="Save",
+                               create_dir=True)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 

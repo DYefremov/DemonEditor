@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -38,7 +38,7 @@ from gi.repository.GObject import BindingFlags
 from app.commons import log, run_task
 from app.connections import UtfFTP
 from app.settings import IS_DARWIN, IS_WIN
-from app.ui.dialogs import translate, get_chooser_dialog, show_dialog, DialogType
+from app.ui.dialogs import translate, show_chooser_dialog, show_dialog, DialogType
 from app.ui.main_helper import get_picon_pixbuf, redraw_image
 from app.ui.uicommons import HeaderBar
 from .uicommons import Gtk, GLib
@@ -267,8 +267,8 @@ class BootLogoManager(Gtk.Window):
             file_filter.add_mime_type("image/jpeg")
             file_filter.add_mime_type("image/png")
 
-        response = get_chooser_dialog(self._app.app_window, self._app.app_settings, "*.jpg, *.jpeg, *.png files",
-                                      ("*.jpg", "*.jpeg", "*.png"), "Select image", file_filter)
+        response = show_chooser_dialog(self._app.app_window, self._app.app_settings, "*.jpg, *.jpeg, *.png files",
+                                       ("*.jpg", "*.jpeg", "*.png"), "Select image", file_filter)
         if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
             return
 

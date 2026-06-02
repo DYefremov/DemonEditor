@@ -35,7 +35,7 @@ from app.eparser import get_bouquets, get_services, BouquetsReader
 from app.eparser.ecommons import BqType, BqServiceType, Bouquet
 from app.eparser.neutrino.bouquets import parse_webtv, parse_bouquets as get_neutrino_bouquets
 from app.settings import SettingsType, IS_DARWIN, SEP
-from app.ui.dialogs import show_dialog, DialogType, get_chooser_dialog, translate, get_builder
+from app.ui.dialogs import show_dialog, DialogType, show_chooser_dialog, translate, get_builder
 from app.ui.main_helper import on_popup_menu, get_iptv_data, show_info_bar_message
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, KeyboardKey, Column, Page, HeaderBar
 
@@ -62,7 +62,7 @@ def import_bouquet(app, model, path, appender, file_paths=None):
             f_pattern = "webtv.xml"
 
     if file_paths is None:
-        res = get_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
+        res = show_chooser_dialog(transient, settings, "bouquet files", (f_pattern,))
         if res == Gtk.ResponseType.CANCEL:
             return
         file_paths = [res]
