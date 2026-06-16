@@ -42,7 +42,7 @@ from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
                                   Service, CAS)
 
-_HEADERS = {"User-Agent": "Mozilla/5.0 (Linux x86_64; rv:92.0) Gecko/20100101 Firefox/92.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0"}
 _TIMEOUT = 10
 
 
@@ -567,6 +567,7 @@ class ServicesParser(HTMLParser):
 
     def get_transponders_links(self, sat_url):
         """ Returns transponder links. """
+        trs = []
         try:
             if self._source is SatelliteSource.KINGOFSAT:
                 sat_url = f"https://en.kingofsat.tv/{sat_url}"
@@ -575,11 +576,12 @@ class ServicesParser(HTMLParser):
             log(e)
         else:
             if self._source is SatelliteSource.LYNGSAT:
-                url = "https://www.lyngsat.com/muxes/"
-                return [row[0] for row in
-                        filter(lambda x: x and len(x) > 8 and x[0].url and x[0].url.startswith(url), self._rows)]
+                for r in filter(lambda x: x[0].url and x[0].url.startswith("/muxes/"), self._rows):
+                    t_cell = r[0]
+                    t_cell.url = f"https://www.lyngsat.com{t_cell.url}"
+                    trs.append(t_cell)
+
             elif self._source is SatelliteSource.KINGOFSAT:
-                trs = []
                 for r in self._rows:
                     if len(r) == 12 and SatellitesParser.POS_PAT.match(r[0].text):
                         t_cell = r[4]
@@ -588,7 +590,7 @@ class ServicesParser(HTMLParser):
                             t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
                             trs.append(t_cell)
                 return trs
-        return []
+        return trs
 
     def get_transponder_services(self, tr_url, sat_position=None, use_pids=False):
         """ Returns services for given transponder.
