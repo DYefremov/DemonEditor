@@ -1971,7 +1971,7 @@ class Application(Gtk.Application):
             h_box.set_spacing(2)
             img = Gtk.Image.new_from_icon_name("document-properties", 0)
             h_box.add(img)
-            h_box.add(Gtk.Label(len(paths)))
+            h_box.add(Gtk.Label(str(len(paths))))
             h_box.set_halign(Gtk.Align.START)
             h_box.set_margin_left(10)
             h_box.set_margin_bottom(5)
