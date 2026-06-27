@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,15 +34,15 @@
 import re
 from enum import Enum
 from html.parser import HTMLParser
-
-import requests
+from urllib.request import urlopen, Request
 
 from app.commons import log
 from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
                                   Service, CAS)
 
-_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0"}
+_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
+            "Accept": "text/html; charset=utf-8"}
 _TIMEOUT = 10
 
 
@@ -169,15 +169,13 @@ class SatellitesParser(HTMLParser):
 
         for src in SatelliteSource.get_sources(self._source):
             try:
-                resp = requests.get(url=src, headers=_HEADERS, timeout=_TIMEOUT)
-            except requests.exceptions.RequestException as e:
-                log(f"Getting satellite list error: {repr(e)}")
-            else:
-                reason = resp.reason
-                if reason == "OK":
-                    self.feed(resp.text)
-                else:
-                    log(f"Getting satellite list error: {reason} -> {resp.url}")
+                with urlopen(Request(src, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+                    if resp.getcode() == 200:
+                        self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
+                    else:
+                        log(f"Getting satellite list error: {resp.reason} -> {resp.url}")
+            except Exception as e:
+                log(f"Getting satellite list error: {e} -> {src}")
 
         if self._rows:
             if self._source is SatelliteSource.FLYSAT:
@@ -274,20 +272,19 @@ class SatellitesParser(HTMLParser):
             sat_url = f"https://en.kingofsat.tv/{sat_url}"
 
         try:
-            request = requests.get(url=sat_url, headers=_HEADERS, timeout=_TIMEOUT)
-        except requests.exceptions.RequestException as e:
+            with urlopen(Request(sat_url, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+                if resp.getcode() == 200:
+                    self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
+                    if self._source is SatelliteSource.FLYSAT:
+                        self.get_transponders_for_fly_sat(trs)
+                    elif self._source is SatelliteSource.LYNGSAT:
+                        self.get_transponders_for_lyng_sat(trs)
+                    elif self._source is SatelliteSource.KINGOFSAT:
+                        self.get_transponders_for_king_of_sat(trs)
+                else:
+                    log(f"SatellitesParser [get transponders] error: {sat_url}  {resp.reason}")
+        except Exception as e:
             log(f"Getting transponders error: {e}")
-        else:
-            if request.status_code == 200:
-                self.feed(request.text)
-                if self._source is SatelliteSource.FLYSAT:
-                    self.get_transponders_for_fly_sat(trs)
-                elif self._source is SatelliteSource.LYNGSAT:
-                    self.get_transponders_for_lyng_sat(trs)
-                elif self._source is SatelliteSource.KINGOFSAT:
-                    self.get_transponders_for_king_of_sat(trs)
-            else:
-                log(f"SatellitesParser [get transponders] error: {sat_url}  {request.reason}")
 
         return sorted(trs, key=lambda x: int(x.frequency))
 
@@ -555,15 +552,13 @@ class ServicesParser(HTMLParser):
 
         self._rows.clear()
         try:
-            request = requests.get(url=url, headers=_HEADERS, timeout=_TIMEOUT)
-        except requests.exceptions.RequestException as e:
+            with urlopen(Request(url, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+                if resp.getcode() == 200:
+                    self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
+                else:
+                    raise ValueError(resp.reason)
+        except Exception as e:
             raise ValueError(e)
-        else:
-            reason = request.reason
-            if reason == "OK":
-                self.feed(request.text)
-            else:
-                raise ValueError(reason)
 
     def get_transponders_links(self, sat_url):
         """ Returns transponder links. """
