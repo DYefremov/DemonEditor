@@ -75,6 +75,7 @@ def run_task(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         task = Task()
+        task.set_priority(GLib.PRIORITY_DEFAULT_IDLE)
         task.run_in_thread(lambda t, s, d, c: func(*args, **kwargs))
 
     return wrapper
