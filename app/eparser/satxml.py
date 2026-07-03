@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -69,12 +69,13 @@ _CABLE_COMMENT = ("\tFile was created in DemonEditor.\n\n"
                   "\t5: QAM256\n")
 
 
-def get_satellites(path):
+def get_satellites(path, readable_pos=False, transponders=True):
     """ Returns data [Satellite] list from *.xml. """
     return [Satellite(e.get("name", None),
                       e.get("flags", None),
-                      e.get("position", None) or "0",
-                      get_sat_transponders(e)) for e in ETree.parse(path).iter("sat")]
+                      get_pos_str(int(e.get("position", "0"))) if readable_pos else e.get("position", "0"),
+                      get_sat_transponders(e) if transponders else [])
+            for e in ETree.parse(path).iter("sat")]
 
 
 def get_sat_transponders(elem):
