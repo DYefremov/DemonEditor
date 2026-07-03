@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- interface-name picon.ui -->
+  <!-- interface-license-type mit -->
+  <!-- interface-copyright 2026 Dmitriy Yefremov -->
+  <!-- interface-authors Dmitriy Yefremov <https://github.com/DYefremov> -->
+  <requires lib="gtk" version="3.24"/>
+  <template class="PiconWidget" parent="GtkFlowBoxChild">
+    <property name="width-request">150</property>
+    <property name="height-request">120</property>
+    <property name="valign">start</property>
+    <child>
+      <object class="GtkFrame">
+        <property name="label-xalign">0.2</property>
+        <property name="margin-bottom">5</property>
+        <property name="margin-start">5</property>
+        <property name="margin-end">5</property>
+        <child type="label">
+          <object class="GtkLabel" id="_name_label"/>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <property name="margin-top">5</property>
+            <property name="margin-bottom">5</property>
+            <child>
+              <object class="GtkImage" id="_image"/>
+            </child>
+            <child>
+              <object class="GtkLabel" id="_info_label">
+                <property name="label">Not assigned</property>
+                <property name="ellipsize">end</property>
+                <property name="wrap-mode">char</property>
+                <property name="width-chars">25</property>
+                <property name="max-width-chars">25</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="pack-type">end</property>
+              </packing>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

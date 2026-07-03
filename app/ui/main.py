@@ -1147,13 +1147,7 @@ class Application(Gtk.Application):
 
     def on_picons_realize(self, box):
         if not self._picon_manager:
-            ids = {}
-            if self._s_type is SettingsType.ENIGMA_2:
-                for r in self._services_model:
-                    data = r[Column.SRV_PICON_ID].split("_")
-                    ids[f"{data[3]}:{data[5]}:{data[6]}"] = r[Column.SRV_PICON_ID]
-
-            self._picon_manager = PiconManager(self, self._settings, ids, self._sat_positions)
+            self._picon_manager = PiconManager(self)
             box.pack_start(self._picon_manager, True, True, 0)
 
     def on_epg_realize(self, box):
@@ -2322,7 +2316,7 @@ class Application(Gtk.Application):
                 file_filter.add_mime_type("application/gzip")
 
             response = show_chooser_dialog(self._main_window, self._settings,
-                                          "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
+                                           "*.zip, *.gz files", ("*.zip", "*.gz"), "Open archive", file_filter)
             if response in (Gtk.ResponseType.CANCEL, Gtk.ResponseType.DELETE_EVENT):
                 return
             self.open_data(response)
@@ -4739,6 +4733,10 @@ class Application(Gtk.Application):
     @picons_buffer.setter
     def picons_buffer(self, value):
         self._picons_buffer.extend(value)
+
+    @property
+    def sat_positions(self):
+        return self._sat_positions
 
     @property
     def app_window(self):
