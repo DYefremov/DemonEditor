@@ -3052,7 +3052,6 @@ class Application(Gtk.Application):
         if key is KeyboardKey.UNDEFINED:
             return
 
-        ctrl = event.state & MOD_MASK
         shift = event.state & Gdk.ModifierType.SHIFT_MASK
         model_name, model = get_model_data(view)
 
@@ -3060,7 +3059,7 @@ class Application(Gtk.Application):
             view.do_unselect_all(view)
 
         if model_name == self.FAV_MODEL:
-            if ctrl and key in (KeyboardKey.CTRL_L, KeyboardKey.CTRL_R):
+            if key is KeyboardKey.CTRL_L or key is KeyboardKey.CTRL_R:
                 self.update_fav_num_column(model)
                 self.update_bouquet_list()
 
