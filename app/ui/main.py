@@ -80,7 +80,7 @@ from .xml.edit import SatellitesTool
 
 class Application(Gtk.Application):
     """ Main application class. """
-    VERSION = "3.14.4"
+    VERSION = "3.15.0"
 
     SERVICE_MODEL = "services_list_store"
     FAV_MODEL = "fav_list_store"
