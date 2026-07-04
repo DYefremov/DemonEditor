@@ -175,7 +175,7 @@ class PiconManager(Gtk.Box):
 
         self._app_window = app.get_active_window()
         self._stack = builder.get_object("stack")
-        self._picons_box_view = builder.get_object("picons_src_box")
+        self._picons_src_box = builder.get_object("picons_src_box")
         self._picons_dest_box = builder.get_object("picons_dest_box")
         self._picons_dest_box_sw = builder.get_object("picons_dest_box_sw")
         self._providers_view = builder.get_object("providers_view")
@@ -218,7 +218,7 @@ class PiconManager(Gtk.Box):
         self._filter_button = builder.get_object("filter_button")
         self._src_button = builder.get_object("src_button")
         self._picons_dest_box.set_filter_func(self.picons_dst_filter_function)
-        self._picons_box_view.set_filter_func(self.picons_src_filter_function)
+        self._picons_src_box.set_filter_func(self.picons_src_filter_function)
         # Header buttons. -> Used instead stack switcher.
         self._manager_button = builder.get_object("manager_button")
         self._downloader_button = builder.get_object("downloader_button")
@@ -278,8 +278,8 @@ class PiconManager(Gtk.Box):
             self.show_info_message(f"{translate('Source error!')} {translate('The paths are the same!')}")
         else:
             self._src_button.set_active(True)
-            self._picons_box_view.foreach(lambda w: self._picons_box_view.remove(w))
-            self.update_picons_data(self._picons_box_view, resp)
+            self._picons_src_box.foreach(lambda w: self._picons_src_box.remove(w))
+            self.update_picons_data(self._picons_src_box, resp)
 
     def update_picons_dest(self, app, page):
         if page is Page.PICONS:
@@ -357,7 +357,7 @@ class PiconManager(Gtk.Box):
 
     def update_src_picons(self, path):
         for index, file in enumerate(Path(path).glob("*.png")):
-            self._picons_box_view.add(self.get_picon_widget(file.name, file.resolve()))
+            self._picons_src_box.add(self.get_picon_widget(file.name, file.resolve()))
             if index % self._FACTOR == 0:
                 yield True
 
@@ -376,7 +376,7 @@ class PiconManager(Gtk.Box):
         if not f_path:
             return
 
-        dest = self._picons_dest_box if box is self._picons_dest_box else self._picons_box_view
+        dest = self._picons_dest_box if box is self._picons_dest_box else self._picons_src_box
 
         if path.is_file():
             dest.add(self.get_picon_widget(path.name, f_path))
@@ -392,11 +392,11 @@ class PiconManager(Gtk.Box):
         self._picons_dest_box.drag_dest_add_uri_targets()
         self._picons_dest_box.drag_source_add_uri_targets()
 
-        self._picons_box_view.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.MOVE)
-        self._picons_box_view.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
-        self._picons_box_view.drag_dest_add_text_targets()
-        self._picons_box_view.drag_dest_add_uri_targets()
-        self._picons_box_view.drag_source_add_uri_targets()
+        self._picons_src_box.drag_source_set(Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.MOVE)
+        self._picons_src_box.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self._picons_src_box.drag_dest_add_text_targets()
+        self._picons_src_box.drag_dest_add_uri_targets()
+        self._picons_src_box.drag_source_add_uri_targets()
 
         self._picon_info_image.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self._picon_info_image.drag_dest_add_uri_targets()
@@ -617,7 +617,7 @@ class PiconManager(Gtk.Box):
 
     def on_send(self, app, page):
         if page is Page.PICONS:
-            box = self._picons_box_view if self._picons_box_view.is_focus() else self._picons_dest_box
+            box = self._picons_src_box if self._picons_src_box.is_focus() else self._picons_dest_box
             paths = self.get_selected_paths(box)
             if paths:
                 self.on_picons_send(files_filter={p.name for p in paths})
@@ -1011,7 +1011,7 @@ class PiconManager(Gtk.Box):
 
     def on_fiter_src_toggled(self, button):
         """ Activates re-filtering when filter check-button has toggled. """
-        GLib.idle_add(self._picons_box_view.invalidate_filter, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._picons_src_box.invalidate_filter, priority=GLib.PRIORITY_LOW)
 
     @run_with_delay(0.5)
     def on_picons_filter_changed(self, entry):
@@ -1021,7 +1021,7 @@ class PiconManager(Gtk.Box):
             self._filter_cache[s.picon_id] = any(t in s.service.upper() or t in str(s.picon_id) for t in txt)
 
         GLib.idle_add(self._picons_dest_box.invalidate_filter, priority=GLib.PRIORITY_LOW)
-        GLib.idle_add(self._picons_box_view.invalidate_filter, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self._picons_src_box.invalidate_filter, priority=GLib.PRIORITY_LOW)
 
     def picons_src_filter_function(self, item):
         return self.filter_function(item, self._src_filter_button.get_active())

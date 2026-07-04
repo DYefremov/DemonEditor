@@ -610,6 +610,7 @@ Author: Dmitriy Yefremov
                                         <property name="can-focus">True</property>
                                         <property name="column-spacing">2</property>
                                         <property name="row-spacing">2</property>
+                                        <property name="valign">start</property>
                                         <property name="tooltip-text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                         <property name="activate-on-single-click">False</property>
                                         <property name="selection-mode">3</property>
@@ -697,6 +698,7 @@ Author: Dmitriy Yefremov
                                         <property name="can-focus">True</property>
                                         <property name="column-spacing">2</property>
                                         <property name="row-spacing">2</property>
+                                        <property name="valign">start</property>
                                         <property name="tooltip-text" translatable="yes">Drag the services to the desired picon or picon to the list of selected services.</property>
                                         <property name="activate-on-single-click">False</property>
                                         <property name="selection-mode">3</property>
