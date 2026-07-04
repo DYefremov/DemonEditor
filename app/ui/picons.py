@@ -1004,6 +1004,7 @@ class PiconManager(Gtk.Box):
         active = self._filter_button.get_active()
         if not active:
             self._picons_filter_entry.set_text("")
+            self._auto_filter_switch.set_active(False)
 
     def on_fiter_dst_toggled(self, button):
         """ Activates re-filtering when filter check-button has toggled. """
