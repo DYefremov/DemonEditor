@@ -571,22 +571,21 @@ class PiconManager(Gtk.Box):
     # ******************** Download/Upload/Remove ************************* #
 
     def on_selective_send(self, box):
-        paths = self.get_selected_paths(box)
-        if paths:
-            path = paths.pop()
-            self.on_picons_send(files_filter={path.name}, path=path.parent)
+        names, path = self.get_selected_paths_data(box)
+        if names:
+            self.on_picons_send(files_filter=names, path=path)
+        else:
+            self.show_info_message("No selected item!", Gtk.MessageType.ERROR)
 
     def on_selective_download(self, box):
-        paths = self.get_selected_paths(box)
-        if paths:
-            path = paths.pop()
-            self.on_picons_download(files_filter={path.name})
+        names, path = self.get_selected_paths_data(box)
+        if names:
+            self.on_picons_download(files_filter=names)
 
     def on_selective_remove(self, box):
-        paths = self.get_selected_paths(box)
-        if paths:
-            path = paths.pop()
-            self.on_remove(files_filter={path.name})
+        names, path = self.get_selected_paths_data(box)
+        if names:
+            self.on_remove(files_filter=names)
 
     def on_local_remove(self, box):
         if self._progress.get_visible():
@@ -618,11 +617,7 @@ class PiconManager(Gtk.Box):
     def on_send(self, app, page):
         if page is Page.PICONS:
             box = self._picons_src_box if self._picons_src_box.is_focus() else self._picons_dest_box
-            paths = self.get_selected_paths(box)
-            if paths:
-                self.on_picons_send(files_filter={p.name for p in paths})
-            else:
-                self._app.show_error_message("No selected item!")
+            self.on_selective_send(box)
 
     def on_picons_send(self, item=None, files_filter=None, path=None):
         dest_path = path or self._settings.profile_picons_path
@@ -659,11 +654,12 @@ class PiconManager(Gtk.Box):
                                                                                          Gtk.MessageType.INFO),
                                             files_filter=files_filter))
 
-    def get_selected_paths(self, box):
+    def get_selected_paths_data(self, box):
+        """ Returns icon names set and common path for the selected widgets. """
         selected = box.get_selected_children()
         if selected:
-            return [Path(c.path).resolve() for c in selected]
-        return []
+            return {c.name for c in selected}, Path(selected[0].path).resolve().parent
+        return None, None
 
     # ******************** Downloader ************************* #
 
