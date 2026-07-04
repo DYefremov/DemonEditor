@@ -376,7 +376,7 @@ class PiconManager(Gtk.Box):
         if not f_path:
             return
 
-        dest = self._picons_dest_box_sw if box is self._picons_dest_box else self._picons_box_view
+        dest = self._picons_dest_box if box is self._picons_dest_box else self._picons_box_view
 
         if path.is_file():
             dest.add(self.get_picon_widget(path.name, f_path))
@@ -440,9 +440,17 @@ class PiconManager(Gtk.Box):
 
         if txt.startswith("file://"):
             self.update_picons_from_file(box, txt)
+            drag_context.finish(True, False, time)
             return
 
         itr_str, sep, src = txt.partition(self._app.DRAG_SEP)
+        if not src:
+            p = Path(itr_str.strip())
+            if p.exists():
+                self.update_picons_from_file(box, p.as_uri())
+            drag_context.finish(True, False, time)
+            return
+
         if src == self._app.BQ_MODEL:
             return
 
