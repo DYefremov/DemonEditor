@@ -19,8 +19,8 @@ ui_files = [('app\\ui\\*.glade', 'ui'),
             ('app\\ui\\*.ui', 'ui'),
             ('app\\ui\\epg\\*.glade', 'ui\\epg'),
             ('app\\ui\\xml\\*.glade', 'ui\\xml'),
+            ('app\\ui\\icons*', 'ui\\icons'),
             ('app\\ui\\lang*', 'share\\locale'),
-            ('app\\ui\\icons*', 'share\\icons'),
             ('extensions\\*', 'extensions')
             ]
 
