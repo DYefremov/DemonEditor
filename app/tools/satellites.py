@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -41,9 +41,9 @@ from app.eparser import Satellite, Transponder, is_transponder_valid
 from app.eparser.ecommons import (PLS_MODE, get_key_by_value, FEC, SYSTEM, POLARIZATION, MODULATION, SERVICE_TYPE,
                                   Service, CAS)
 
-_HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
-            "Accept": "text/html; charset=utf-8"}
-_TIMEOUT = 10
+HEADERS = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
+           "Accept": "text/html; charset=utf-8"}
+TIMEOUT = 10
 
 
 class SatelliteSource(Enum):
@@ -158,9 +158,6 @@ class SatellitesParser(HTMLParser):
             self._rows.append(row)
             self._current_row = []
 
-    def error(self, message):
-        pass
-
     def get_satellites_list(self, source):
         """ Getting complete list of satellites. """
         self.reset()
@@ -169,7 +166,7 @@ class SatellitesParser(HTMLParser):
 
         for src in SatelliteSource.get_sources(self._source):
             try:
-                with urlopen(Request(src, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+                with urlopen(Request(src, headers=HEADERS), timeout=TIMEOUT) as resp:
                     if resp.getcode() == 200:
                         self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
                     else:
@@ -272,7 +269,7 @@ class SatellitesParser(HTMLParser):
             sat_url = f"https://en.kingofsat.tv/{sat_url}"
 
         try:
-            with urlopen(Request(sat_url, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+            with urlopen(Request(sat_url, headers=HEADERS), timeout=TIMEOUT) as resp:
                 if resp.getcode() == 200:
                     self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
                     if self._source is SatelliteSource.FLYSAT:
@@ -542,9 +539,6 @@ class ServicesParser(HTMLParser):
             self._rows.append(row)
             self._current_row = []
 
-    def error(self, message):
-        log(f"ServicesParser error: {message}")
-
     def init_data(self, url):
         """ Initializes data for the given URL. """
         if self._source not in (SatelliteSource.LYNGSAT, SatelliteSource.KINGOFSAT):
@@ -552,7 +546,7 @@ class ServicesParser(HTMLParser):
 
         self._rows.clear()
         try:
-            with urlopen(Request(url, headers=_HEADERS), timeout=_TIMEOUT) as resp:
+            with urlopen(Request(url, headers=HEADERS), timeout=TIMEOUT) as resp:
                 if resp.getcode() == 200:
                     self.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
                 else:

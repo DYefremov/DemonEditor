@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# Author: Dmitriy Yefremov
+# Author: Dmitriy Yefremov <https://github.com/DYefremov>
 #
 
 
@@ -38,12 +38,13 @@ from enum import IntEnum
 from html.parser import HTMLParser
 from io import BytesIO
 from pathlib import Path
+from urllib.request import urlopen, Request
 
 import requests
 
 from app.commons import log, run_task
 from app.settings import SettingsType, IS_LINUX, IS_WIN, IS_DARWIN, GTK_PATH
-from app.tools.satellites import _HEADERS
+from app.tools.satellites import HEADERS, TIMEOUT
 
 _ENIGMA2_PICON_KEY = "{:X}:{:X}:{}"
 _NEUTRINO_PICON_KEY = "{:x}{:04x}{:04x}.png"
@@ -329,7 +330,6 @@ class PiconsParser(HTMLParser):
         elif tag == "tr":
             row = self._current_row
             ln = len(row)
-
             if self._single and ln == 4 and row[0].startswith("/logo/"):
                 self.picons.append(Picon(row[0].strip(), "0"))
             else:
@@ -343,49 +343,50 @@ class PiconsParser(HTMLParser):
 
             self._current_row = []
 
-    def error(self, message):
-        pass
-
     @staticmethod
     def parse(provider, picons_path, picon_ids, s_type=SettingsType.ENIGMA_2):
         """ Returns tuple(url, picon file name) list. """
-        req = requests.get(provider.url, timeout=5)
-        if req.status_code == 200:
-            logo_data = req.text
-        else:
-            log(f"Provider picons downloading error: {provider.url} {req.reason}")
-            return
-
-        on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
-        neg_pos = pos.endswith("W")
-        pos = int("".join(c for c in pos if c.isdigit()))
-        # For negative (West) positions 3600 - numeric position value!!!
-        if neg_pos:
-            pos = 3600 - pos
-
-        parser = PiconsParser(single=provider.single)
-        parser.reset()
-        parser.feed(logo_data)
-        picons = parser.picons
+        url = f"{PiconsParser._BASE_URL}{provider.url}"
         picons_data = []
+        try:
+            with urlopen(Request(url, headers=HEADERS), timeout=TIMEOUT) as resp:
+                if resp.getcode() == 200:
+                    logo_data = resp.read().decode(encoding="utf-8", errors="ignore")
+                else:
+                    log(f"Provider picons downloading error:: {resp.reason} -> {resp.url}")
+                    return picons_data
+        except Exception as e:
+            log(f"Provider picons downloading error:: {e} -> {url}")
+        else:
+            on_id, pos, ssid, single = provider.on_id, provider.pos, provider.ssid, provider.single
+            neg_pos = pos.endswith("W")
+            pos = int("".join(c for c in pos if c.isdigit()))
+            # For negative (West) positions 3600 - numeric position value!!!
+            if neg_pos:
+                pos = 3600 - pos
 
-        if picons:
-            for p in picons:
-                try:
-                    if single:
-                        on_id, freq = on_id.strip().split("::")
-                        namespace = "{:X}{:X}".format(int(pos), int(freq))
-                    else:
-                        namespace = "{:X}0000".format(int(pos))
+            parser = PiconsParser(single=provider.single)
+            parser.reset()
+            parser.feed(logo_data)
+            picons = parser.picons
 
-                    if single and not ssid.isdigit():
-                        ssid = "".join(c for c in ssid if c.isdigit()) or "0"
-                    name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
-                    p_name = picons_path + (name if name else os.path.basename(p.ref))
-                    picons_data.append(("{}{}".format(PiconsParser._BASE_URL, p.ref), p_name))
-                except (TypeError, ValueError) as e:
-                    msg = f"Picons format parse error: {p}\n{e}"
-                    log(msg)
+            if picons:
+                for p in picons:
+                    try:
+                        if single:
+                            on_id, freq = on_id.strip().split("::")
+                            namespace = "{:X}{:X}".format(int(pos), int(freq))
+                        else:
+                            namespace = "{:X}0000".format(int(pos))
+
+                        if single and not ssid.isdigit():
+                            ssid = "".join(c for c in ssid if c.isdigit()) or "0"
+                        name = PiconsParser.format(ssid if single else p.ssid, on_id, namespace, picon_ids, s_type)
+                        p_name = picons_path + (name if name else os.path.basename(p.ref))
+                        picons_data.append((f"{PiconsParser._BASE_URL}{p.ref}", p_name))
+                    except (TypeError, ValueError) as e:
+                        msg = f"Picons format parse error: {p}\n{e}"
+                        log(msg)
 
         return picons_data
 
@@ -404,7 +405,7 @@ class ProviderParser(HTMLParser):
     """ Parser for satellite html page. (https://www.lyngsat.com/*sat-name*.html) """
 
     _POSITION_PATTERN = re.compile(r"at\s\d+\..*(?:E|W)']")
-    _ONID_TID_PATTERN = re.compile(r"^\d+-\d+.*")
+    _ONID_TID_PATTERN = re.compile(r"(^\d+-\d+)(.*)")
     _TRANSPONDER_FREQUENCY_PATTERN = re.compile(r"^\d+ [HVLR]+")
     _DOMAINS = {"/tvchannels/", "/radiochannels/", "/packages/", "/logo/"}
     _BASE_URL = "https://www.lyngsat.com"
@@ -471,13 +472,14 @@ class ProviderParser(HTMLParser):
                 if m:
                     self._freq = m.group().split()[0]
 
-            if len_row > 12:
+            if len_row > 6:
                 # Providers
-                name = row[5]
-                self._prv_names.add(name)
+                url = row[5]
                 m = self._ONID_TID_PATTERN.match(str(row[-5]))
-                if m:
-                    on_id, tid = m.group().split("-")
+                if m and url.endswith(".html"):
+                    name = row[4]
+                    self._prv_names.add(name)
+                    on_id, tid = m.group(1).split("-")
                     if on_id not in self._ids:
                         self._on_id = on_id
                         row[-2] = on_id
@@ -487,30 +489,31 @@ class ProviderParser(HTMLParser):
                         self._prv_names.add(name + on_id)
                         logo_data = None
                         if row[2].startswith("/logo/"):
-                            req = requests.get(self._BASE_URL + row[2], timeout=5)
-                            if req.status_code == 200:
-                                logo_data = req.content
-                            else:
-                                log(f"Downloading provider logo error: {req.reason}")
-                        self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=row[6], on_id=on_id,
-                                                  ssid=None, single=False, selected=True))
-            elif 6 < len_row < 12:
-                # Single services
-                name, url, ssid = None, None, None
-                if row[0].startswith("http"):
-                    name, url, ssid = row[1], row[0], row[0]
-                elif row[1].startswith("http"):
-                    name, url, ssid = row[2], row[1], row[0]
+                            logo_url = f"{self._BASE_URL}{row[2]}"
+                            try:
+                                with urlopen(Request(logo_url, headers=HEADERS), timeout=5) as resp:
+                                    if resp.getcode() == 200:
+                                        logo_data = resp.read()
+                                    else:
+                                        log(f"Downloading provider logo error: {resp.reason}")
+                            except Exception as e:
+                                log(f"Downloading provider logo error: {e} -> {logo_url}")
 
-                if name and url:
-                    on_id = "{}::{}".format(self._on_id if self._on_id else "1", self._freq)
-                    self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=on_id,
-                                              ssid=ssid, single=True, selected=False))
+                        self.rows.append(Provider(logo=logo_data, name=name, pos=self._positon, url=url, on_id=on_id,
+                                                  ssid=None, single=False, selected=True))
+                else:
+                    # Single services
+                    name, url, ssid = None, None, None
+
+                    if row[0].isdigit() and row[1].endswith(".html"):
+                        name, url, ssid = row[2], row[1], row[0]
+
+                    if name and url:
+                        on_id = f"{self._on_id if self._on_id else '1'}::{self._freq}"
+                        self.rows.append(Provider(logo=None, name=name, pos=self._positon, url=url, on_id=on_id,
+                                                  ssid=ssid, single=True, selected=False))
 
             self._current_row = []
-
-    def error(self, message):
-        pass
 
     def reset(self):
         super().reset()
@@ -519,42 +522,33 @@ class ProviderParser(HTMLParser):
 def parse_providers(url):
     """ Returns a list of providers sorted by logo [single channels after providers]. """
     parser = ProviderParser()
-
-    request = requests.get(url=url, headers=_HEADERS)
-    if request.status_code == 200:
-        parser.feed(request.text)
-    else:
-        log(f"Parse providers error [{url}]: {request.reason}")
-
-    def srt(p):
-        if p.logo is None:
-            return 1
-        return 0
+    try:
+        with urlopen(Request(url, headers=HEADERS), timeout=TIMEOUT) as resp:
+            if resp.getcode() == 200:
+                parser.feed(resp.read().decode(encoding="utf-8", errors="ignore"))
+            else:
+                log(f"Parse providers error [{url}]: {resp.reason}")
+    except Exception as e:
+        log(f"Parse providers error: {e} -> {url}")
 
     providers = parser.rows
-    providers.sort(key=srt)
+    providers.sort(key=lambda p: 1 if p.logo is None else 0)
 
     return providers
 
 
 def download_picon(src_url, dest_path):
     """ Downloads and saves the picon to file.  """
-    err_msg = "Picon download error: {}  [{}]"
-    timeout = (3, 5)  # connect and read timeouts
-    log("Downloading: {}.".format(os.path.basename(dest_path)))
-
-    req = requests.get(src_url, timeout=timeout, stream=True)
-    if req.status_code != 200:
-        err_msg = err_msg.format(src_url, req.reason)
-        log(err_msg)
-    else:
-        try:
-            with open(dest_path, "wb") as f:
-                for chunk in req:
-                    f.write(chunk)
-        except OSError as e:
-            err_msg = f"Saving picon [{dest_path}] error: {e}"
-            log(err_msg)
+    log(f"Downloading: {os.path.basename(dest_path)}.")
+    with urlopen(Request(src_url, headers=HEADERS), timeout=3.5) as resp:
+        if resp.getcode() == 200:
+            try:
+                with open(dest_path, "wb") as f:
+                    f.write(resp.read())
+            except OSError as e:
+                log(f"Saving picon [{dest_path}] error: {e}")
+        else:
+            log(f"Picon download error: {src_url}  [{resp.reason}]")
 
 
 @run_task
