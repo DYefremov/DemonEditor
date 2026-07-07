@@ -34,6 +34,7 @@ from html import escape
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 
+import PIL
 from gi.repository import GLib, GObject
 from gi.repository.GdkPixbuf import Pixbuf
 
@@ -603,8 +604,8 @@ class PiconManager(Gtk.Box):
             path = c.path
             p_path = Path(c.path).resolve()
             if p_path.is_file():
-                if is_dest and path in self._current_paths:
-                    self._current_paths.remove(path)
+                if is_dest and p_path in self._current_paths:
+                    self._current_paths.remove(p_path)
                 p_path.unlink()
                 to_remove.append(c)
 
@@ -935,9 +936,13 @@ class PiconManager(Gtk.Box):
             res = (220, 132) if self._resize_220_132_radio_button.get_active() else (100, 60)
 
             for img_file in Path(path).glob("*.png"):
-                img = Image.open(img_file)
-                img = img.resize(res, Image.ANTIALIAS)
-                img.save(img_file, "PNG", optimize=True)
+                try:
+                    img = Image.open(img_file)
+                except PIL.UnidentifiedImageError as e:
+                    f"{translate('Conversion error.')} {e} -> {img_file}"
+                else:
+                    img = img.resize(res, Image.Resampling.LANCZOS)
+                    img.save(img_file, "PNG", optimize=True)
 
             self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
