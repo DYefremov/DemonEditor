@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2024 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -584,6 +584,18 @@ def get_picon_file_name(service_name):
     """ Returns picon file name by service name. """
     name = unicodedata.normalize("NFKD", service_name).encode("ASCII", errors="ignore").decode(errors="ignore")
     return f"{re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())}.png"
+
+
+def svg_to_png(svg_path, remove_svg=True):
+    """ Converts *.svg files to *.png. """
+    img = Gtk.Image.new_from_file(str(svg_path))
+    dest = f"{svg_path.parent}{os.sep}{svg_path.stem}.png"
+    bix = img.get_pixbuf()
+    if bix:
+        bix.savev(dest, "png")
+
+    if Path(dest).is_file() and remove_svg:
+        svg_path.unlink()
 
 
 # ***************** Bouquets ********************* #
