@@ -45,7 +45,7 @@ from app.tools.picons import (PiconsParser, parse_providers, Provider, convert_t
 from app.tools.satellites import SatellitesParser, SatelliteSource
 from .dialogs import show_dialog, DialogType, translate, get_builder, show_chooser_dialog
 from .main_helper import (scroll_to, on_popup_menu, get_base_model, set_picon, get_picon_pixbuf, get_picon_dialog,
-                          get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale, get_pos_num)
+                          get_picon_file_name, get_pixbuf_from_data, get_pixbuf_at_scale, get_pos_num, svg_to_png)
 from .uicommons import Gtk, Gdk, UI_RESOURCES_PATH, TV_ICON, Column, KeyboardKey, Page, ViewTarget
 
 
@@ -332,6 +332,7 @@ class PiconManager(Gtk.Box):
                 return
 
             p_path = file.resolve()
+
             if p_path in self._current_paths:
                 srv = self._services.get(file.name, None)
                 if srv:
@@ -879,6 +880,14 @@ class PiconManager(Gtk.Box):
             for future in not_done:
                 future.cancel()
             concurrent.futures.wait(not_done)
+            # Converting svg -> png.
+            res = Path(path).glob("*.svg")
+            svg_path = next(res, False)
+            if svg_path:
+                log("Converting *.svg to *.png...")
+                svg_to_png(svg_path)
+                [svg_to_png(file) for file in res]
+
             self.show_info_message(translate("Done!"), Gtk.MessageType.INFO)
 
     def get_picons_for_picon_cz(self, path, providers):
@@ -1146,10 +1155,6 @@ class PiconManager(Gtk.Box):
     def get_selected_providers(self):
         """ returns selected providers """
         return [r for r in self._providers_view.get_model() if r[7]]
-
-    @run_idle
-    def show_dialog(self, message, dialog_type):
-        show_dialog(dialog_type, self._app_window, message)
 
     def get_picons_format(self):
         return SettingsType.NEUTRINO_MP if self._neutrino_mp_radio_button.get_active() else SettingsType.ENIGMA_2
