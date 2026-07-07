@@ -34,7 +34,6 @@ from html import escape
 from pathlib import Path
 from urllib.parse import urlparse, unquote
 
-import PIL
 from gi.repository import GLib, GObject
 from gi.repository.GdkPixbuf import Pixbuf
 
@@ -929,7 +928,7 @@ class PiconManager(Gtk.Box):
 
         try:
             from pathlib import Path
-            from PIL import Image
+            from PIL import Image, UnidentifiedImageError
         except ImportError as e:
             self.show_info_message(f"{translate('Conversion error.')} {e}", Gtk.MessageType.ERROR)
         else:
@@ -938,7 +937,7 @@ class PiconManager(Gtk.Box):
             for img_file in Path(path).glob("*.png"):
                 try:
                     img = Image.open(img_file)
-                except PIL.UnidentifiedImageError as e:
+                except UnidentifiedImageError as e:
                     f"{translate('Conversion error.')} {e} -> {img_file}"
                 else:
                     img = img.resize(res, Image.Resampling.LANCZOS)
