@@ -31,6 +31,11 @@ import os
 from enum import Enum, IntEnum
 from functools import lru_cache
 
+# Force X11 session.
+if os.environ.get("XDG_SESSION_TYPE", None) == "wayland":
+    print("Detected 'Wayland' session. Switching to 'x11'...")
+    os.environ["GDK_BACKEND"] = "x11"
+
 import gi
 
 gi.require_version("Gtk", "3.0")
