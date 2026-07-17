@@ -93,7 +93,7 @@ class PiconWidget(Gtk.FlowBoxChild):
     @path.setter
     def path(self, value):
         self._path = value
-        self._image.set_from_pixbuf(get_pixbuf_at_scale(value, 72, 48, True))
+        self._image.set_from_pixbuf(get_pixbuf_at_scale(value, 100, 60, True))
 
     @GObject.Property(type=Pixbuf)
     def pixbuf(self):
