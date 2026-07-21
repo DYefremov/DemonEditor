@@ -123,7 +123,6 @@ class PiconManager(Gtk.Box):
         self._POS_PATTERN = re.compile(r"^\d+\.\d+[EW]?$")
         self._FACTOR = self._app.DEL_FACTOR // 4
         self._current_process = None
-        self._terminate = False
         self._is_downloading = False
         self._services = None
         self._current_picon_info = None
@@ -328,9 +327,6 @@ class PiconManager(Gtk.Box):
         info = {}
 
         for index, file in enumerate(Path(path).glob("*.png")):
-            if self._terminate:
-                return
-
             p_path = file.resolve()
 
             if p_path in self._current_paths:
@@ -666,7 +662,7 @@ class PiconManager(Gtk.Box):
 
     def get_picon_ids(self):
         ids = {}
-        if self._s_type is SettingsType.ENIGMA_2:
+        if self._s_type is SettingsType.ENIGMA_2 and self._services:
             for p_id in self._services:
                 data = p_id.split("_")
                 ids[f"{data[3]}:{data[5]}:{data[6]}"] = p_id
@@ -962,7 +958,6 @@ class PiconManager(Gtk.Box):
 
     @run_task
     def terminate_task(self):
-        self._terminate = True
         self._is_downloading = False
         self.show_info_message(translate("The task is canceled!"), Gtk.MessageType.WARNING)
 
