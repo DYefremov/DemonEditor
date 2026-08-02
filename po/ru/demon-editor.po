@@ -1611,3 +1611,6 @@ msgstr "Проверьте, установлен ли FFmpeg!"
 
 msgid "It can cause some problems."
 msgstr "Это может вызывать некоторые проблемы."
+
+msgid "Filter by current satellite positions"
+msgstr "Фильтрация по текущим позициям спутников"
