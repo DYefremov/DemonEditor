@@ -354,6 +354,8 @@ class XmlTvReader(Reader):
 
     def parse(self):
         """ Parses XML. """
+        sub = self.process_node()
+        next(sub)
         try:
             log("Processing XMLTV data...")
             suf = os.path.splitext(self._path)[1]
@@ -361,45 +363,49 @@ class XmlTvReader(Reader):
                 import gzip
 
                 with gzip.open(self._path, "rb") as gzf:
-                    list(map(self.process_node, ET.iterparse(gzf)))
+                    list(map(sub.send, ET.iterparse(gzf)))
             elif suf == ".xml":
                 with open(self._path, "rb") as xml:
-                    list(map(self.process_node, ET.iterparse(xml)))
+                    list(map(sub.send, ET.iterparse(xml)))
             else:
                 log(f"{self.__class__.__name__} [parse] error: Unsupported file type [{suf}].")
         except OSError as e:
             log(f"{self.__class__.__name__} [parse] error: {e}")
         else:
             log("XMLTV data parsing is complete.")
+        finally:
+            sub.close()
 
-    def process_node(self, node):
-        event, element = node
-        if element.tag == self.CH_TAG:
-            ch_id = element.get("id", None)
-            logo = None  # Currently not in use.
-            # Since a service can have several names, we will store a set of names in the "names" field!
-            self._cache[ch_id] = self.Service(ch_id, {c.text for c in element if c.tag == self.DSP_NAME_TAG}, logo, [])
-        elif element.tag == self.PR_TAG:
-            channel = self._cache.get(element.get(self.CH_TAG, None), None)
-            if channel:
-                events = channel[-1]
-                start = element.get("start", None)
-                if start:
-                    start = self.get_utc_time(start)
+    def process_node(self):
+        """ Parses XML parts [nodes] -> [coroutine]. """
+        while True:
+            event, element = yield
+            if element.tag == self.CH_TAG:
+                ch_id = element.get("id", None)
+                logo = None  # Currently not in use.
+                # Since a service can have several names, we will store a set of names in the "names" field!
+                self._cache[ch_id] = self.Service(ch_id, {c.text for c in element if c.tag == self.DSP_NAME_TAG}, logo, [])
+            elif element.tag == self.PR_TAG:
+                channel = self._cache.get(element.get(self.CH_TAG, None), None)
+                if channel:
+                    events = channel[-1]
+                    start = element.get("start", None)
+                    if start:
+                        start = self.get_utc_time(start)
 
-                stop = element.get("stop", None)
-                if stop:
-                    stop = self.get_utc_time(stop)
+                    stop = element.get("stop", None)
+                    if stop:
+                        stop = self.get_utc_time(stop)
 
-                title, desc = None, None
-                for c in element:
-                    if c.tag == self.TITLE_TAG:
-                        title = c.text
-                    elif c.tag == self.DESC_TAG:
-                        desc = c.text
+                    title, desc = None, None
+                    for c in element:
+                        if c.tag == self.TITLE_TAG:
+                            title = c.text
+                        elif c.tag == self.DESC_TAG:
+                            desc = c.text
 
-                if all((start, stop, title)):
-                    events.append(self.Event(start, stop, title, desc))
+                    if all((start, stop, title)):
+                        events.append(self.Event(start, stop, title, desc))
 
     def to_epg_dat(self):
         """ Converts and saves imported data to 'epg.dat' file. """
