@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -183,7 +183,7 @@ class BouquetsReader:
     _BQ_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?([\w-]+)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
     _BQ_PAT2 = re.compile(r"#SERVICE:+\s+(?:[0-9a-f]+:+)+([^:]+[.](?:tv|radio))$", re.IGNORECASE)
     _BQ_POST_PAT = re.compile(r".*FROM BOUQUET\s+\"((.*bouquet|alternatives)?\.?(.*)\.?(\w+)?)\"\s+.*$", re.IGNORECASE)
-    _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739"}
+    _STREAM_TYPES = {"4097", "5001", "5002", "8193", "8739", "4115"}
 
     __slots__ = ["_path", "_errors"]
 
