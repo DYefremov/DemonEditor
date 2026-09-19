@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ ENCODING_BLACKLIST = {"MacRoman"}
 class StreamType(Enum):
     DVB_TS = "1"
     NONE_TS = "4097"
+    DAB = "4115"
     NONE_REC_1 = "5001"
     NONE_REC_2 = "5002"
     E_SERVICE_URI = "8193"

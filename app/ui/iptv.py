@@ -77,7 +77,9 @@ def get_stream_type(box):
         return StreamType.NONE_REC_2.value
     elif active == 4:
         return StreamType.E_SERVICE_URI.value
-    return StreamType.E_SERVICE_HLS.value
+    elif active == 5:
+        return StreamType.E_SERVICE_HLS.value
+    return StreamType.DAB.value
 
 
 class IptvDialog:
@@ -100,6 +102,7 @@ class IptvDialog:
         self._yt_links = None
         self._yt_dl = None
         self._inserted_url = False
+        self._e_types = (StreamType.E_SERVICE_URI.value, StreamType.E_SERVICE_HLS.value)
 
         builder = get_builder(_UI_PATH, handlers, use_str=True,
                               objects=("iptv_dialog", "stream_type_liststore", "yt_quality_liststore"))
@@ -210,6 +213,8 @@ class IptvDialog:
                 self._stream_type_combobox.set_active(4)
             elif stream_type is StreamType.E_SERVICE_HLS:
                 self._stream_type_combobox.set_active(5)
+            elif stream_type is StreamType.DAB:
+                self._stream_type_combobox.set_active(6)
         except ValueError:
             self.show_info_message(f"Unknown stream type {s_type}", Gtk.MessageType.ERROR)
 
@@ -257,8 +262,7 @@ class IptvDialog:
     def on_url_changed(self, entry):
         url_str = entry.get_text()
         url = urlparse(url_str)
-        e_types = (StreamType.E_SERVICE_URI.value, StreamType.E_SERVICE_HLS.value)
-        cond = all([url.scheme, url.netloc, url.path]) or self.get_type() in e_types
+        cond = all((url.scheme, url.netloc)) or self.get_type() in self._e_types
         entry.set_name("GtkEntry" if cond else _DIGIT_ENTRY_NAME)
 
         yt_id = YouTube.get_yt_id(url_str)
@@ -319,6 +323,7 @@ class IptvDialog:
         yield True
 
     def on_stream_type_changed(self, item):
+        self.on_info_bar_close()
         if self.get_type() in (StreamType.E_SERVICE_URI.value, StreamType.E_SERVICE_HLS.value):
             self.show_info_message("DreamOS only!", Gtk.MessageType.WARNING)
         self.update_reference_entry()
@@ -387,7 +392,7 @@ class IptvDialog:
 
     @run_idle
     def on_info_bar_close(self, bar=None, resp=None):
-        self._info_bar.set_visible(False)
+        self._info_bar.hide()
 
     @run_idle
     def show_info_message(self, text, message_type):
