@@ -3,7 +3,7 @@
 
 The MIT License (MIT)
 
-Copyright (c) 2018-2020 Dmitriy Yefremov
+Copyright (c) 2018-2026 Dmitriy Yefremov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,12 @@ Author: Dmitriy Yefremov
 
 -->
 <interface domain="demon-editor">
-  <requires lib="gtk+" version="3.16"/>
+  <requires lib="gtk+" version="3.24"/>
   <!-- interface-css-provider-path style.css -->
   <!-- interface-license-type mit -->
   <!-- interface-name DemonEditor -->
   <!-- interface-description Enigma2 channel and satellites list editor for GNU/Linux. -->
-  <!-- interface-copyright 2018-2020 Dmitriy Yefremov -->
+  <!-- interface-copyright 2018-2026 Dmitriy Yefremov -->
   <!-- interface-authors Dmitriy Yefremov -->
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
@@ -51,7 +51,11 @@ Author: Dmitriy Yefremov
       <object class="GtkBox" id="tool_bar">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="spacing">1</property>
+        <property name="spacing">2</property>
+        <property name="margin-top">2</property>
+        <property name="margin-bottom">2</property>
+        <property name="margin-start">2</property>
+        <property name="margin-end">2</property>
         <child>
           <object class="GtkButton" id="previous_button">
             <property name="visible">True</property>
@@ -68,7 +72,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="previous_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-media-previous</property>
+                <property name="icon-name">media-skip-backward-symbolic</property>
               </object>
             </child>
           </object>
@@ -93,7 +97,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="next_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-media-next</property>
+                <property name="icon-name">media-skip-forward-symbolic</property>
               </object>
             </child>
           </object>
@@ -112,7 +116,7 @@ Author: Dmitriy Yefremov
             <property name="margin_right">2</property>
             <property name="margin_top">1</property>
             <property name="margin_bottom">1</property>
-            <property name="primary_icon_stock">gtk-paste</property>
+            <property name="primary-icon-name">insert-link-symbolic</property>
             <signal name="activate" handler="on_url_activate" swapped="no"/>
             <signal name="changed" handler="on_url_changed" swapped="no"/>
             <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
@@ -138,7 +142,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="play_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-media-play</property>
+                <property name="icon-name">media-playback-start-symbolic</property>
               </object>
             </child>
           </object>
@@ -163,7 +167,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="stop_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-media-stop</property>
+                <property name="icon-name">media-playback-stop-symbolic</property>
               </object>
             </child>
           </object>
@@ -189,7 +193,7 @@ Author: Dmitriy Yefremov
               <object class="GtkImage" id="clear_button_image">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-clear</property>
+                <property name="icon-name">edit-clear-symbolic</property>
               </object>
             </child>
           </object>
@@ -199,11 +203,11 @@ Author: Dmitriy Yefremov
             <property name="position">6</property>
           </packing>
         </child>
-        <style>
-          <class name="primary-toolbar"/>
-        </style>
       </object>
     </child>
+    <style>
+      <class name="primary-toolbar"/>
+    </style>
   </object>
   <object class="GtkImage" id="show_image">
     <property name="visible">True</property>
