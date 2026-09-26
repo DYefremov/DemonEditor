@@ -1601,3 +1601,24 @@ msgstr "Uložiť aktuálne zmeny"
 
 msgid "Create a new service"
 msgstr "Vytvoriť novú službu"
+
+msgid "Extension support is disabled!"
+msgstr "Podpora rozšírenia je vypnutá!"
+
+msgid "Do you want to enable it?"
+msgstr "Prajete si zapnúť?"
+
+msgid "Playback of IPTV streams only!"
+msgstr "Prehrávanie iba IPTV streamov!"
+
+msgid "There are running background tasks!"
+msgstr "Bežia úlohy na pozadí!"
+
+msgid "Check if FFmpeg is installed!"
+msgstr "Skontrolujte, či je nainštalovaný FFmpeg!"
+
+msgid "It can cause some problems."
+msgstr "Môže to spôsobiť určité problémy."
+
+msgid "Filter by current satellite positions"
+msgstr "Filtrovať podľa aktuálnych pozícií satelitov"
