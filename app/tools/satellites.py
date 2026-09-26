@@ -444,6 +444,7 @@ class ServicesParser(HTMLParser):
         self._KING_TR_PAT = re.compile((r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*"
                                         r"?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?"
                                         r"\s+(.*PSK).*?(?:.*Stream\s+(\d+))?.*"))
+        self._KING_TID_NID_PAT = re.compile(r"NID\s+(\d+).*TSID\s+(\d+).*")
         self._lang = "en"
         if lang:
             langs = {"en", "fr", "nl", "de", "se", "no", "pt", "es", "it", "pl",
@@ -642,7 +643,7 @@ class ServicesParser(HTMLParser):
 
         if not tr:
             er = f"Transponder [{self._t_url}] not found or its type [T2-MI, etc] not supported yet."
-            log(f"ServicesParser error [get transponder services]: {er}")
+            log(f"ServicesParser error [get services]: {er}")
             return services
 
         # Services.
@@ -665,31 +666,41 @@ class ServicesParser(HTMLParser):
                     services.append(Service(flags, "s", None, name, None, None, pkg, _s_type, r[1].img, picon_id,
                                             sid, freq, sr, pol, fec, sys, pos, data_id, fav_id, multi_tr or tr))
                 except ValueError as e:
-                    log(f"ServicesParser error [get transponder services]: {e}")
+                    log(f"ServicesParser error [get services]: {e}")
 
         return services
 
     def get_kingofsat_services(self, sat_position=None, use_pids=False):
         services = []
+        min_size = 10
         # Transponder
-        tr = list(filter(lambda r: len(r) == 12 and r[4].url and r[4].url.startswith("tp"), self._rows))
-        if not tr:
-            log(f"ServicesParser error [get transponder services]: Transponder [{self._t_url}] not found!")
+        if not next(filter(lambda r: len(r) > min_size and r[3].url and r[3].url.startswith("tp"), self._rows), None):
+            log(f"ServicesParser error [get services]: Transponder [{self._t_url}] not found!")
             return services
 
         tr, multi_tr, tid, nid, nsp = None, None, None, None, None
         freq, sr, pol, fec, sys, pos = None, None, None, None, None, None
 
-        for r in filter(lambda x: len(x) > 11, self._rows):
+        for i, r in enumerate(self._rows):
+            if not r:
+                continue
+
             r_size = len(r)
-            if r_size == 12 and r[4].url and r[4].url.startswith("tp"):
-                res = re.match(self._KING_TR_PAT, f"{r[6].text} {r[7].text}")
+            if r_size > min_size and r[3].url and r[3].url.startswith("tp"):
+                res = re.match(self._KING_TR_PAT, f"{r[5].text} {r[6].text}")
                 if not res:
+                    log(f"Unable to determine transponder [{self._t_url}] parameters.")
                     continue
 
                 sys, mod = res.group(1), res.group(5)
-                s_pos, freq, pol, sr_fec = r[0].text, r[2].text, r[3].text, r[8].text
-                nid, tid = r[10].text, r[11].text
+                s_pos, freq_pol, sr, fec = r[0].text, r[2].text, r[7].text, r[8].text
+                tn_index = i + 1
+                if len(self._rows) > tn_index:
+                    tn_row = self._rows[i + 1]
+                    if len(tn_row) > 3:
+                        tn_res = re.match(self._KING_TID_NID_PAT, tn_row[3].text)
+                        if tn_res:
+                            nid, tid = tn_res.group(1), tn_res.group(2)
 
                 pos = sat_position
                 if not sat_position:
@@ -697,7 +708,7 @@ class ServicesParser(HTMLParser):
                     if pos_tr:
                         pos = self.get_position(pos_tr.group(1))
 
-                sr, fec = sr_fec.split()
+                freq, pol = freq_pol.split()
                 pol = get_key_by_value(POLARIZATION, pol)
                 sys, mod, fec, nsp, s2_flags, roll_off, pilot, inv = self.get_transponder_data(pos, fec, sys, mod)
                 if not all((freq, nid, tid)):
@@ -717,21 +728,22 @@ class ServicesParser(HTMLParser):
                 if multi_tr:
                     log(f"Detected multi-stream transponder! [{freq} {sr}]")
 
-            if tr and r_size == 14 and not r[1].text and r[7].text and r[7].text.isdigit():
-                if r[1].img == "/radio.gif":
+            if tr and r_size == 13 and not r[0].text and r[6].text and r[6].text.isdigit():
+                if r[0].img == "/audio.png":
                     s_type = ""
-                elif r[8].img == "/hd.gif":
+                elif r[7].img == "/hd.gif":
                     s_type = "HEVC HD"
-                elif r[1].img == "/data.gif":
+                elif r[0].img == "/data.png":
                     s_type = "Data"
                 else:
                     s_type = "SD"
 
                 s_type = self._S_TYPES.get(s_type, "3")
                 _s_type = SERVICE_TYPE.get(s_type, SERVICE_TYPE.get("3"))
-                reg, grp = r[3].text, r[4].text
+                reg, grp = r[2].text, r[3].text
 
-                name, pkg, cas, sid, v_pid, a_pid = r[2].text, r[5].text, r[6].text, r[7].text, None, None
+                v_pid, a_pid = r[7].text if use_pids else None, None
+                name, pkg, cas, sid, = r[1].text, r[4].text, r[5].text, r[6].text
                 flags, sid, fav_id, picon_id, data_id = self.get_service_data(s_type, pkg, sid, tid, nid, nsp,
                                                                               v_pid, a_pid, cas, use_pids)
                 services.append(Service(flags, "s", None, name, reg, grp, pkg, _s_type, None, picon_id,
