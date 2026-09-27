@@ -81,7 +81,7 @@ app = BUNDLE(coll,
                  'CFBundleGetInfoString': "Enigma2 channel and satellite editor",
                  'LSApplicationCategoryType': 'public.app-category.utilities',
                  'LSMinimumSystemVersion': '10.13',
-                 'CFBundleShortVersionString': f"3.15.0.{BUILD_DATE} Beta",
+                 'CFBundleShortVersionString': f"3.15.1.{BUILD_DATE} Beta",
                  'NSHumanReadableCopyright': u"Copyright © 2018-2026, Dmitriy Yefremov",
                  'NSRequiresAquaSystemAppearance': 'false',
                  'NSHighResolutionCapable': 'true'
