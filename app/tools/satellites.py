@@ -573,11 +573,11 @@ class ServicesParser(HTMLParser):
 
             elif self._source is SatelliteSource.KINGOFSAT:
                 for r in self._rows:
-                    if len(r) == 12 and SatellitesParser.POS_PAT.match(r[0].text):
-                        t_cell = r[4]
+                    if len(r) > 10 and SatellitesParser.POS_PAT.match(r[0].text):
+                        t_cell = r[3]
                         if t_cell.url and t_cell.url.startswith("tp"):
                             t_cell.url = f"https://{self._lang}.kingofsat.tv/{t_cell.url}"
-                            t_cell.text = f"{r[2].text} {r[3].text} {r[6].text} {r[8].text}"
+                            t_cell.text = f"{r[2].text} {r[7].text} {r[5].text} {r[8].text}"
                             trs.append(t_cell)
                 return trs
         return trs
