@@ -384,28 +384,29 @@ class SatellitesParser(HTMLParser):
         """
         sys_pat = re.compile(r"(DVB-S[2]?)\s?(?:T2-MI,\s+PLP\s+(\d+))?.*?(?:PLS:\s+(Root|Gold|Combo)\+(\d+))?")
         mod_pat = re.compile(r"(.*PSK).*?(?:.*Stream\s+(\d+))?.*")
-        sr_fec_pattern = re.compile(r"(\d{4,5})+\s+(\d+/\d+).*")
 
-        for row in filter(lambda r: len(r) == 14 and self.POS_PAT.match(r[0]), self._rows):
-            freq, pol = row[2].replace(".", "0"), row[3]
-            if not freq.isdigit() or pol not in "VHLR":
+        for row in filter(lambda r: len(r) > 10 and self.POS_PAT.match(r[0]), self._rows):
+            freq_pol = row[2].split()
+            if len(freq_pol) != 2 or freq_pol[-1] not in "VHLR":
                 continue
 
-            res = re.match(sys_pat, row[8])
+            freq, pol = freq_pol
+            freq = f"{int(float(freq)) * 1000}"
+
+            res = re.match(sys_pat, row[7])
             if not res:
                 continue
             sys, t2_mi, pls_id, pls_code = res.group(1), res.group(2), res.group(3), res.group(4)
             pls_id = self.PLS_MODES.get(pls_id, None)
 
-            res = re.match(mod_pat, row[9])
+            res = re.match(mod_pat, row[8])
             if not res:
                 continue
             mod, is_id = res.group(1), res.group(2)
 
-            res = re.match(sr_fec_pattern, row[10])
-            if not res:
+            sr, fec = row[9], row[10]
+            if not sr.isdigit():
                 continue
-            sr, fec = res.group(1), res.group(2)
 
             if t2_mi:
                 log(f"Detected T2-MI transponder! [{freq} {sr} {pol}] ")
