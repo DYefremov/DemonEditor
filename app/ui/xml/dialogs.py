@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2018-2025 Dmitriy Yefremov
+# Copyright (c) 2018-2026 Dmitriy Yefremov
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,8 @@ from app.eparser.satxml import get_pos_str
 from app.settings import Settings, CONFIG_PATH
 from app.tools.satellites import SatellitesParser, SatelliteSource, ServicesParser
 from ..dialogs import show_dialog, BaseDialog, DialogType, translate, get_builder
-from ..main_helper import append_text_to_tview, get_base_model, on_popup_menu, get_services_type_groups
+from ..main_helper import (append_text_to_tview, get_base_model, on_popup_menu, get_services_type_groups,
+                           show_info_bar_message)
 from ..search import SearchProvider
 from ..uicommons import Gtk, Gdk, UI_RESOURCES_PATH, HeaderBar
 
@@ -849,6 +850,7 @@ class ServicesUpdateDialog(UpdateDialog):
         self._services = {}
         self._selected_transponders = set()
         self._services_parser = ServicesParser(source=SatelliteSource.LYNGSAT)
+        self._services_parser.use_short_names = self._dialog_settings.get("kos_short_names", False)
         # Transponder view popup menu.
         tr_popup_menu = Gtk.Menu()
         select_all_item = Gtk.ImageMenuItem.new_from_stock("gtk-select-all")
@@ -873,6 +875,8 @@ class ServicesUpdateDialog(UpdateDialog):
         self._kos_bq_groups_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"kos_bq_groups": s}))
         self._kos_bq_lang_switch = Gtk.Switch(active=self._dialog_settings.get("kos_bq_lang", False))
         self._kos_bq_lang_switch.connect("state-set", lambda b, s: self._dialog_settings.update({"kos_bq_lang": s}))
+        self._kos_names_switch = Gtk.Switch(active=self._services_parser.use_short_names)
+        self._kos_names_switch.connect("state-set", self.on_names_switch_state)
         self._kos_options_box = Gtk.Box(spacing=5, orientation=Gtk.Orientation.VERTICAL)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_top=5)
         box.pack_start(Gtk.Label(translate("Create Category bouquets")), False, True, 0)
@@ -881,6 +885,10 @@ class ServicesUpdateDialog(UpdateDialog):
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_bottom=5)
         box.pack_start(Gtk.Label(translate("Create Regional bouquets")), False, True, 0)
         box.pack_end(self._kos_bq_lang_switch, False, True, 0)
+        self._kos_options_box.add(box)
+        box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=5, margin_bottom=5)
+        box.pack_start(Gtk.Label(translate("Short service names (by ID)")), False, True, 0)
+        box.pack_end(self._kos_names_switch, False, True, 0)
         self._kos_options_box.add(box)
         self._kos_options_box.connect("realize", self.on_source_changed)
         self._general_options_box.pack_start(self._kos_options_box, True, True, 0)
@@ -901,6 +909,14 @@ class ServicesUpdateDialog(UpdateDialog):
             self._kos_bq_groups_switch.set_active(False)
             self._kos_bq_lang_switch.set_active(False)
         self._kos_options_box.set_tooltip_text(None if is_kos else translate("KingOfSat only!"))
+
+    def on_names_switch_state(self, switch, state):
+        self._dialog_settings.update({"kos_short_names": state})
+        self._services_parser.use_short_names = state
+        show_info_bar_message(self._sat_update_info_bar,
+                              self._info_bar_message_label,
+                              translate("For transponders that have not yet been loaded!"),
+                              Gtk.MessageType.WARNING)
 
     @run_task
     def receive_services(self):
